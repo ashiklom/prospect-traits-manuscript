@@ -1,16 +1,15 @@
 .PHONY: all
 
 all:
-	./sync_figures.sh
 	rm -f *.bbl
-	latexmk -gg -pdf main.tex
-	latexmk -c
+	cd manuscript && latexmk -gg -pdf main.tex
+	cd manuscript && latexmk -c
 
 %.png: %.pdf
 	convert -flatten $< $@
 
-figures/prospect_pairs_N.png: figures/prospect_pairs_N.pdf
-figures/prospect_pairs_Cab.png: figures/prospect_pairs_Cab.pdf
-figures/prospect_pairs_Car.png: figures/prospect_pairs_Car.pdf
-figures/prospect_pairs_Cw.png: figures/prospect_pairs_Cw.pdf
-figures/prospect_pairs_Cm.png: figures/prospect_pairs_Cm.pdf
+manuscript/figures/prospect_pairs_N.png: manuscript/figures/prospect_pairs_N.pdf
+manuscript/figures/prospect_pairs_Cab.png: manuscript/figures/prospect_pairs_Cab.pdf
+manuscript/figures/prospect_pairs_Car.png: manuscript/figures/prospect_pairs_Car.pdf
+manuscript/figures/prospect_pairs_Cw.png: manuscript/figures/prospect_pairs_Cw.pdf
+manuscript/figures/prospect_pairs_Cm.png: manuscript/figures/prospect_pairs_Cm.pdf
