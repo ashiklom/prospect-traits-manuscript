@@ -1,5 +1,13 @@
 project:
-  title: "prospect-traits-manuscript"
+  output-dir: _output
 
+bibliography: references.bib
 
-
+format:
+  html:
+    toc: true
+  pdf:
+    documentclass: article
+  docx:
+    toc: true
+    highlight-style: github

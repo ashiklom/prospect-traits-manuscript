@@ -1,7 +1,2 @@
-standalone.pdf
-main.pdf
-*.bbl
-
-manuscript/figures/
-
 /.quarto/
+/_output/

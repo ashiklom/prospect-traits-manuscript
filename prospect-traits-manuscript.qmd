@@ -6,8 +6,11 @@ author:
     - Yoseline Angel
     - Dhruva Kathuria
     - Michael C. Dietze
-bibliography: library.bib
 ---
+
+# Abstract
+
+TODO
 
 # Introduction
 
