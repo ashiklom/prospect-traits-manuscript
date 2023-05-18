@@ -1,0 +1,26 @@
+---
+title: "Chlorplasts to canopies: Leaf optical properties shed light on foliar trait variability at individual to global scales"
+author:
+    - Alexey N. Shiklomanov
+    - Shawn P. Serbin
+    - Yoseline Angel
+    - Dhruva Kathuria
+    - Michael C. Dietze
+bibliography: library.bib
+---
+
+# Introduction
+
+Plant functional traits are measurable plant characteristics related to plant function and fitness [@violle2007let].
+Global trait databases are really good.
+However, something else.
+
+# Methods
+
+```{r}
+plot(Sepal.Length ~ Sepal.Width, data = iris)
+```
+
+# Results
+
+# Discussion
