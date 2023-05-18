@@ -15,15 +15,56 @@ TODO
 # Introduction
 
 Plant functional traits are measurable plant characteristics related to plant function and fitness [@violle2007let].
-Global trait databases are really good.
-However, something else.
+Examples of traits include measures of 
+the chemistry (e.g., N concentration) and structure (e.g., mass per area) of specific plant organs (especially leaves, roots, and seeds),
+rates and limits of plant metabolism (e.g., maximum rates of photosynthesis and respiration; stomatal conductance),
+and overall plant morphology and structure (e.g., maximum height; leaf angle distribution).
+The role of traits in explaining plant function also makes traits useful as parameters in vegetation and land surface models, where they are an important source of uncertainty [@shiklomanovStructureParameterUncertainty2020; @dietze2014quantitative].
+The focus of this study is primarily on leaf traits and, to a lesser extent, traits related to plant metabolic rates.
+
+Leaf traits vary across multiple geographic, temporal, and phylogenetic scales, and the extent of variation at these different scales itself varies across traits.
+For example, globally, leaf C mass fraction, C:N ratio, and C and N isotope fractions vary by a factor of 2 to 3, while specific leaf area and leaf N and P mass fractions vary over 2 to 3 orders of magnitude [@kattge2020try].
+On average, trait variation within species ("_intra_specific variation") is between 25% and 32% of global trait variation, but traits related to leaf chemistry (e.g., leaf N concentration) vary relatively more within-species than traits related to leaf structure (e.g., leaf mass per area) [@siefertGlobalMetaanalysisRelative2015].
+Intraspecific variation in leaf traits is a combination of differences across plant individuals due to environmental variability or ecological pressure [@pakeman2013intraspecific; @sandelPredictingIntraspecificTrait2021] and differences between leaves within an individual's canopy [@niinemets2016withincanopy; @wuConvergenceRelationshipsLeaf2016].
+
+Patterns of leaf trait variation are not independent across traits.
+Rather, traits often covary with each other along multi-dimensional axes that may be indicative of ecological strategies.
+One prominent example is the leaf economics spectrum, which describes a global negative correlation between traits associated with high metabolic rates (e.g., N mass fraction; rates of photosynthesis and respiration) and traits associated with resilience and longevity (e.g., leaf longevity; leaf mass per area) [@wright2004worldwide].
+Although the leaf economics spectrum concept is supported by ecological theory [@shipley2005functional; @donovan2011evolution] and physiological mechanisms [@onoda2017physiological; @blonder_2010_venation; @blonder_2013_assessing],
+the extent to which the leaf economics spectrum holds at finer spatial scales or within species or functional groups is unclear [@shiklomanovDoesLeafEconomic2020; @grubb2015relationships; @wright2012does; @messier2016trait].
+More importantly, the leaf economics spectrum is only one axis of plant trait variation, and has been shown to be statistically independent of other axes of plant functional variability such as hydraulics [@li2015leaf] and stem composition [@baralotoDecoupledLeafStem2010].
+
+Understanding and quantifying the drivers of variation in leaf traits is important for understanding individual plant physiology, community assembly, and ultimately ecosystem function.
+However, this aim requires a huge number of trait observations at multiple scales.
+Collectively, the global community of plant scientists have amassed an impressively large collection of trait observations in this way, as exemplified by large trait databases such as TRY [@kattge2020try] and BIEN [@maitner2018bien].
+However, in situ trait collection is labor-intensive and time-consuming, and as a result, global trait databases inevitably have significant gaps and biases [@sandelEstimatingMissingSpecies2015; @cornwell_2019_what].
+
+Estimating traits based on detailed measurements of leaf optical properties --- especially, reflectance --- can be an effective complement to direct trait measurements.
+At the leaf level, field spectroscopy measurements can provide fast and non-destructive estimates of leaf morphological traits [@serbin2019arctic], chemical traits [@TODO], metabolic rates [@serbin2012leaf], isotope ratios [@serbinSpectroscopicDeterminationLeaf2014; @wang2016evaluation], and even phylogenies [@mcmanus2016phylogenetic; @cavender-bares2016associations].
+Airborne imaging spectroscopy has provided a way to map traits over entire landscapes [@TODO].
+Finally, currently and planned satellite imaging spectroscopy missions promise to deliver global maps of plant functional traits [@TODO].
+
+The empirical relationship between leaf traits and leaf optical properties is driven by leaf radiative transfer.
+In visible and shortwave infrared regions, light interacting with a leaf undergoes a combination of scattering --- according to the leaf's external and internal structure --- and absorption --- according to the leaf's chemistry [@angelRemoteDetectionMonitoring2022].
+When simulating these interactions, the best models are 3D. But they aren't typically used by ecologists because they're complicated and expensive.
+More often, we make simplifying assumptions about leaf structure --- p-theory, PROSPECT, Liberty.
+Regardless of the treatment of leaf structure, leaf chemistry is always based on specific absorption coefficients.
+Except for water, these coefficients are empirically derived;
+that's because most traits are collections of many classes of complex, diverse molecules, and
+even for compounds in isolation like chlorophyll, their spectra in vivo are different than their spectra when extracted (e.g., in ether) in laboratory settings.
+
+Objectives:
+
+(1) How well do different RTMs work for estimating leaf properties? What are the implications of different assumptions about leaf structure (e.g., different models) vs. different absorption coefficients (e.g., different versions of PROSPECT)?
+
+(2) What does the multivariate space between spectrally-estimated traits and in situ trait measurements look like? What does that tell us about why empirical approaches work, and under what circumstances?
+
+(3) What drives the variability in spectrally-estimated traits? How does that compare to drivers of variability in other traits?
 
 # Methods
-
-```{r}
-plot(Sepal.Length ~ Sepal.Width, data = iris)
-```
 
 # Results
 
 # Discussion
+
+# Conclusions
