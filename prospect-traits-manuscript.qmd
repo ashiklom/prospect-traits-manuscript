@@ -39,11 +39,13 @@ However, this aim requires a huge number of trait observations at multiple scale
 Collectively, the global community of plant scientists have amassed an impressively large collection of trait observations in this way, as exemplified by large trait databases such as TRY [@kattge2020try] and BIEN [@maitner2018bien].
 However, in situ trait collection is labor-intensive and time-consuming, and as a result, global trait databases inevitably have significant gaps and biases [@sandelEstimatingMissingSpecies2015; @cornwell_2019_what].
 
+<!-- TODO: Flesh out and add references -->
 Estimating traits based on detailed measurements of leaf optical properties --- especially, reflectance --- can be an effective complement to direct trait measurements.
 At the leaf level, field spectroscopy measurements can provide fast and non-destructive estimates of leaf morphological traits [@serbin2019arctic], chemical traits [@TODO], metabolic rates [@serbin2012leaf], isotope ratios [@serbinSpectroscopicDeterminationLeaf2014; @wang2016evaluation], and even phylogenies [@mcmanus2016phylogenetic; @cavender-bares2016associations].
 Airborne imaging spectroscopy has provided a way to map traits over entire landscapes [@TODO].
 Finally, currently and planned satellite imaging spectroscopy missions promise to deliver global maps of plant functional traits [@TODO].
 
+<!-- TODO: Write this section properly -->
 The empirical relationship between leaf traits and leaf optical properties is driven by leaf radiative transfer.
 In visible and shortwave infrared regions, light interacting with a leaf undergoes a combination of scattering --- according to the leaf's external and internal structure --- and absorption --- according to the leaf's chemistry [@angelRemoteDetectionMonitoring2022].
 When simulating these interactions, the best models are 3D. But they aren't typically used by ecologists because they're complicated and expensive.
@@ -62,6 +64,76 @@ Objectives:
 (3) What drives the variability in spectrally-estimated traits? How does that compare to drivers of variability in other traits?
 
 # Methods
+
+Briefly, this work proceeded as follows:
+First, we compiled a database of existing paired measurements of leaf reflectance spectra and direct observations of traits from a variety of sources.
+Second, to every leaf reflectance spectrum, we fit several leaf radiative transfer models --- different versions of PROSPECT, Liberty, and leaf-SIP --- using a Bayesian inversion algorithm, producing a collection of spectra-based leaf trait estimates.
+Third, we evaluated the fit of these radiative transfer models both by comparing spectra-based leaf trait estimates to direct measurements of the same traits (where available) and by comparing best-fit predictions and actual observations of leaf optical properties.
+Fourth, we quantified the sources of variation in spectra-based leaf trait estimates.
+Finally, we investigated correlations between spectra-based leaf trait estimates and independent measurements of the same leaf traits at multiple scales.
+Each of these tasks is described in more detail in the following sub-sections.
+
+## Data
+
+<!-- TODO: Flesh this out -->
+
+Data from this project were assembled from #TODO# projects on leaf spectra and related foliar traits (Table #TODO#).
+Most of these datasets are available in the ECOSIS spectral library (`https://ecosis.org/`), with the following exceptions:
+Data from [@barnes2017greenness] are hosted in a publicly-available Open Science Framework repository described in the manuscript.
+Data for [@divittorio2009spectral], [@wu2016leaf], and [@yang2016seasonal] were provided directly by the authors.
+Finally, data from both NGEE projets and the HyspIRI campaign were provided by Shawn Serbin.
+Collectively, these data are comprised of nearly 12,000 observations from 346 species, and span a wide geographic (Figure #TODO#) and climatic range (Figure #TODO#).
+
+## Trait estimation
+
+### Radiative transfer models
+
+This work used three different leaf radiative transfer model formulations:
+PROSPECT, Liberty, and leaf-SIP.
+
+#### PROSPECT
+
+The PROSPECT leaf radiative transfer models
+[@jacquemoud_prospect_1990; @jacquemoud2009prospect; @feret2008prospect4; @feret2017prospectd; @feretPROSPECTPROEstimatingContent2021]
+simulates leaf reflectance and transmittance for 400 to 2500 nm wavelengths at 1 nm increments as a function of leaf morphological and biochemical characteristics.
+Briefly, PROSPECT treats a leaf as a stack of $\mathcal{N}$ semi-transparent identical parallel plates (with $\mathcal{N}--1$ interfaces between them), with a mathematical generalization to non-integer values of $\mathcal{N}$ [@allenInteractionIsotropicLight1969].
+(Note: PROSPECT literature typically use a simple $N$ to denote this value. However, this can cause confusion with N, the elemental symbol for nitrogen. Therefore, we use the stylized $\mathcal{N}$ to refer to the PROSPECT "effective number of leaf layers" parameter).
+Variations in PROSPECT versions since its original formulation are primarily driven by changes in the parameterization of the wavelength-specific optical properties of each "plate", especially the refractive index (independent of leaf traits) and absorptivity (driven by leaf traits).
+All versions of PROSPECT define the absorptivity of a leaf "plate", $k(\lambda)$ as a linear combination of traits ($C_i$) multiplied by their respective wavelength-dependent specific absorptivities ($K_{spe,i}(\lambda)$):
+
+$$
+k(\lambda) = \frac{\sum_{i}K_{spe,i}(\lambda) \times C_i}{\mathcal{N}}
+$$
+
+In this work, we consider five versions of PROSPECT.
+
+- PROSPECT 4 has four parameters --- $\mathcal{N}$ and three absorptive traits:
+  total chlorophyll content per area (Cab, $\mathrm{\mu g~cm^{-2}}$),
+  leaf water content per area (LWC, $\mathrm{g~m^{-2}}$),
+  and leaf dry matter content per area (LDMC, $\mathrm{g~m^{-2}}$) [@feret2008prospect4].
+
+- PROSPECT 5 extends PROSPECT 4 with an additional absorptive trait,
+  total carotenoid content per area (Car, $\mathrm{\mu g~cm^{-2}}$) [@feret2008prospect4].
+
+- PROSPECT 5B adds an additional absorptive trait,
+  total "senescent brown pigment" content (Cbrown, arbitrary units) [@jacquemoud2009prospect].
+
+- PROSPECT D adds an additional absorptive trait,
+  total anthocynanin content per area (Canth, $\mathrm{\mu g~cm^{-2}}$)
+  and includes a revised estimate of the wavelength-dependent refractive index
+  [@feret2017prospectd]
+
+- Finally, PROSPECT-PRO separates the LDMC parameter into contributions from
+  proteins (Cprot, $\mathrm{g~cm^{-2}}$)
+  and non-protein carbon-based constituents (Ccbc, $\mathrm{g~cm^{-2}}$)
+
+The absorption coefficients for all of the traits mentioned above, aligned with example leaf reflectance spectra, are shown in Figure #TODO#.
+
+#### Liberty
+
+#### Leaf-SIP
+
+### Bayesian inversion
 
 # Results
 
