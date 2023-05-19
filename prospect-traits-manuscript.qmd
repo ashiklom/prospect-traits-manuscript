@@ -29,9 +29,9 @@ Intraspecific variation in leaf traits is a combination of differences across pl
 
 Patterns of leaf trait variation are not independent across traits.
 Rather, traits often covary with each other along multi-dimensional axes that may be indicative of ecological strategies.
-One prominent example is the leaf economics spectrum, which describes a global negative correlation between traits associated with high metabolic rates (e.g., N mass fraction; rates of photosynthesis and respiration) and traits associated with resilience and longevity (e.g., leaf longevity; leaf mass per area) [@wright2004worldwide].
+One prominent example is the leaf economics spectrum, which describes a global negative correlation between traits associated with high metabolic rates (e.g., N mass fraction; rates of photosynthesis and respiration) and traits associated with resilience and longevity (e.g., leaf longevity; leaf mass per area) [@wrightWorldwideLeafEconomics2004].
 Although the leaf economics spectrum concept is supported by ecological theory [@shipley2005functional; @donovan2011evolution] and physiological mechanisms [@onoda2017physiological; @blonder_2010_venation; @blonder_2013_assessing],
-the extent to which the leaf economics spectrum holds at finer spatial scales or within species or functional groups is unclear [@shiklomanovDoesLeafEconomic2020; @grubb2015relationships; @wright2012does; @messier2016trait].
+the extent to which the leaf economics spectrum holds at finer spatial scales or within species or functional groups is unclear [@shiklomanovDoesLeafEconomic2020; @grubb2015relationships; @wrightDoesLeafEconomic2012; @messier2016trait].
 More importantly, the leaf economics spectrum is only one axis of plant trait variation, and has been shown to be statistically independent of other axes of plant functional variability such as hydraulics [@li2015leaf] and stem composition [@baralotoDecoupledLeafStem2010].
 
 Understanding and quantifying the drivers of variation in leaf traits is important for understanding individual plant physiology, community assembly, and ultimately ecosystem function.
