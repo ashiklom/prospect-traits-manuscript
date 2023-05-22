@@ -1,5 +1,5 @@
 ---
-title: "Chlorplasts to canopies: Leaf optical properties shed light on foliar trait variability at individual to global scales"
+title: "Chloroplasts to canopies: Leaf optical properties shed light on foliar trait variability at individual to global scales"
 author:
     - Alexey N. Shiklomanov
     - Shawn P. Serbin
