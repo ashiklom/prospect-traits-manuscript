@@ -1,3 +1,6 @@
 /.quarto/
 /_output/
 /prospect-traits-manuscript_files/
+
+/data/ecosis-download
+/data/ecosis-processed/*/*.arrow
