@@ -34,25 +34,27 @@ dat2 <- dat %>%
       sprintf("%05d", row_number()),
       sep = "|"
     ),
-    spectra_id = observation_id,
+    spectra_id = paste(observation_id, "R", sep = "|"),
     leaf_mass_per_area = lma_g_m2,
     lma_g_m2 = NULL,
+    spectral_measurement = "reflectance",
     .before = 1
   )
 
 message("Pivoting spectra...")
 spectra <- dat2 %>%
-  select(spectra_id, `350`:`2500`) %>%
+  select(observation_id, spectra_id, `350`:`2500`) %>%
   pivot_longer(
     !spectra_id,
     names_to = "wavelength_nm",
-    names_transform = as.numeric
+    names_transform = as.numeric,
+    values_to = "value"
   ) %>%
   arrow_table()
 
 message("Post-processing metadata...")
 metadata <- dat2 %>%
-  select(-(`350`:`2500`)) %>%
+  select(-(`350`:`2500`), -spectra_id) %>%
   arrow_table()
 metadata$metadata <- header
 
