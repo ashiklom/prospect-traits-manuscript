@@ -34,3 +34,4 @@ end
 
 r1 = fit_row(metadata, spectra_data, 1; nsamp = 500)
 r1b = fit_row(metadata, spectra_data, 1; nsamp = 500)
+r2 = fit_row(metadata, spectra_data, 2; nsamp = 500)
