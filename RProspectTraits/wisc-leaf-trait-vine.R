@@ -45,7 +45,7 @@ message("Pivoting spectra...")
 spectra <- dat2 %>%
   select(observation_id, spectra_id, `350`:`2500`) %>%
   pivot_longer(
-    !spectra_id,
+    !c(spectra_id, observation_id),
     names_to = "wavelength_nm",
     names_transform = as.numeric,
     values_to = "value"

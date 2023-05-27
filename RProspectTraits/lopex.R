@@ -19,7 +19,7 @@ header <- list(
   ecosis_id = "leaf-optical-properties-experiment-database--lopex93-"
 )
 
-metadata_orig <- read_csv(file.path(data_root, "metadata.csvy"), comment = "#") %>%
+metadata <- read_csv(file.path(data_root, "metadata.csvy"), comment = "#") %>%
   mutate(entity_id = observation_id)
 
 read_csvy_header <- function(filename) {
@@ -71,5 +71,6 @@ metadata_arrow <- arrow_table(metadata)
 metadata_arrow$metadata <- header
 
 outdir <- file.path("data", "ecosis-processed", dataset_id)
+dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
+write_feather(metadata_arrow, file.path(outdir, "metadata.arrow"))
 write_feather(spectra_arrow, file.path(outdir, "spectra.arrow"))
-write_feather(spectra_arrow, file.path(outdir, "metadata.arrow"))
