@@ -1,3 +1,4 @@
+# import Pkg; Pkg.activate("ProspectTraits.jl")
 using Revise
 
 using ProspectTraits

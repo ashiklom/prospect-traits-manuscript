@@ -1,13 +1,8 @@
-struct Spectrum
-    λ::AbstractVector{typeof(400.0u"nm")}
-    values::AbstractArray{AbstractFloat}
-end
-
 function fit_prospect(obs::Spectrum, nsamples)
     opti_c = createLeafOpticalStruct(obs.λ; method = :interp)
     function prospect4(N::T, Cab::T, Cw::T, Cm::T) where {T}
         leaf = LeafProspectProProperties{T}(N=N, Ccab=Cab, Cw=Cw, Cm=Cm)
-        _, R = prospect(leaf, opti_c; autodiff=false)
+        _, R = prospect(leaf, opti_c)
         return R
     end
 
@@ -24,9 +19,6 @@ function fit_prospect(obs::Spectrum, nsamples)
     function sample_model(n)
         sample(turingmod(obs.values), NUTS(), n)
     end
-
-    # Test out the sampler with 10 iterations
-    # sample_model(10)
 
     # Do the real sampling --- 5000 iterations
     samples = sample_model(nsamples)
