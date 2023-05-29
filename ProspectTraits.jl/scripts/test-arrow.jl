@@ -27,11 +27,14 @@ function fit_row(metadata, spectra_data, rn;
         return outfile
     end
     observation = as_spectrum(spectra_data, observation_id)
-    samples = fit_prospect(observation, nsamp)
+    samples = fit_prospectpro(observation, nsamp)
     serialize(outfile, samples)
     return outfile
 end
 
-r1 = fit_row(metadata, spectra_data, 1; nsamp = 500)
-r1b = fit_row(metadata, spectra_data, 1; nsamp = 500)
-r2 = fit_row(metadata, spectra_data, 2; nsamp = 500)
+# 78.28 seconds
+r1 = fit_row(metadata, spectra_data, 1; nsamp = 500, overwrite = true)
+r1out = deserialize(r1)
+
+# r1b = fit_row(metadata, spectra_data, 1; nsamp = 500)
+# r2 = fit_row(metadata, spectra_data, 2; nsamp = 500)

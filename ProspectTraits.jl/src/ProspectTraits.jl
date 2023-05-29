@@ -1,5 +1,5 @@
 module ProspectTraits
-export Spectrum, as_spectrum, fit_prospect
+export Spectrum, as_spectrum
 
 using CanopyOptics
 using Turing
