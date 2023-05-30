@@ -10,10 +10,16 @@ macro make_fit_prospect(name, args...)
                     _, R = prospect(leaf, opti_c)
                     return R
                 end
+                # Run PROSPECT once, to determine autocorrelation
+                mod = myprospect($(args...))
+                # Spectral autocorrelation
                 @model function turingmod(obs_refl)
                     $(priors...)
-                    resid ~ InverseGamma(1.0, 0.2)
+                    σ_a ~ Normal(0, 0.1)
+                    σ_b ~ Normal(0, 0.1)
                     mod = myprospect($(args...))
+                    # Heteroskedastic variance model 
+                    resid = σ_a .* mod .+ σ_b
                     obs_refl ~ MvNormal(mod, resid * I)
                 end
                 return sample(turingmod(obs.values), NUTS(), nsamples)
