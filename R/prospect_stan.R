@@ -62,11 +62,11 @@ prospect_stan <- function(prospect_version) {
   "
 
   gpm_func <- "
-    real gpm(real N, real k, data real talf, data real t12, data real t21) {
+    real gpm(real N, real k,
+             data real talf, data real ralf,
+             data real t12, data real r12,
+             data real t21, data real r21) {
       real trans = transfun(k);
-      real ralf = 1 - talf;
-      real r12 = 1 - t12;
-      real r21 = 1 - t21;
       real denom = 1 - r21 ^ 2 * trans ^ 2;
       real Ta = talf * trans * t21 / denom;
       real Ra = ralf + r21 * trans * Ta;
@@ -116,8 +116,10 @@ prospect_stan <- function(prospect_version) {
   prospect_func <- sprintf(
     "
     vector prospect(
-      real N, %s,
-      data vector talf, data vector t12, data vector t21, data matrix kmat
+      real N, %s, data matrix kmat,
+      data vector talf, data vector ralf,
+      data vector t12, data vector r12,
+      data vector t21, data vector r21
     ) {
       matrix[%d, 1] cc;
       int nwl = size(talf);
@@ -125,7 +127,7 @@ prospect_stan <- function(prospect_version) {
       vector[nwl] k = to_vector(kmat * cc);
       vector[nwl] result;
       for (i in 1:nwl) {
-        result[i] = gpm(N, k[i], talf[i], t12[i], t21[i]);
+        result[i] = gpm(N, k[i], talf[i], ralf[i], t12[i], r12[i], t21[i], r21[i]);
       }
       return result;
     }
@@ -149,6 +151,12 @@ prospect_stan <- function(prospect_version) {
       vector[nwl] t12;
       vector[nwl] t21;
       matrix[nwl, %d] kmat;
+    }
+
+    transformed data {
+      vector[nwl] ralf = 1 - talf;
+      vector[nwl] r12 = 1 - t12;
+      vector[nwl] r21 = 1 - t21;
     }
     ", n_col
   )
@@ -174,7 +182,8 @@ prospect_stan <- function(prospect_version) {
       // Priors
       %s
       // Likelihood
-      vector[nwl] mod = prospect(N, %s, talf, t12, t21, kmat);
+      vector[nwl] mod = prospect(N, %s, kmat,
+                                 talf, ralf, t12, r12, t21, r21);
       for (i in 1:nobs) {
         obs[,i] ~ normal(mod, rsd);
       }
