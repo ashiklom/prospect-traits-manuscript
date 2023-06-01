@@ -1,3 +1,31 @@
+# https://mathoverflow.net/questions/275831/determinant-of-correlation-matrix-of-autoregressive-model
+# det_AR1(ρ, n) = (1 - ρ^2)^(n - 1)
+logdet_AR1(ρ, n) = (n - 1) * log(1 - ρ^2)
+
+# https://math.stackexchange.com/questions/975069/the-inverse-of-ar-structure-correlation-matrix-kac-murdock-szeg%C5%91-matrix
+inv_AR1(ρ, n) = inv(one(ρ) - ρ^2) * SymTridiagonal([one(ρ), fill(1 + ρ^2, n-2)..., one(ρ)], fill(-ρ, n-1))
+
+function logpdf_ar1(x, μ, σ, ρ)
+    n = size(μ, 1)
+    σ⁻¹ = inv(Diagonal(σ))
+    s = (x - μ)
+    Σ_inv = σ⁻¹ * inv_AR1(ρ, n) * σ⁻¹
+    sΣs = s' * Σ_inv * s
+    # Ω = Correlation; Σ = Covariance
+    # det(Σ) = det(Diagonal(σ²)) * det(Ω)
+    # Determinant of diagonal matrix is product of elements.
+    # We do this on the variance, not the standard deviation,
+    # hence σ², which is 2log(σ) in log space.
+    # Product in log space --> sum.
+    ldet = logdet_AR1(ρ, n) + 2 * sum(log.(σ))
+    logp = n * log(2π) + ldet + sΣs
+    return -0.5 * logp
+end
+
+function logpdf_ar1(x::AbstractMatrix{<:Real}, μ, σ, ρ)
+    sum(map(xᵢ-> logpdf_ar1(xᵢ, μ, σ, ρ), eachcol(x)))
+end
+
 macro make_fit_prospect(name, args...)
     typedargs = [:($arg::T) for arg in args]
     namedargs = [Expr(:kw, arg, arg) for arg in args]
@@ -10,17 +38,15 @@ macro make_fit_prospect(name, args...)
                     _, R = prospect(leaf, opti_c)
                     return R
                 end
-                # Run PROSPECT once, to determine autocorrelation
-                mod = myprospect($(args...))
-                # Spectral autocorrelation
                 @model function turingmod(obs_refl)
                     $(priors...)
-                    σ_a ~ Normal(0, 0.1)
-                    σ_b ~ Normal(0, 0.1)
-                    mod = myprospect($(args...))
+                    σ_a ~ Exponential(0.005)
+                    σ_b ~ Exponential(0.02)
+                    ρ ~ Beta(12, 1.1)
+                    pred = myprospect($(args...))
                     # Heteroskedastic variance model 
-                    resid = σ_a .* mod .+ σ_b
-                    obs_refl ~ MvNormal(mod, resid * I)
+                    σ = σ_a .* pred .+ σ_b
+                    Turing.@addlogprob! logpdf_ar1(obs_refl, pred, σ, ρ)
                 end
                 return sample(turingmod(obs.values), NUTS(), nsamples)
             end
@@ -43,40 +69,3 @@ Cw_prior = truncated(Normal(0.01, 0.01); lower = 0.0)
 Cprot_prior = truncated(Normal(0.01, 0.01); lower = 0.0)
 Ccbc_prior = truncated(Normal(0.01, 0.01); lower = 0.0)
 Cm_prior = truncated(Normal(0.01, 0.01); lower = 0.0)
-
-# # Original implementation (for reference)
-# function fit_prospect(obs::Spectrum, nsamples)
-#     opti_c = createLeafOpticalStruct(obs.λ; method = :interp)
-#     function prospectpro(N::T, Ccab::T, Ccar::T, Canth::T,
-#             Cbrown::T, Cw::T, Cprot::T, Ccbc::T
-#     ) where {T}
-#         leaf = LeafProspectProProperties{T}(
-#             N=N, Ccab=Ccab, Ccar=Ccar, Canth=Canth,
-#             Cbrown=Cbrown, Cw=Cw, Cprot=Cprot, Ccbc=Ccbc
-#         )
-#         _, R = prospect(leaf, opti_c)
-#         return R
-#     end
-#
-#     @model function turingmod(obs_refl)
-#         N ~ N_prior
-#         Cab ~ Cab_prior
-#         Car ~ Car_prior
-#         Canth ~ Canth_prior
-#         Cbrown ~ Cbrown_prior
-#         Cw ~ Cw_prior
-#         Cprot ~ Cprot_prior
-#         Ccbc ~ Ccbc_prior
-#         resid ~ InverseGamma(1, 0.2)
-#         mod = prospect4(N, Cab, Cw, Cm)
-#         obs_refl ~ MvNormal(mod, resid * I)
-#     end
-#
-#     function sample_model(n)
-#         sample(turingmod(obs.values), NUTS(), n)
-#     end
-#
-#     # Do the real sampling --- 5000 iterations
-#     samples = sample_model(nsamples)
-#     return samples
-# end
