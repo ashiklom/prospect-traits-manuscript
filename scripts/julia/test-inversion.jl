@@ -28,4 +28,3 @@ r1 = fit_row(metadata, spectra_data, 1; nsamp = 500)
 
 using StatsPlots
 plot(r1)
-
