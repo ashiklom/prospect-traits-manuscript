@@ -10,7 +10,7 @@ function Spectrum(λ::AbstractArray{<:Real}, values)
 end
 
 """
-    as_spectrum(spectra_df, observation_id[; T=Float32, unit=u"nm"])
+    as_spectrum(spectra_df, observation_id)
 
 Convert spectra DataFrame row to Spectrum object suitable for inversion
 
@@ -19,8 +19,7 @@ Convert spectra DataFrame row to Spectrum object suitable for inversion
 - `observation_id::String`: Observation ID
 
 """
-function as_spectrum(spectra_df, observation_id;
-        T = Float32)
+function as_spectrum(spectra_df, observation_id)
     ""
     spec_obs = subset(
         spectra_df,
@@ -28,7 +27,7 @@ function as_spectrum(spectra_df, observation_id;
         :spectral_measurement => x -> x .== "reflectance"
     )[:, [:wavelength_nm, :spectra_id, :value]]
     spec_wide = unstack(spec_obs, :spectra_id, :value)
-    waves = Array{T}(spec_wide[:, :wavelength_nm])*u"nm"
-    values = Array{T}(spec_wide[:, Not(:wavelength_nm)])
+    waves = Array{Float64}(spec_wide[:, :wavelength_nm])*u"nm"
+    values = Array{Float64}(spec_wide[:, Not(:wavelength_nm)])
     Spectrum(waves, values)
 end
