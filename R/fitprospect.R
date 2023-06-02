@@ -70,11 +70,15 @@ make_data_list <- function(waves, reflectance,
     kmat = kmat
   )
   obs <- as.matrix(reflectance)
+  # Distance matrix for autocorrelation
+  times <- seq_along(waves)
+  H <- abs(outer(times, times, "-"))
   c(
     list(
       nwl = length(waves),
       nobs = ncol(obs),
-      obs = obs
+      obs = t(obs),
+      H = H
     ),
     lapply(spec_quantities, resample_func, waves = waves)
   )

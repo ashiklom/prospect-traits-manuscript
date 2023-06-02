@@ -61,6 +61,38 @@ prospect_stan <- function(prospect_version) {
     }
   "
 
+  logpdf_funcs <- '
+  real logdet_AR1(real rho, int n) {
+    return (n - 1.0) * log(1.0 - rho^2);
+  }
+
+  real st_Sigma_s(vector s, vector sigma, real rho) {
+    int n = size(sigma);
+    // Primary diagonal of inv(Omega) 
+    real c = 1.0 / (1.0 - rho^2);
+    vector[n] iOmega_d = rep_vector((1 + rho^2) * c, n);
+    iOmega_d[1] = c;
+    iOmega_d[n] = c;
+    // Secondary diagonal of inv(Omega) is just -rho;
+    // Primary diagonal of covariance
+    vector[n] iSigma_d = iOmega_d .* (sigma .^ 2);
+    // Secondary diagonal of inv(Sigma)
+    vector[n-1] iSigma_s = -rho .* sigma[1:(n-1)] .* sigma[2:n];
+    // Simplified tri-diagonal product vT S v
+    return sum(iSigma_d .* s.^2) + 2 * sum(iSigma_s .* s[1:(n-1)] .* s[2:n]);
+  }
+
+  real logpdf_ar1(vector x, vector mu, vector sigma, real rho) {
+    int n = size(mu);
+    vector[n] tau = 1/sigma;
+    vector[n] s = x - mu;
+    real sSigmas = st_Sigma_s(s, sigma, rho);
+    real ldet = logdet_AR1(rho, n) + 2 * sum(log(sigma));
+    real result = n*log(2*pi()) + ldet + sSigmas;
+    return -0.5 * result;
+  }
+  '
+
   gpm_func <- "
     real gpm(real N, real k,
              data real talf, data real ralf,
@@ -136,7 +168,8 @@ prospect_stan <- function(prospect_version) {
 
   funcblock <- paste(
     "functions {",
-    expint_func, transfun_func, gpm_func, prospect_func,
+    expint_func, transfun_func, gpm_func,
+    logpdf_funcs, prospect_func,
     "}", collapse = "\n"
   )
 
@@ -145,12 +178,12 @@ prospect_stan <- function(prospect_version) {
     data {
       int<lower=0> nwl;
       int<lower=0> nobs;
-      // array[nobs] row_vector[nwl] obs;
-      array[nwl, nobs] real obs;
+      array[nobs] vector[nwl] obs;
       vector[nwl] talf;
       vector[nwl] t12;
       vector[nwl] t21;
       matrix[nwl, %d] kmat;
+      matrix[nwl, nwl] H;
     }
 
     transformed data {
@@ -166,6 +199,7 @@ prospect_stan <- function(prospect_version) {
     parameters {
       real<lower=1> N;
       %s
+      real<lower=0, upper=1> rho;
       real<lower=0> rsd;
     }
     ", paramlist
@@ -183,12 +217,15 @@ prospect_stan <- function(prospect_version) {
       %s
       // Likelihood
       vector[nwl] mod = prospect(N, %s, kmat,
-                                 talf, ralf, t12, r12, t21, r21);
+                                 talf, ralf,
+                                 t12, r12,
+                                 t21, r21);
+      vector[nwl] sigma = rep_vector(rsd, nwl);
       for (i in 1:nobs) {
-        obs[,i] ~ normal(mod, rsd);
+        target += logpdf_ar1(obs[i], mod, sigma, rho);
       }
     }
-    ", priorblock, paste(prospect_Cparams, collapse = ", ")
+    ", priorblock, paste(prospect_Cparams, collapse = ",")
   )
 
   paste(
