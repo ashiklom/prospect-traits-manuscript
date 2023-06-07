@@ -1,16 +1,22 @@
+# using Revise
+@info "Activatintg package"
 import Pkg; Pkg.activate(".")
-using Revise
 
+@info "Loading ProspectTraits"
 using ProspectTraits
 
+@info "Loading other libraries"
 using Arrow
 using DataFrames
 
 using Unitful
 
+using FLoops
+
 using Serialization
 using Base.Filesystem
 
+@info "Begin code"
 data_basedir = "data/"
 dataset_id = "lopex"
 
@@ -34,8 +40,10 @@ end
 # Try the first row...
 # @time fit_row_save(metadata[1,:observation_id], spectra_data; nsamp = 2000)
 
-Threads.@threads for row in eachrow(metadata)
-    Threads.@threads for version in ("pro", "d", "5b", "5", "4")
-        fit_row_save(row[:observation_id], spectra_data, version; nsamp = 2000)
-    end
+const versions = ("pro", "d", "5b", "5", "4")
+# Threads.@threads for row in eachrow(metadata), version in versions
+# Threads.@threads for (row, version) in Iterators.product(eachrow(metadata), versions)
+@info "Begin loop"
+@floop for row in eachrow(metadata), version in versions
+    fit_row_save(row[:observation_id], spectra_data, version; nsamp = 2000)
 end
