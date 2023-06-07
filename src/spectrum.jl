@@ -1,5 +1,4 @@
-struct Spectrum{Tλ <: AbstractArray{<:Union{Real, Quantity}},
-        Tvalues <: AbstractArray{<:Real}}
+struct Spectrum{Tλ <: AbstractArray{typeof(400.0u"nm")}, Tvalues}
     λ::Tλ
     values::Tvalues
 end

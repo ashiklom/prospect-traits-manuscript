@@ -26,66 +26,141 @@ function logpdf_ar1(x::AbstractMatrix, μ, σ, ρ)
     sum(map(xᵢ-> logpdf_ar1(xᵢ, μ, σ, ρ), eachcol(x)))
 end
 
-function fit_prospectpro(obs::Spectrum, nsamples::Int)
-    opti_c = createLeafOpticalStruct(obs.λ; method = :interp)
-    function myprospect(N::T, Ccab::T, Ccar::T, Canth::T, Cbrown::T,
-            Cw::T, Ccbc::T, Cprot::T) where {T}
-        leaf = LeafProspectProProperties{T}(N=N,
-            Ccab=Ccab, Ccar=Ccar, Canth=Canth, Cbrown=Cbrown,
-            Cw=Cw, Ccbc=Ccbc, Cprot=Cprot, 
-            Cm=0.0)
-        _, R  = prospect(leaf, opti_c)
-        return R
-    end
-    @model function turingmod(obs_refl)
-        N ~ N_prior
-        Ccab ~ Ccab_prior
-        Ccar ~ Ccar_prior
-        Canth ~ Canth_prior
-        Cbrown ~ Cbrown_prior
-        Cw ~ Cw_prior
-        Ccbc ~ Ccbc_prior
-        Cprot ~ Cprot_prior
-        σ_a ~ σa_prior
-        σ_b ~ σb_prior
-        ρ ~ ρ_prior
-        pred = myprospect(N, Ccab, Ccar, Canth, Cbrown, Cw, Ccbc, Cprot)
-        # Heteroskedastic variance model 
-        σ = σ_a .* pred .+ σ_b
-        Turing.@addlogprob! logpdf_ar1(obs_refl, pred, σ, ρ)
-    end
-    return sample(turingmod(obs.values), NUTS(), nsamples)
+@model function prospectpro_turing(obs_refl, opti_c)
+    N ~ N_prior
+    Ccab ~ Ccab_prior
+    Ccar ~ Ccar_prior
+    Canth ~ Canth_prior
+    Cbrown ~ Cbrown_prior
+    Cw ~ Cw_prior
+    Ccbc ~ Ccbc_prior
+    Cprot ~ Cprot_prior
+    # σ_a ~ σa_prior
+    # σ_b ~ σb_prior
+    σ ~ σ_prior
+    ρ ~ ρ_prior
+    leaf = LeafProspectProProperties(
+        N=N, Ccab=Ccab, Ccar=Ccar, Canth=Canth, Cbrown=Cbrown,
+        Cw=Cw, Ccbc=Ccbc, Cprot=Cprot,
+        Cm=zero(N)
+    )
+    _, pred = prospect(leaf, opti_c)
+    # Heteroskedastic variance model 
+    # σ = σ_a .* pred .+ σ_b
+    σᵥ = fill(σ, size(pred, 1))
+    Turing.@addlogprob! logpdf_ar1(obs_refl, pred, σᵥ, ρ)
 end
 
-function fit_prospectd(obs::Spectrum, nsamples::Int)
-    opti_c = createLeafOpticalStruct(obs.λ; method = :interp)
-    function myprospect(N::T, Ccab::T,
-            Ccar::T, Canth::T, Cbrown::T,
-            Cw::T, Cm::T) where {T}
-        leaf = LeafProspectProProperties{T}(N=N,
-            Ccab=Ccab, Ccar=Ccar, Canth=Canth, Cbrown=Cbrown,
-            Cw=Cw, Cm=Cm,
-            Ccbc=0.0, Cprot=0.0)
-        _, R  = prospect(leaf, opti_c)
-        return R
+@model function prospectd_turing(obs_refl, opti_c)
+    N ~ N_prior
+    Ccab ~ Ccab_prior
+    Ccar ~ Ccar_prior
+    Canth ~ Canth_prior
+    Cbrown ~ Cbrown_prior
+    Cw ~ Cw_prior
+    Cm ~ Cm_prior
+    # σ_a ~ σa_prior
+    # σ_b ~ σb_prior
+    σ ~ σ_prior
+    ρ ~ ρ_prior
+    leaf = LeafProspectProProperties(
+        N=N, Ccab=Ccab, Ccar=Ccar, Canth=Canth, Cbrown=Cbrown,
+        Cw=Cw, Cm=Cm,
+        Ccbc=zero(N), Cprot=zero(N)
+    )
+    _, pred = prospect(leaf, opti_c)
+    # Heteroskedastic variance model 
+    # σ = σ_a .* pred .+ σ_b
+    σᵥ = fill(σ, size(pred, 1))
+    Turing.@addlogprob! logpdf_ar1(obs_refl, pred, σᵥ, ρ)
+end
+
+@model function prospect5b_turing(obs_refl, opti_c)
+    N ~ N_prior
+    Ccab ~ Ccab_prior
+    Ccar ~ Ccar_prior
+    Cbrown ~ Cbrown_prior
+    Cw ~ Cw_prior
+    Cm ~ Cm_prior
+    # σ_a ~ σa_prior
+    # σ_b ~ σb_prior
+    σ ~ σ_prior
+    ρ ~ ρ_prior
+    leaf = LeafProspectProProperties(
+        N=N, Ccab=Ccab, Ccar=Ccar, Cbrown=Cbrown,
+        Cw=Cw, Cm=Cm,
+        Canth = zero(N), Ccbc=zero(N), Cprot=zero(N)
+    )
+    _, pred = prospect(leaf, opti_c)
+    # Heteroskedastic variance model 
+    # σ = σ_a .* pred .+ σ_b
+    σᵥ = fill(σ, size(pred, 1))
+    Turing.@addlogprob! logpdf_ar1(obs_refl, pred, σᵥ, ρ)
+end
+
+@model function prospect5_turing(obs_refl, opti_c)
+    N ~ N_prior
+    Ccab ~ Ccab_prior
+    Ccar ~ Ccar_prior
+    Cw ~ Cw_prior
+    Cm ~ Cm_prior
+    # σ_a ~ σa_prior
+    # σ_b ~ σb_prior
+    σ ~ σ_prior
+    ρ ~ ρ_prior
+    leaf = LeafProspectProProperties(
+        N=N, Ccab=Ccab, Ccar=Ccar, Cw=Cw, Cm=Cm,
+        Cbrown=zero(N), Canth=zero(N), Ccbc=zero(N), Cprot=zero(N)
+    )
+    _, pred = prospect(leaf, opti_c)
+    # Heteroskedastic variance model 
+    # σ = σ_a .* pred .+ σ_b
+    σᵥ = fill(σ, size(pred, 1))
+    Turing.@addlogprob! logpdf_ar1(obs_refl, pred, σᵥ, ρ)
+end
+
+@model function prospect4_turing(obs_refl, opti_c)
+    N ~ N_prior
+    Ccab ~ Ccab_prior
+    Cw ~ Cw_prior
+    Cm ~ Cm_prior
+    # σ_a ~ σa_prior
+    # σ_b ~ σb_prior
+    σ ~ σ_prior
+    ρ ~ ρ_prior
+    leaf = LeafProspectProProperties(
+        N=N, Ccab=Ccab, Cw=Cw, Cm=Cm,
+        Ccar=zero(N), Cbrown=zero(N), Canth=zero(N), Ccbc=zero(N), Cprot=zero(N)
+    )
+    _, pred = prospect(leaf, opti_c)
+    # Heteroskedastic variance model 
+    # σ = σ_a .* pred .+ σ_b
+    σᵥ = fill(σ, size(pred, 1))
+    Turing.@addlogprob! logpdf_ar1(obs_refl, pred, σᵥ, ρ)
+end
+
+function fit_prospect(obs::Spectrum, nsamples::Int;
+        version = "pro", sampler = NUTS(), kwargs...)
+    dλ = diff(obs.λ)
+    λ_windows = vcat(obs.λ[1] - dλ[1], obs.λ[1:(end-1)] .+ dλ, obs.λ[end] + dλ[end])
+    if version == "5b"
+        opti_c = createLeafOpticalStruct(λ_windows; prospect_version = "5")
+    else
+        opti_c = createLeafOpticalStruct(λ_windows; prospect_version = version)
     end
-    @model function turingmod(obs_refl)
-        N ~ N_prior
-        Ccab ~ Ccab_prior
-        Ccar ~ Ccar_prior
-        Canth ~ Canth_prior
-        Cbrown ~ Cbrown_prior
-        Cw ~ Cw_prior
-        Ccm ~ Cm_prior
-        σ_a ~ σa_prior
-        σ_b ~ σb_prior
-        ρ ~ ρ_prior
-        pred = myprospect(N, Ccab, Ccar, Canth, Cbrown, Cw, Cm)
-        # Heteroskedastic variance model 
-        σ = σ_a .* pred .+ σ_b
-        Turing.@addlogprob! logpdf_ar1(obs_refl, pred, σ, ρ)
-    end
-    return sample(turingmod(obs.values), NUTS(), nsamples)
+    turingmod = Dict(
+        "4"   => prospect4_turing,
+        "5"   => prospect5_turing,
+        "5b"  => prospect5b_turing,
+        "d"   => prospectd_turing,
+        "pro" => prospectpro_turing
+    )[version]
+    return sample(
+        turingmod(obs.values, opti_c),
+        sampler, 
+        nsamples; 
+        kwargs...
+    )
 end
 
 N_prior = truncated(Normal(1.4, 0.2); lower = 1.0)
@@ -98,6 +173,7 @@ Cprot_prior = truncated(Normal(0.01, 0.01); lower = 0.0)
 Ccbc_prior = truncated(Normal(0.01, 0.01); lower = 0.0)
 Cm_prior = truncated(Normal(0.01, 0.01); lower = 0.0)
 
-σa_prior = Exponential(0.005)
-σb_prior = Exponential(0.02)
+σ_prior = Exponential(0.1)
+# σa_prior = Exponential(0.005)
+# σb_prior = Exponential(0.02)
 ρ_prior = Beta(12.0, 1.1)
