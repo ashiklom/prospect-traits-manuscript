@@ -217,7 +217,9 @@ version = "0.5.1"
 
 [[deps.CanopyOptics]]
 deps = ["CUDA", "DelimitedFiles", "DiffRules", "Distributions", "DocStringExtensions", "FastGaussQuadrature", "ForwardDiff", "LazyArtifacts", "LinearAlgebra", "Parameters", "Polynomials", "QuadGK", "SpecialFunctions", "UnicodePlots", "Unitful", "UnitfulEquivalences", "YAML"]
-path = "/home/ashiklom/projects/rtm/CanopyOptics.jl"
+git-tree-sha1 = "93d1feca9eca618ac3cc46e342325eae3a1ea181"
+repo-rev = "ad-optim"
+repo-url = "https://github.com/ashiklom/CanopyOptics.jl"
 uuid = "a18e34a6-5dbe-4f38-a44b-e5141852e7a7"
 version = "0.1.2"
 
