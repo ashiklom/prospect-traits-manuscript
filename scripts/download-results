@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+rsync -avz --progress \
+  discover:~/projects/prospect-traits-manuscript/data/results/ \
+  ./data/results/

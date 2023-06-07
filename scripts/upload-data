@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+rsync -avz --progress \
+  ./data/ecosis-processed/ \
+  discover:~/projects/prospect-traits-manuscript/data/ecosis-processed/
