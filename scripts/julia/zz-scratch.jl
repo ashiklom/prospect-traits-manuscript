@@ -274,3 +274,12 @@ function sᵀΣs(s, σ, ρ)
     Σ⁻¹s = -ρ .* σ[1:(n-1)] .* σ[2:n]
     return sum(Σ⁻¹d .* s.^2) + 2 * sum(Σ⁻¹s .* s[1:(n-1)] .* s[2:n])
 end
+
+################################################################################
+
+outfile = fit_row_save(metadata[2, :observation_id], spectra_data, "pro";
+    nsamp = 2000, progress = true, overwrite = true)
+deserialize(outfile)
+
+outfile = fit_row_save(metadata[3, :observation_id], spectra_data, "pro";
+    nsamp = 2000, progress = true, overwrite = true)
