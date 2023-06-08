@@ -1,5 +1,7 @@
-@info "Activating package"
-import Pkg; Pkg.activate(".")
+using LoggingExtras
+logpath = mkpath("logs")
+logfile = "$logpath/fit-lopex.log"
+global_logger(MinLevelLogger(FileLogger(logfile), Logging.Info))
 
 @info "Loading ProspectTraits"
 using ProspectTraits
@@ -27,7 +29,7 @@ function fit_row_save(observation_id, spectra_data, prospect_version;
     outdir = mkpath("$data_basedir/results/raw/$dataset_id/prospect-$prospect_version")
     outfile = "$outdir/$observation_id.result"
     if isfile(outfile) && ~overwrite
-        println("$outfile already exists! Skipping...")
+        @info "$outfile already exists! Skipping..."
         return outfile
     end
     observation = as_spectrum(spectra_data, observation_id)

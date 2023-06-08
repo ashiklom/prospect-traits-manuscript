@@ -4,3 +4,4 @@
 
 /data/ecosis-download
 /data/ecosis-processed/*/*.arrow
+/logs/
