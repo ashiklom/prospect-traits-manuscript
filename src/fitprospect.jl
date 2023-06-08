@@ -1,31 +1,3 @@
-# https://mathoverflow.net/questions/275831/determinant-of-correlation-matrix-of-autoregressive-model
-# det_AR1(ρ, n) = (1 - ρ^2)^(n - 1)
-logdet_AR1(ρ, n) = (n - 1) * log(1 - ρ^2)
-
-# https://math.stackexchange.com/questions/975069/the-inverse-of-ar-structure-correlation-matrix-kac-murdock-szeg%C5%91-matrix
-inv_AR1(ρ, n) = inv(one(ρ) - ρ^2) * SymTridiagonal([one(ρ), fill(1 + ρ^2, n-2)..., one(ρ)], fill(-ρ, n-1))
-
-function logpdf_ar1(x::AbstractVector, μ, σ, ρ)
-    n = size(μ, 1)
-    s = (x - μ)
-    σ⁻¹ = inv(Diagonal(σ))
-    Σ_inv = σ⁻¹ * inv_AR1(ρ, n) * σ⁻¹
-    sΣs = s' * Σ_inv * s
-    # Ω = Correlation; Σ = Covariance
-    # det(Σ) = det(Diagonal(σ²)) * det(Ω)
-    # Determinant of diagonal matrix is product of elements.
-    # We do this on the variance, not the standard deviation,
-    # hence σ², which is 2log(σ) in log space.
-    # Product in log space --> sum.
-    ldet = logdet_AR1(ρ, n) + 2 * sum(log.(σ))
-    logp = n * log(2π) + ldet + sΣs
-    return -0.5 * logp
-end
-
-function logpdf_ar1(x::AbstractMatrix, μ, σ, ρ)
-    sum(map(xᵢ-> logpdf_ar1(xᵢ, μ, σ, ρ), eachcol(x)))
-end
-
 @model function prospectpro_turing(obs_refl, opti_c)
     N ~ N_prior
     Ccab ~ Ccab_prior
@@ -39,16 +11,11 @@ end
     # σ_b ~ σb_prior
     σ ~ σ_prior
     ρ ~ ρ_prior
-    leaf = LeafProspectProProperties(
-        N=N, Ccab=Ccab, Ccar=Ccar, Canth=Canth, Cbrown=Cbrown,
-        Cw=Cw, Ccbc=Ccbc, Cprot=Cprot,
-        Cm=zero(N)
-    )
-    _, pred = prospect(leaf, opti_c)
+    pred = prospectpro(opti_c, N, Ccab, Ccar, Canth, Cbrown, Cw,
+        Ccbc, Cprot)
     # Heteroskedastic variance model 
     # σ = σ_a .* pred .+ σ_b
-    σᵥ = fill(σ, size(pred, 1))
-    Turing.@addlogprob! logpdf_ar1(obs_refl, pred, σᵥ, ρ)
+    Turing.@addlogprob! logpdf_ar1(obs_refl, pred, σ, ρ)
 end
 
 @model function prospectd_turing(obs_refl, opti_c)
@@ -63,16 +30,10 @@ end
     # σ_b ~ σb_prior
     σ ~ σ_prior
     ρ ~ ρ_prior
-    leaf = LeafProspectProProperties(
-        N=N, Ccab=Ccab, Ccar=Ccar, Canth=Canth, Cbrown=Cbrown,
-        Cw=Cw, Cm=Cm,
-        Ccbc=zero(N), Cprot=zero(N)
-    )
-    _, pred = prospect(leaf, opti_c)
+    pred = prospectd(opti_c, N, Ccab, Ccar, Canth, Cbrown, Cw, Cm)
     # Heteroskedastic variance model 
     # σ = σ_a .* pred .+ σ_b
-    σᵥ = fill(σ, size(pred, 1))
-    Turing.@addlogprob! logpdf_ar1(obs_refl, pred, σᵥ, ρ)
+    Turing.@addlogprob! logpdf_ar1(obs_refl, pred, σ, ρ)
 end
 
 @model function prospect5b_turing(obs_refl, opti_c)
@@ -86,16 +47,10 @@ end
     # σ_b ~ σb_prior
     σ ~ σ_prior
     ρ ~ ρ_prior
-    leaf = LeafProspectProProperties(
-        N=N, Ccab=Ccab, Ccar=Ccar, Cbrown=Cbrown,
-        Cw=Cw, Cm=Cm,
-        Canth = zero(N), Ccbc=zero(N), Cprot=zero(N)
-    )
-    _, pred = prospect(leaf, opti_c)
+    pred = prospect5b(opti_c, N, Ccab, Ccar, Cbrown, Cw, Cm)
     # Heteroskedastic variance model 
     # σ = σ_a .* pred .+ σ_b
-    σᵥ = fill(σ, size(pred, 1))
-    Turing.@addlogprob! logpdf_ar1(obs_refl, pred, σᵥ, ρ)
+    Turing.@addlogprob! logpdf_ar1(obs_refl, pred, σ, ρ)
 end
 
 @model function prospect5_turing(obs_refl, opti_c)
@@ -108,15 +63,10 @@ end
     # σ_b ~ σb_prior
     σ ~ σ_prior
     ρ ~ ρ_prior
-    leaf = LeafProspectProProperties(
-        N=N, Ccab=Ccab, Ccar=Ccar, Cw=Cw, Cm=Cm,
-        Cbrown=zero(N), Canth=zero(N), Ccbc=zero(N), Cprot=zero(N)
-    )
-    _, pred = prospect(leaf, opti_c)
+    pred = prospect5(opti_c, N, Ccab, Ccar, Cw, Cm)
     # Heteroskedastic variance model 
     # σ = σ_a .* pred .+ σ_b
-    σᵥ = fill(σ, size(pred, 1))
-    Turing.@addlogprob! logpdf_ar1(obs_refl, pred, σᵥ, ρ)
+    Turing.@addlogprob! logpdf_ar1(obs_refl, pred, σ, ρ)
 end
 
 @model function prospect4_turing(obs_refl, opti_c)
@@ -128,15 +78,10 @@ end
     # σ_b ~ σb_prior
     σ ~ σ_prior
     ρ ~ ρ_prior
-    leaf = LeafProspectProProperties(
-        N=N, Ccab=Ccab, Cw=Cw, Cm=Cm,
-        Ccar=zero(N), Cbrown=zero(N), Canth=zero(N), Ccbc=zero(N), Cprot=zero(N)
-    )
-    _, pred = prospect(leaf, opti_c)
+    pred = prospect4(opti_c, N, Ccab, Cw, Cm)
     # Heteroskedastic variance model 
     # σ = σ_a .* pred .+ σ_b
-    σᵥ = fill(σ, size(pred, 1))
-    Turing.@addlogprob! logpdf_ar1(obs_refl, pred, σᵥ, ρ)
+    Turing.@addlogprob! logpdf_ar1(obs_refl, pred, σ, ρ)
 end
 
 function fit_prospect(obs::Spectrum, nsamples::Int;

@@ -10,6 +10,8 @@ using LinearAlgebra
 using DataFrames
 
 include("spectrum.jl")
+include("logpdf_ar1.jl")
+include("prospect.jl")
 include("fitprospect.jl")
 
 end # module ProspectTraits
