@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+REMOTE=${1:-"discover:~/projects/"}
+
 rsync -avz --progress \
   ./data/ecosis-processed/ \
-  discover:~/projects/prospect-traits-manuscript/data/ecosis-processed/
+  "$REMOTE"/prospect-traits-manuscript/data/ecosis-processed/
+
+rsync -avz --progress \
+  ./data/results/ \
+  "$REMOTE"/prospect-traits-manuscript/data/results/
