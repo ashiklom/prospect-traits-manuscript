@@ -89,3 +89,15 @@ using Unitful
 
     end
 end
+
+if false
+    using DataFrames, Arrow
+    function fit_lopex(rn, nsamp, version)
+        metadata = DataFrame(Arrow.Table("data/ecosis-processed/lopex/metadata.arrow"))
+        spectra_data = DataFrame(Arrow.Table("data/ecosis-processed/lopex/spectra.arrow"))
+        observation_id = metadata[rn,:observation_id]
+        observation = as_spectrum(spectra_data, observation_id)
+        return fit_prospect(observation, nsamp; version = version)
+    end
+    @time result = fit_lopex(1, 1000, "4")
+end
