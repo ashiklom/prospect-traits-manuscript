@@ -4,4 +4,5 @@
 
 /data/ecosis-download
 /data/ecosis-processed/*/*.arrow
+/data/results
 /logs/
