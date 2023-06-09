@@ -15,6 +15,11 @@ function getobs(rn)
 end
 
 function fit_lopex(version; nsamp=1000, rn=1)
+    obs = getobs(rn)
+    return fit_prospect(obs, nsamp; version=version)
+end
+
+function fit_lopex_custom(version; nsamp=1000, rn=1)
     observation = getobs(rn)
     opti_c = createLeafOpticalStruct(observation; prospect_version = version)
     turingmod = Dict(
@@ -24,10 +29,15 @@ function fit_lopex(version; nsamp=1000, rn=1)
         "d"   => ProspectTraits.prospectd_turing,
         "pro" => ProspectTraits.prospectpro_turing
     )[version]
+    init_params = (
+        N = 1.4, Ccab = 40.0, Cw = 0.01, Cm = 0.01,
+        σ = 0.01, ρ = 0.99
+    )
     return sample(
         turingmod(observation.values, opti_c),
         NUTS(),
-        nsamp
+        nsamp,
+        init_params = init_params
     )
 end
 

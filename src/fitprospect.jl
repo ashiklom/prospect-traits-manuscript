@@ -84,6 +84,22 @@ end
     Turing.@addlogprob! logpdf_ar1(obs_refl, pred, σ, ρ)
 end
 
+function prospect_defaults(version)
+    default_values = LeafProspectProProperties{Float64}(Cm = 0.01)
+    default_names = fieldnames(LeafProspectProProperties)
+    defaults_all = (; [(name, getfield(default_values, name)) for name in default_names]...)
+    prospect_params = Dict(
+        "4"   => (:N, :Ccab, :Cw, :Cm),
+        "5"   => (:N, :Ccab, :Ccar, :Cw, :Cm),
+        "5b"  => (:N, :Ccab, :Ccar, :Cbrown, :Cw, :Cm),
+        "d"   => (:N, :Ccab, :Ccar, :Canth, :Cbrown, :Cw, :Cm),
+        "pro" => (:N, :Ccab, :Ccar, :Canth, :Cbrown, :Cw, :Ccbc, :Cprot)
+    )
+    defaults_prosp = defaults_all[prospect_params[version]]
+    defaults_other = (rsd = 0.01, ρ = 0.9)
+    return (; defaults_prosp..., defaults_other...)
+end
+
 function fit_prospect(obs::Spectrum, nsamples::Int;
         version = "pro", sampler = NUTS(), kwargs...)
     opti_c = createLeafOpticalStruct(obs; prospect_version = version)
@@ -95,10 +111,12 @@ function fit_prospect(obs::Spectrum, nsamples::Int;
         "pro" => prospectpro_turing
     )
     turingmod = prospect_models[version]
+    init_params = prospect_defaults(version)
     return sample(
         turingmod(obs.values, opti_c),
         sampler, 
-        nsamples; 
+        nsamples,
+        init_params = init_params;
         kwargs...
     )
 end
