@@ -283,3 +283,8 @@ deserialize(outfile)
 
 outfile = fit_row_save(metadata[3, :observation_id], spectra_data, "pro";
     nsamp = 2000, progress = true, overwrite = true)
+
+################################################################################
+using Turing, Zygote
+Turing.setadbackend(:zygote)
+r_test = fit_prospect(obs, 500; version = "pro")
