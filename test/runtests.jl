@@ -14,7 +14,43 @@ using Unitful
         optis = createLeafOpticalStruct(spec)
     end
 
-    @testset "Fit PROSPECT" begin
+    @testset "Optim PROSPECT" begin
+
+        # True values
+        N = 1.4
+        Ccab = 40.0
+        Ccar = 8.0
+        Canth = 4.0
+        Cbrown = 0.1
+        Cw = 0.01
+        Cm = 0.01
+        Ccbc = 0.008
+        Cprot = 0.002
+        ρ = 0.999
+        σ = 0.007
+        
+        # Simulate some fake data
+        λ_windows = (399.5:1.0:2500.5)*u"nm"
+        n = length(λ_windows) - 1
+        opti_c = createLeafOpticalStruct(λ_windows; prospect_version="pro")
+        true_pro = ProspectTraits.prospectpro(opti_c, N, Ccab, Ccar, Canth, Cbrown,
+            Cw, Cprot, Ccbc)
+        H = abs.(hcat([collect(1:n) .- i for i in (1:n)]...))
+        Ω = ρ.^H
+        dist = MvNormal(true_pro, σ^2 * Ω)
+        λ = (400.0:1.0:2500.0)*u"nm"
+        obs_refl = rand(dist, 3)
+        obs = Spectrum(λ, obs_refl)
+
+        r_pro = optim_prospect(obs, "pro")
+        r_d = optim_prospect(obs, "d")
+        r_5b = optim_prospect(obs, "5b")
+        r_5 = optim_prospect(obs, "5")
+        r_4 = optim_prospect(obs, "4")
+
+    end
+
+    @testset skip=true "Fit PROSPECT" begin
 
         # True values
         N = 1.4

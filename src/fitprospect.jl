@@ -100,16 +100,17 @@ function prospect_defaults(version)
     return (; defaults_prosp..., defaults_other...)
 end
 
+const prospect_models = Dict(
+    "4"   => prospect4_turing,
+    "5"   => prospect5_turing,
+    "5b"  => prospect5b_turing,
+    "d"   => prospectd_turing,
+    "pro" => prospectpro_turing
+)
+
 function fit_prospect(obs::Spectrum, nsamples::Int;
         version = "pro", sampler = NUTS(), kwargs...)
     opti_c = createLeafOpticalStruct(obs; prospect_version = version)
-    prospect_models = Dict(
-        "4"   => prospect4_turing,
-        "5"   => prospect5_turing,
-        "5b"  => prospect5b_turing,
-        "d"   => prospectd_turing,
-        "pro" => prospectpro_turing
-    )
     turingmod = prospect_models[version]
     init_params = prospect_defaults(version)
     return sample(
@@ -119,6 +120,12 @@ function fit_prospect(obs::Spectrum, nsamples::Int;
         init_params = init_params;
         kwargs...
     )
+end
+
+function optim_prospect(obs::Spectrum, version::String)
+    opti_c = createLeafOpticalStruct(obs; prospect_version = version)
+    turingmod = prospect_models[version]
+    return optimize(turingmod(obs.values, opti_c), MAP())
 end
 
 N_prior = truncated(Normal(1.4, 0.2); lower = 1.0)

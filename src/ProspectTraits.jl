@@ -2,6 +2,7 @@ module ProspectTraits
 
 using CanopyOptics
 using Turing
+using Optim
 using Distributions
 using Unitful
 using LinearAlgebra
@@ -15,6 +16,7 @@ include("fitprospect.jl")
 export Spectrum,
        as_spectrum,
        createLeafOpticalStruct,
-       fit_prospect
+       fit_prospect,
+       optim_prospect
 
 end # module ProspectTraits
