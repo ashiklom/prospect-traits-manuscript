@@ -66,8 +66,25 @@ prospect_stan <- function(prospect_version) {
     return (n - 1.0) * log(1.0 - rho^2);
   }
 
+  real st_Sigma_s(vector s, real sigma, real rho) {
+    int n = size(s);
+    real tau = sigma ^ (-2);
+    // Primary diagonal of inv(Omega) 
+    real c = 1.0 / (1.0 - rho^2);
+    vector[n] iOmega_d = rep_vector((1 + rho^2) * c, n);
+    iOmega_d[1] = c;
+    iOmega_d[n] = c;
+    // Secondary diagonal of inv(Omega) is just -rho;
+    // Primary diagonal of covariance
+    vector[n] iSigma_d = tau * iOmega_d;
+    // Secondary diagonal of inv(Sigma)
+    real iSigma_s = tau * -rho;
+    // Simplified tri-diagonal product vT S v
+    return sum(iSigma_d .* s.^2) + 2 * iSigma_s * sum(s[1:(n-1)] .* s[2:n]);
+  }
+
   real st_Sigma_s(vector s, vector sigma, real rho) {
-    int n = size(sigma);
+    int n = size(s);
     // Primary diagonal of inv(Omega) 
     real c = 1.0 / (1.0 - rho^2);
     vector[n] iOmega_d = rep_vector((1 + rho^2) * c, n);
@@ -82,9 +99,17 @@ prospect_stan <- function(prospect_version) {
     return sum(iSigma_d .* s.^2) + 2 * sum(iSigma_s .* s[1:(n-1)] .* s[2:n]);
   }
 
+  real logpdf_ar1(vector x, vector mu, real sigma, real rho) {
+    int n = size(mu);
+    vector[n] s = x - mu;
+    real sSigmas = st_Sigma_s(s, sigma, rho);
+    real ldet = logdet_AR1(rho, n) + 2 * n * log(sigma);
+    real result = n*log(2*pi()) + ldet + sSigmas;
+    return -0.5 * result;
+  }
+
   real logpdf_ar1(vector x, vector mu, vector sigma, real rho) {
     int n = size(mu);
-    vector[n] tau = 1/sigma;
     vector[n] s = x - mu;
     real sSigmas = st_Sigma_s(s, sigma, rho);
     real ldet = logdet_AR1(rho, n) + 2 * sum(log(sigma));
@@ -183,7 +208,6 @@ prospect_stan <- function(prospect_version) {
       vector[nwl] t12;
       vector[nwl] t21;
       matrix[nwl, %d] kmat;
-      matrix[nwl, nwl] H;
     }
 
     transformed data {
@@ -220,9 +244,8 @@ prospect_stan <- function(prospect_version) {
                                  talf, ralf,
                                  t12, r12,
                                  t21, r21);
-      vector[nwl] sigma = rep_vector(rsd, nwl);
       for (i in 1:nobs) {
-        target += logpdf_ar1(obs[i], mod, sigma, rho);
+        target += logpdf_ar1(obs[i], mod, rsd, rho);
       }
     }
     ", priorblock, paste(prospect_Cparams, collapse = ",")
