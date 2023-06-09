@@ -1,6 +1,4 @@
 module ProspectTraits
-export Spectrum, as_spectrum
-export fit_prospect
 
 using CanopyOptics
 using Turing
@@ -13,5 +11,10 @@ include("spectrum.jl")
 include("logpdf_ar1.jl")
 include("prospect.jl")
 include("fitprospect.jl")
+
+export Spectrum,
+       as_spectrum,
+       createLeafOpticalStruct,
+       fit_prospect
 
 end # module ProspectTraits

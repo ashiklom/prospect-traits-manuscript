@@ -86,20 +86,15 @@ end
 
 function fit_prospect(obs::Spectrum, nsamples::Int;
         version = "pro", sampler = NUTS(), kwargs...)
-    dλ = diff(obs.λ)
-    λ_windows = vcat(obs.λ[1] - dλ[1], obs.λ[1:(end-1)] .+ dλ, obs.λ[end] + dλ[end])
-    if version == "5b"
-        opti_c = createLeafOpticalStruct(λ_windows; prospect_version = "5")
-    else
-        opti_c = createLeafOpticalStruct(λ_windows; prospect_version = version)
-    end
-    turingmod = Dict(
+    opti_c = createLeafOpticalStruct(obs; prospect_version = version)
+    prospect_models = Dict(
         "4"   => prospect4_turing,
         "5"   => prospect5_turing,
         "5b"  => prospect5b_turing,
         "d"   => prospectd_turing,
         "pro" => prospectpro_turing
-    )[version]
+    )
+    turingmod = prospect_models[version]
     return sample(
         turingmod(obs.values, opti_c),
         sampler, 

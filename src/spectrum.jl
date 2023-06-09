@@ -30,3 +30,10 @@ function as_spectrum(spectra_df, observation_id)
     values = Array{Float64}(spec_wide[:, Not(:wavelength_nm)])
     Spectrum(waves, values)
 end
+
+function CanopyOptics.createLeafOpticalStruct(obs::Spectrum; prospect_version = "pro")
+    dλ = diff(obs.λ)
+    λ_windows = vcat(obs.λ[1] - dλ[1], obs.λ[1:(end-1)] .+ dλ, obs.λ[end] + dλ[end])
+    v = prospect_version == "5b" ? "5" : prospect_version
+    return createLeafOpticalStruct(λ_windows; prospect_version = v)
+end
