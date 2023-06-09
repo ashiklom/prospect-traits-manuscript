@@ -5,6 +5,19 @@ logdet_AR1(ρ, n) = (n - 1) * log(1 - ρ^2)
 # https://math.stackexchange.com/questions/975069/the-inverse-of-ar-structure-correlation-matrix-kac-murdock-szeg%C5%91-matrix
 inv_AR1(ρ, n) = inv(one(ρ) - ρ^2) * SymTridiagonal([one(ρ), fill(1 + ρ^2, n-2)..., one(ρ)], fill(-ρ, n-1))
 
+# Simplified tridiagonal multiplication. Added here for later experiments, but
+# not used right now because it's not very reliable.
+function sᵀΣs(s, σ::Number, ρ)
+    n = size(s, 1)
+    ρ² = ρ^2
+    τ = σ^(-2)
+    c = 1.0 / (1.0 - ρ²)
+    Ω⁻¹d = [c, fill(1 + ρ², n-2)..., c]
+    Σ⁻¹d = Ω⁻¹d .* τ
+    Σ⁻¹s = -ρ * τ
+    return sum(Σ⁻¹d .* s.^2) + 2 * sum(Σ⁻¹s .* s[1:(n-1)] .* s[2:n])
+end
+
 function logpdf_ar1(x::AbstractVector, μ, σ::AbstractVector, ρ)
     n = size(μ, 1)
     s = (x - μ)
