@@ -3,10 +3,8 @@ logpath = mkpath("logs")
 logfile = "$logpath/fit-lopex.log"
 global_logger(MinLevelLogger(FileLogger(logfile), Logging.Info))
 
-@info "Loading ProspectTraits"
 using ProspectTraits
 
-@info "Loading other libraries"
 using Arrow
 using DataFrames
 
@@ -17,7 +15,6 @@ using FLoops
 using Serialization
 using Base.Filesystem
 
-@info "Begin code"
 data_basedir = "data/"
 dataset_id = "lopex"
 
@@ -29,17 +26,18 @@ function fit_row_save(observation_id, spectra_data, prospect_version;
     outdir = mkpath("$data_basedir/results/raw/$dataset_id/prospect-$prospect_version")
     outfile = "$outdir/$observation_id.result"
     if isfile(outfile) && ~overwrite
-        @info "$outfile already exists! Skipping..."
+        @info "[$observation_id, $prospect_version] Skipping b/c already complete"
         return outfile
     end
+    @info "[$observation_id, $prospect_version] Beginning inversion"
     observation = as_spectrum(spectra_data, observation_id)
     samples = fit_prospect(observation, nsamp; version = prospect_version, progress = progress)
+    @info "[$observation_id, $prospect_version] Inversion complete! Saving results"
     serialize(outfile, samples)
     return outfile
 end
 
 const versions = ("pro", "d", "5b", "5", "4")
-@info "Begin loop"
 @floop for row in eachrow(metadata), version in versions
     fit_row_save(row[:observation_id], spectra_data, version; nsamp = 2000)
 end
