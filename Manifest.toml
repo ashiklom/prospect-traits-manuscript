@@ -2,7 +2,7 @@
 
 julia_version = "1.9.0"
 manifest_format = "2.0"
-project_hash = "9f1de45f9a22e38f07a8700087eb5ce102632454"
+project_hash = "6adeee22f92ecdebdd9484ec3f7f82ab1ab2d894"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "dcfdf328328f2645531c4ddebf841228aef74130"
@@ -271,8 +271,8 @@ version = "0.5.1"
 
 [[deps.CanopyOptics]]
 deps = ["CUDA", "DelimitedFiles", "DiffRules", "Distributions", "DocStringExtensions", "FastGaussQuadrature", "ForwardDiff", "LazyArtifacts", "LinearAlgebra", "Parameters", "Polynomials", "QuadGK", "SpecialFunctions", "UnicodePlots", "Unitful", "UnitfulEquivalences", "YAML"]
-git-tree-sha1 = "6e57e6c82172da668c1818033dc611d311a5a7b0"
-repo-rev = "ad-optim"
+git-tree-sha1 = "b4bdb44ad9091643e26806be7edf2825b03fb683"
+repo-rev = "numerical-stability"
 repo-url = "https://github.com/ashiklom/CanopyOptics.jl"
 uuid = "a18e34a6-5dbe-4f38-a44b-e5141852e7a7"
 version = "0.1.2"
