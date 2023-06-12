@@ -10,5 +10,5 @@ datasets: \
 	data/ecosis-processed/lopex/spectra.arrow
 
 data/ecosis-processed/%/spectra.arrow: \
-	RProspectTraits/%.R
+	scripts/R/process-%.R
 	Rscript $<
