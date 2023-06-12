@@ -112,12 +112,11 @@ function fit_prospect(obs::Spectrum, nsamples::Int;
         version = "pro", sampler = NUTS(), kwargs...)
     opti_c = createLeafOpticalStruct(obs; prospect_version = version)
     turingmod = prospect_models[version]
-    init_params = prospect_defaults(version)
+    # init_params = prospect_defaults(version)
     return sample(
         turingmod(obs.values, opti_c),
         sampler, 
-        nsamples,
-        init_params = init_params;
+        nsamples;
         kwargs...
     )
 end
