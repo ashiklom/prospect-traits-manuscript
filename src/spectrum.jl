@@ -19,7 +19,6 @@ Convert spectra DataFrame row to Spectrum object suitable for inversion
 
 """
 function as_spectrum(spectra_df, observation_id)
-    ""
     spec_obs = subset(
         spectra_df,
         :observation_id => x -> x .== observation_id,
