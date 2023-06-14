@@ -14,20 +14,29 @@ end
 Convert spectra DataFrame row to Spectrum object suitable for inversion
 
 # Arguments
-- `spectra_df::DataFrame`: Data frame containing spectra
-- `observation_id::String`: Observation ID
+- `spectra_df`: `DataFrame` containing spectra, or `String` path to spectra
+  dataset in Arrow format.
+- `observation_id`: Observation ID
 
 """
 function as_spectrum(spectra_df, observation_id)
     spec_obs = subset(
         spectra_df,
         :observation_id => x -> x .== observation_id,
-        :spectral_measurement => x -> x .== "reflectance"
+        :spectral_measurement => x -> x .== "reflectance",
+        :wavelength_nm => x -> x .>= 400.0,
+        :wavelength_nm => x -> x .<= 2500.0
     )[:, [:wavelength_nm, :spectra_id, :value]]
+    @assert nrow(spec_obs) > 0, "No observations found for $observation_id"
     spec_wide = unstack(spec_obs, :spectra_id, :value)
     waves = Array{Float64}(spec_wide[:, :wavelength_nm])*u"nm"
     values = Array{Float64}(spec_wide[:, Not(:wavelength_nm)])
     Spectrum(waves, values)
+end
+
+function as_spectrum(spectra_df::String, observation_id)
+    @assert isfile(spectra_df)
+    return as_spectrum(DataFrame(Arrow.Table(spectra_df)), observation_id)
 end
 
 function CanopyOptics.createLeafOpticalStruct(obs::Spectrum; prospect_version = "pro")

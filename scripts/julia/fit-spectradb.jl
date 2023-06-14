@@ -1,17 +1,10 @@
-if ~isinteractive()
-    using LoggingExtras
-    logpath = mkpath("logs")
-    logfile = "$logpath/fit-spectradb.log"
-    global_logger(MinLevelLogger(FileLogger(logfile), Logging.Info))
-end
+using Distributed
+addprocs()
 
-using ProspectTraits
-
+using Dates
 using Arrow
 using DataFrames
 using Base.Filesystem
-
-using FLoops
 
 # Read all metadata
 function get_observation_ids(dataset_id)
@@ -21,21 +14,34 @@ function get_observation_ids(dataset_id)
     return DataFrame(dataset_id = dataset_id, observation_id = df[:, :observation_id])
 end
 datasets_all = readdir("data/ecosis-processed")
-skip_datasets = ["accp", "foster_beetle"]
+skip_datasets = ["accp", "foster_beetle", "wisc-leaf-trait-vine"]
 datasets = setdiff(datasets_all, skip_datasets)
 metadata_all = vcat([get_observation_ids(did) for did in datasets]...)
 
-const versions = ("pro", "d", "5b", "5", "4")
-for row in eachrow(metadata_all), version in versions
-    dataset_id = row[:dataset_id]
-    obs_id = row[:observation_id]
-    try
+@everywhere using ProspectTraits
+
+logpath = mkpath("logs")
+dstamp = Dates.format(now(), "yyyymmdd-HHMMSS")
+logfile = "$logpath/fit-spectradb-$dstamp.log"
+@everywhere using LoggingExtras
+@everywhere global_logger(MinLevelLogger(FileLogger($logfile; append=true), Logging.Info))
+
+@everywhere function fit_safe(dataset_id, obs_id, version)
+    result = try 
         fit_observation(dataset_id, obs_id, version)
     catch err
-        println("Error in PROSPECT inversion...")
+        if isa(err, InterruptException)
+            rethrow(err)
+        else
+            @info "[$dataset_id, $obs_id] $err\n\nSkipping..."
+            nothing
+        end
     end
+    return result
 end
 
-# dataset_id = "accp"
-# observation_id = "accp|92BHIS10BW1|1992"
-# spectra_df = spectra_data
+const versions = ("pro", "d", "5b", "5", "4")
+items = [(row[:dataset_id], row[:observation_id], version) for row in eachrow(metadata_all) for version in versions]
+@sync @distributed for item = items
+    fit_safe(item...)
+end

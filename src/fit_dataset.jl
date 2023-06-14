@@ -9,8 +9,8 @@ function fit_observation(dataset_id, observation_id, prospect_version;
         return outfile
     end
     @info "$logtag Beginning inversion"
-    spectra_data = DataFrame(Arrow.Table("data/ecosis-processed/$dataset_id/spectra.arrow"))
-    observation = as_spectrum(spectra_data, observation_id)
+    specfile = "data/ecosis-processed/$dataset_id/spectra.arrow"
+    observation = as_spectrum(specfile, observation_id)
     samples = fit_prospect(observation, nsamp; version = prospect_version, progress = progress)
     @info "$logtag Inversion complete! Saving results"
     serialize(outfile, samples)
