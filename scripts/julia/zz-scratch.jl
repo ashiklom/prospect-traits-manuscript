@@ -288,3 +288,54 @@ outfile = fit_row_save(metadata[3, :observation_id], spectra_data, "pro";
 using Turing, Zygote
 Turing.setadbackend(:zygote)
 r_test = fit_prospect(obs, 500; version = "pro")
+
+################################################################################
+using DataFrames
+using Arrow
+
+fname = "data/ecosis-processed/angers/spectra.arrow"
+Base.format_bytes(filesize(fname))
+df = DataFrame(Arrow.Table(fname))
+varinfo(r"df")
+
+function subset_df(fname)
+    df = DataFrame(Arrow.Table(fname))
+    return subset(
+        df,
+        :observation_id => x -> x .== "an03r0001",
+        :spectral_measurement => x -> x .== "reflectance"
+    )[:, [:wavelength_nm, :spectra_id, :value]]
+end
+
+function subset_query(fname)
+    tab = Arrow.Table(fname)
+    return tab |> 
+        @filter(
+            _.observation_id == "anr03r0001" &&
+            _.spectral_measurement == "reflectance"
+        ) |>
+        @select(:wavelength_nm, :spectra_id, :value)
+end
+
+using BenchmarkTools
+
+using Query
+dfarrow = Arrow.Table(fname)
+
+################################################################################
+dataset_id = "ngee_arctic"
+observation_id = "ngee_arctic|BNL32|2012"
+
+using DataFrames, Arrow
+
+meta = DataFrame(Arrow.Table("data/ecosis-processed/ngee_arctic/metadata.arrow"))
+meta[:,:observation_id]
+unique(spectra_df[:,:observation_id])
+spectra_df = DataFrame(Arrow.Table("data/ecosis-processed/ngee_arctic/spectra.arrow"))
+spec_obs = subset(
+    spectra_df,
+    :observation_id => x -> x .== observation_id
+)
+@assert nrow(spec_obs) > 0 "No observations found for $observation_id"
+
+ng1 = fit_observation(dataset_id, observation_id, "pro")
