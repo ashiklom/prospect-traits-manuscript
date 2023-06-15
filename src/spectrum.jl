@@ -24,15 +24,16 @@ function as_spectrum(spectra_df, observation_id)
         spectra_df,
         :observation_id => x -> x .== observation_id,
         :spectral_measurement => x -> x .== "reflectance",
-        :wavelength_nm => x -> x .>= 400.0,
-        :wavelength_nm => x -> x .<= 2500.0,
+        :wavelength_nm => x -> (x .>= 400.0) .& (x .<= 2500.0),
+        :value => x -> x .>= 0.0,
         skipmissing = true
     )[:, [:wavelength_nm, :spectra_id, :value]]
-    dropmissing!(spec_obs)
     @assert nrow(spec_obs) > 0 "No reflectance observations found for $observation_id"
     spec_wide = unstack(spec_obs, :spectra_id, :value)
-    waves = (spec_wide[:, :wavelength_nm])*u"nm"
-    values = spec_wide[:, Not(:wavelength_nm)]
+    dropmissing!(spec_wide; disallowmissing=true)
+    @assert nrow(spec_wide) > 0 "No non-missing values for $observation_id"
+    waves = Vector((spec_wide[:, :wavelength_nm])*u"nm")
+    values = Matrix(spec_wide[:, Not(:wavelength_nm)])
     Spectrum(waves, values)
 end
 
