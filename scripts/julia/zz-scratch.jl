@@ -342,6 +342,7 @@ ng1 = fit_observation(dataset_id, observation_id, "pro")
 
 ################################################################################
 using DataFrames, Arrow
+spfile(dataset_id) = "data/ecosis-processed/$dataset_id/spectra.arrow"
 prospect_version = "pro"
 dataset_id = "ecosis_pepper"
 observation_id = "ecosis_pepper_221_03"
@@ -349,10 +350,12 @@ observation_id = "ecosis_pepper_221_03"
 dataset_id = "ecosis_cedarcreek_biodiversity"
 observation_id = "ecosis_cedarcreek_biodiversity_044"
 
-as_spectrum(specfile, observation_id)
+dataset_id = "ecosis_santamonica"
+observation_id = "s5ad_a01-95"
 
-spectra_df = DataFrame(Arrow.Table(specfile))
-unique(spectra_df[:,:spectral_measurement])
+as_spectrum(spfile(dataset_id), observation_id)
+
+spectra_df = DataFrame(Arrow.Table(spfile(dataset_id)))
 subset(
     spectra_df,
     :observation_id => x -> x .== observation_id,

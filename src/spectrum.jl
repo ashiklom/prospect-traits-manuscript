@@ -28,10 +28,11 @@ function as_spectrum(spectra_df, observation_id)
         :wavelength_nm => x -> x .<= 2500.0,
         skipmissing = true
     )[:, [:wavelength_nm, :spectra_id, :value]]
+    dropmissing!(spec_obs)
     @assert nrow(spec_obs) > 0 "No reflectance observations found for $observation_id"
     spec_wide = unstack(spec_obs, :spectra_id, :value)
-    waves = Array{Float64}(spec_wide[:, :wavelength_nm])*u"nm"
-    values = Array{Float64}(spec_wide[:, Not(:wavelength_nm)])
+    waves = (spec_wide[:, :wavelength_nm])*u"nm"
+    values = spec_wide[:, Not(:wavelength_nm)]
     Spectrum(waves, values)
 end
 
