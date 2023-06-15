@@ -26,8 +26,6 @@ skip_datasets = ["accp", "foster_beetle", "wisc-leaf-trait-vine"]
 datasets = setdiff(datasets_all, skip_datasets)
 obs_all = vcat([get_observation_ids(did) for did in datasets]...)
 
-fit_observation(obs_all[100,:dataset_id], obs_all[100,:observation_id], "pro")
-
 @everywhere using ProspectTraits
 
 logpath = mkpath("logs")
