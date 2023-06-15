@@ -342,9 +342,12 @@ ng1 = fit_observation(dataset_id, observation_id, "pro")
 
 ################################################################################
 using DataFrames, Arrow
+prospect_version = "pro"
 dataset_id = "ecosis_pepper"
 observation_id = "ecosis_pepper_221_03"
-prospect_version = "pro"
+
+dataset_id = "ecosis_cedarcreek_biodiversity"
+observation_id = "ecosis_cedarcreek_biodiversity_044"
 
 as_spectrum(specfile, observation_id)
 
