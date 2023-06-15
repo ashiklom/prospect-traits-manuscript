@@ -25,9 +25,10 @@ function as_spectrum(spectra_df, observation_id)
         :observation_id => x -> x .== observation_id,
         :spectral_measurement => x -> x .== "reflectance",
         :wavelength_nm => x -> x .>= 400.0,
-        :wavelength_nm => x -> x .<= 2500.0
+        :wavelength_nm => x -> x .<= 2500.0,
+        skipmissing = true
     )[:, [:wavelength_nm, :spectra_id, :value]]
-    @assert nrow(spec_obs) > 0, "No observations found for $observation_id"
+    @assert nrow(spec_obs) > 0 "No reflectance observations found for $observation_id"
     spec_wide = unstack(spec_obs, :spectra_id, :value)
     waves = Array{Float64}(spec_wide[:, :wavelength_nm])*u"nm"
     values = Array{Float64}(spec_wide[:, Not(:wavelength_nm)])
@@ -35,7 +36,7 @@ function as_spectrum(spectra_df, observation_id)
 end
 
 function as_spectrum(spectra_df::String, observation_id)
-    @assert isfile(spectra_df)
+    @assert isfile(spectra_df) "$spectra_df not found"
     return as_spectrum(DataFrame(Arrow.Table(spectra_df)), observation_id)
 end
 

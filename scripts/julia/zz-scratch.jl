@@ -1,5 +1,5 @@
-import Pkg; Pkg.activate(".")
 using Revise
+import Pkg; Pkg.activate(".")
 
 using ProspectTraits
 using Unitful
@@ -339,3 +339,20 @@ spec_obs = subset(
 @assert nrow(spec_obs) > 0 "No observations found for $observation_id"
 
 ng1 = fit_observation(dataset_id, observation_id, "pro")
+
+################################################################################
+using DataFrames, Arrow
+dataset_id = "ecosis_pepper"
+observation_id = "ecosis_pepper_221_03"
+prospect_version = "pro"
+
+as_spectrum(specfile, observation_id)
+
+spectra_df = DataFrame(Arrow.Table(specfile))
+unique(spectra_df[:,:spectral_measurement])
+subset(
+    spectra_df,
+    :observation_id => x -> x .== observation_id,
+    :spectral_measurement => x -> x .== "reflectance",
+    skipmissing=true
+)
