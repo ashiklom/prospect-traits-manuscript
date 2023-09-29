@@ -353,7 +353,31 @@ observation_id = "ecosis_cedarcreek_biodiversity_044"
 dataset_id = "ecosis_santamonica"
 observation_id = "s5ad_a01-95"
 
-as_spectrum(spfile(dataset_id), observation_id)
+dataset_id = "ecosis_missoulats"
+observation_id = "nn2_120719"
+
+using Plots
+using Serialization
+
+obs = as_spectrum(spfile(dataset_id), observation_id)
+rfile = fit_observation(dataset_id, observation_id, "pro"; progress=true, overwrite=true)
+result = deserialize(rfile)
+
+# using Debugger
+using ProspectTraits
+using CanopyOptics
+optis = createLeafOpticalStruct(obs)
+leaf = LeafProspectProProperties(
+    N = 1.2505020164739922,
+    Ccab = 0.17416047191818448,
+    Ccar = 0.060332183604325934,
+    Canth = 1.0884711857846752e-22,
+    Cbrown = 1.0555892803208574e9,
+    Cw = 0.006337122152559249,
+    Ccbc = 4.57099243856743e-5,
+    Cprot = 208.49123919175113
+)
+prospect(leaf, optis)
 
 spectra_df = DataFrame(Arrow.Table(spfile(dataset_id)))
 subset(
@@ -362,3 +386,10 @@ subset(
     :spectral_measurement => x -> x .== "reflectance",
     skipmissing=true
 )
+
+df = DataFrame(
+    name = ["a", "a", "b"],
+    i = [1, 2, 2],
+    value = [1.0, 2.0, 3.0]
+)
+unstack(df, :name, :value)
