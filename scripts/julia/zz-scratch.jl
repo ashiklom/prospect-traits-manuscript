@@ -393,3 +393,15 @@ df = DataFrame(
     value = [1.0, 2.0, 3.0]
 )
 unstack(df, :name, :value)
+
+################################################################################
+using Serialization
+using DataFrames
+using CSV
+
+params = deserialize("data/params")
+
+CSV.write("data/params.csv", params)
+
+corrs = deserialize("data/corrs")
+CSV.write("data/corrs.csv", corrs)

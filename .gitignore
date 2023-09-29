@@ -5,6 +5,7 @@
 /data/ecosis-download
 /data/ecosis-processed/*/*.arrow
 /data/results*
+/data/
 /logs/
 
 .osfcli.config
