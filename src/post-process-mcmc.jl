@@ -10,16 +10,21 @@ function summarize_fit(fname)
     m = match(rx, fname)
     dataset_id = String(m[:dataset_id])
     version = String(m[:version])
+    observation_id = String(m[:observation_id])
     result = deserialize(fname)
     param_summary = DataFrame(summarystats(result))
     param_quant = DataFrame(quantile(result; q = [0.025, 0.975]))
     params = outerjoin(param_summary, param_quant, on = :parameters)
     params[!,:dataset_id] .= dataset_id
+    params[!,:observation_id] .= observation_id
     params[!,:version] .= version
-    select!(params, :dataset_id, :version, Not([:dataset_id, :version]))
+    # Rearrange columns so IDs are first
+    select!(params, :dataset_id, :observation_id, :version, Not([:dataset_id, :observation_id, :version]))
     corrdf = stretch(cor(result))
     corrdf[!,:dataset_id] .= dataset_id
+    corrdf[!,:observation_id] .= observation_id
     corrdf[!,:version] .= version
-    select!(corrdf, :dataset_id, :version, Not([:dataset_id, :version]))
+    # Rearrange columns so IDs are first
+    select!(corrdf, :dataset_id, :observation_id, :version, Not([:dataset_id, :observation_id, :version]))
     return params, corrdf
 end
