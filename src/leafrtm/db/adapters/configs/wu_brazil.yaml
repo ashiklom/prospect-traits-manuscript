@@ -1,0 +1,28 @@
+dataset_id: wu_brazil
+source: spectra_db
+source_id: wu_brazil
+citation: "Wu, J., Albert, L. P., Lopes, A. P., et al. (2016). Leaf development and demography explain photosynthetic seasonality in Amazon evergreen forests. Science 351, 972-976; spectra: Chavana-Bryant, C., et al. (2017). Leaf aging of Amazonian canopy trees as revealed by spectral and physiochemical measurements. New Phytol. 214, 1049-1063."
+doi: 10.1111/nph.14051
+# Tapajos (Brazil) canopy leaves. spectra_db's EWT is water_fraction * LMA,
+# which is wrong for a fraction of fresh mass; EWT is instead derived in
+# harmonize.py from LMA and LWC.
+spectra:
+  quantity: {column: spectra_type, map: {R: R}}
+  foreoptic: leaf_clip
+  instrument: asd-fspro
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [observation_id]
+  plant: ["Branch ID"]
+species: {name: scientific_name}
+date: {column: collection_date}
+site: {name: "Tapajos National Forest"}
+lat: latitude
+lon: longitude
+ecosystem: forest
+canopy_position: {column: canopy_position, map: {T: top, M: middle, B: bottom}}
+leaf_age: {column: leaf_age, map: {young: young, mature: mature, old: old}}
+traits:
+  - {column: leaf_mass_per_area, trait: lma, unit: "kg/m**2"}
+  - {column: leaf_water_pct_mass, trait: lwc, unit: dimensionless}

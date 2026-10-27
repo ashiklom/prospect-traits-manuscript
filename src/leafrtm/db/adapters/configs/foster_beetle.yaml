@@ -1,0 +1,5 @@
+dataset_id: foster_beetle
+source: spectra_db
+source_id: foster_beetle
+include: false
+exclude_reason: "Only continuum-removed reflectance is available (no R, T, A or PA), and there are no traits."

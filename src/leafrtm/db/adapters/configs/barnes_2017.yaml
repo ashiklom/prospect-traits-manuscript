@@ -1,0 +1,28 @@
+dataset_id: barnes_2017
+source: spectra_db
+source_id: barnes_2017
+citation: "Barnes, M. L., Breshears, D. D., Law, D. J., et al. (2017). Beyond greenness: Detecting temporal changes in photosynthetic capacity with hyperspectral reflectance data. PLoS ONE 12, e0189539."
+# Poplar (Populus deltoides) leaves at Biosphere 2, one leaf per plant per date
+# (spectra are the average of 9 leaf-clip measurements). Two genotypes.
+spectra:
+  quantity: {column: spectra_type, map: {R: R}}
+  foreoptic: leaf_clip
+  instrument: asd-fs3
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [observation_id]
+  plant: [Plant_ID]
+species: {code: species_code, code_map: {PODE3: Populus deltoides}}
+date: {column: collection_date}
+site: {name: "Biosphere 2"}
+lat: latitude
+lon: longitude
+ecosystem: laboratory
+treatments:
+  - {factor: genotype, column: Genotype}
+traits:
+  - {column: leaf_Vcmax_area, trait: vcmax_area, unit: "umol/m**2/s"}
+  - {column: leaf_Jmax_area, trait: jmax_area, unit: "umol/m**2/s"}
+  - {column: leaf_water_potential, trait: water_potential, unit: MPa}
+  - {column: leaf_temperature, trait: leaf_temperature, unit: degC}

@@ -1,0 +1,31 @@
+dataset_id: divittorio_conifer
+source: spectra_db
+source_id: divittorio_conifer
+citation: "Di Vittorio, A. V. (2009). Enhancing a leaf radiative transfer model to estimate concentrations and in vivo specific absorption coefficients of total carotenoids and chlorophylls a and b from single-needle reflectance and transmittance. Remote Sens. Environ. 113, 1948-1966."
+doi: 10.1016/j.rse.2009.05.002
+# Single Pinus needles, R and T with an Ocean Optics spectrometer (401-799 nm;
+# spectra_db holds them spline-interpolated to 1 nm). Needle condition
+# (ozone damage, insect damage, winter fleck) is a sampled condition, kept as
+# a treatment-like factor with green/random needles as controls.
+spectra:
+  quantity: {column: spectra_type, map: {R: R, T: T}}
+  scale: fraction
+  foreoptic: integrating_sphere
+  instrument: oo-usb2000
+  sample_state: fresh
+  target_config: single_needle
+ids:
+  entity: [observation_id]
+species: {code: species_code, code_map: {PIJE: Pinus jeffreyi, PIPO: Pinus ponderosa}}
+date: 2009
+site: {column: site_code, map: {gf: Giant Forest, mk: Mineral King, pnf: Plumas National Forest}}
+lat: latitude
+lon: longitude
+ecosystem: forest
+treatments:
+  - {factor: other, column: dv_needle_condition, control: [green, random]}
+traits:
+  - {column: leaf_chltot_per_area, trait: chl_area, unit: "ug/cm**2"}
+  - {column: leaf_chla_per_area, trait: chla_area, unit: "ug/cm**2"}
+  - {column: leaf_chlb_per_area, trait: chlb_area, unit: "ug/cm**2"}
+  - {column: leaf_cartot_per_area, trait: car_area, unit: "ug/cm**2"}

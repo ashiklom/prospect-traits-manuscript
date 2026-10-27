@@ -1,0 +1,32 @@
+dataset_id: yang_pheno
+source: spectra_db
+source_id: yang_pheno
+citation: "Yang, X., Tang, J., Mustard, J. F., Wu, J., Zhao, K., Serbin, S., Lee, J.-E. (2016). Seasonal variability of multiple leaf traits captured by leaf spectroscopy at two temperate deciduous forests. Remote Sens. Environ. 179, 1-12."
+doi: 10.1016/j.rse.2016.03.026
+# Weekly sampling of the same trees through the growing season (2011 Martha's
+# Vineyard: R only; 2012 Harvard Forest: R and T). Different leaves each date:
+# entity = tree x date, plant = tree. Season is a time series, not a treatment.
+spectra:
+  quantity: {column: spectra_type, map: {R: R, T: T}}
+  foreoptic: integrating_sphere
+  instrument: asd-other
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [observation_id]
+  plant: [tree_id]
+species: {name: scientific_name}
+date: {column: collectiondate}
+site: {column: description}
+lat: latitude
+lon: longitude
+ecosystem: forest
+sun_shade: {column: sun_shade, map: {sun: sun, shade: shade}}
+traits:
+  - {column: leaf_chltot_per_area, trait: chl_area, unit: "ug/cm**2"}
+  - {column: leaf_chla_per_area, trait: chla_area, unit: "ug/cm**2"}
+  - {column: leaf_chlb_per_area, trait: chlb_area, unit: "ug/cm**2"}
+  - {column: leaf_cartot_per_area, trait: car_area, unit: "ug/cm**2"}
+  - {column: leaf_mass_per_area, trait: lma, unit: "g/m**2"}
+  - {column: leaf_C_pct_mass, trait: c_mass, unit: percent}
+  - {column: leaf_N_pct_mass, trait: n_mass, unit: percent}

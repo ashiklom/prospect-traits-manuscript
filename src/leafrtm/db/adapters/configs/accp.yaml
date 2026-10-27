@@ -1,0 +1,31 @@
+dataset_id: accp
+source: spectra_db
+source_id: accp
+title: "Accelerated Canopy Chemistry Program (ACCP)"
+citation: "Aber, J. D., Bolster, K. L., Newman, S. D., Soulia, M., Martin, M. E. (1994). Analysis of forest foliage II: Measurement of carbon fraction and nitrogen content by end-member analysis. J. Near Infrared Spectrosc. 2, 15-23 (ACCP; data via ORNL DAAC)."
+# NIRS 6500 laboratory spectra (1992-1993), mostly pseudo-absorbance log10(1/R)
+# of dried or powdered foliage, a few fresh-leaf reflectance spectra.
+# sample_prep distinguishes states of one sample: it goes into ids.time.
+spectra:
+  quantity: {column: spectra_type, map: {R: R, PA: PA}}
+  foreoptic: other
+  instrument: foss-nirs6500
+  sample_state: {column: sample_prep, map: {fresh: fresh, dry: dried_intact, powder: ground}}
+  target_config: unknown
+ids:
+  entity: [samplename]
+  time: [sample_prep]
+species: {code: species_code}
+date: {column: collection_date}
+site: {column: site_code}
+plot: {column: plot_code}
+lat: latitude
+lon: longitude
+ecosystem: forest
+traits:
+  - {column: leaf_N_pct_mass, trait: n_mass, unit: percent}
+  - {column: leaf_C_pct_mass, trait: c_mass, unit: percent}
+  - {column: leaf_H_pct_mass, trait: h_mass, unit: percent}
+  - {column: leaf_lignin_pct_mass, trait: lignin_mass, unit: percent}
+  - {column: leaf_cellulose_pct_mass, trait: cellulose_mass, unit: percent}
+  - {column: leaf_water_thickness, trait: ewt, unit: "g/cm**2"}
