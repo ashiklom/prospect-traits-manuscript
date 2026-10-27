@@ -1,0 +1,36 @@
+---
+title: "Within vs among species"
+---
+
+```{python}
+from _lib import *
+var = read("variance")
+```
+
+What fraction of trait variation lies within species, among species, and among datasets
+(sites, campaigns)? The decomposition uses log values. It is shown for three sources:
+
+* `measured`: in-situ measurements
+* `rtm_measured_leaves`: RTM best estimates on the same leaves
+* `rtm_all_leaves`: RTM best estimates on all leaves, which are many more
+
+```{python}
+#| fig-cap: "Share of log-trait variance within species, among species (within datasets) and among datasets, by trait and source."
+if len(var):
+    v = var[var["trait"].isin(TRAIT)].copy()
+    v["label"] = v["trait"].map(lambda t: trait_label(t, False)) + " · " + v["source"]
+    comps = [("within_species", "within species", "#2a78d6"), ("among_species", "among species", "#eb6834"),
+             ("among_datasets", "among datasets", "#1baf7a")]
+    fig = go.Figure()
+    for col, name, color in comps:
+        fig.add_trace(go.Bar(y=v["label"], x=v[col], name=name, orientation="h",
+                             marker=dict(color=color, line=dict(color=SURFACE, width=2)),
+                             customdata=np.c_[v["n_leaves"], v["n_species"]],
+                             hovertemplate="%{y}<br>" + name + ": %{x:.0%}<br>%{customdata[0]} leaves, %{customdata[1]} species<extra></extra>"))
+    fig.update_layout(barmode="stack", xaxis=dict(tickformat=".0%", range=[0, 1]),
+                      height=max(350, 26 * len(v)), margin=dict(l=320), legend=dict(orientation="h", y=1.06))
+    show(fig)
+    show_table(fmt(var))
+else:
+    no_data()
+```

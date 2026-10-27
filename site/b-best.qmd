@@ -1,0 +1,35 @@
+---
+title: "Best trait estimates"
+---
+
+```{python}
+from _lib import *
+best = read("best_config")
+bsum = read("best_estimates")
+```
+
+Objective B needs the best available trait estimate for every leaf, not a model comparison.
+The best configuration (RTM × error model × data use) is chosen per trait and foreoptic
+class:
+
+* **Criterion:** the lowest log-CRPS against measurements on fresh leaves, which rewards
+  accuracy and calibrated uncertainty.
+* **Comparability:** only configurations fitted to all leaves of the group compete.
+* **Honest error estimate:** the selection itself is evaluated by leave-one-dataset-out
+  cross-validation (`lodo_crps_log`).
+
+Leaves without measurements receive the estimate of the configuration selected for their
+foreoptic class.
+
+```{python}
+if len(best):
+    show_table(fmt(best.drop(columns=["scores"])))
+else:
+    no_data()
+```
+
+```{python}
+if len(bsum):
+    stats([(f"{bsum['observation_id'].nunique():,}", "leaves with best estimates"),
+           (f"{bsum['trait'].nunique()}", "traits")])
+```

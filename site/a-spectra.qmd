@@ -1,0 +1,93 @@
+---
+title: "Spectral fit"
+---
+
+```{python}
+from _lib import *
+res = read("spectral_residuals")
+fitl = read("spectral_fit_leaf")
+spec = read("spectra_examples")
+```
+
+## Residual structure by wavelength
+
+```{python}
+#| fig-cap: "Mean residual (observed − posterior mean prediction) by 10 nm bin, fresh leaves, with the 5–95 % range across leaves shaded. One panel per quantity; one line per RTM (error model: Hetero + OU)."
+if len(res):
+    r = res[(res["sample_state"] == "fresh") & res["fitted"] & (res["errmodel"] == "ou") & ~res["rt"].astype(bool)
+            & (res["data_use"] == "all")]
+    qs = [q for q in ["R", "T"] if q in set(r["quantity"])]
+    from plotly.subplots import make_subplots
+    fig = make_subplots(rows=len(qs), cols=1, shared_xaxes=True, subplot_titles=qs, vertical_spacing=0.08)
+    for i, q in enumerate(qs, 1):
+        for m in MODELS:
+            g = r[(r["quantity"] == q) & (r["model"] == m)].sort_values("wl_bin")
+            if g.empty:
+                continue
+            c = MODEL_COLOR[m]
+            fig.add_trace(go.Scatter(x=np.r_[g["wl_bin"], g["wl_bin"][::-1]],
+                                     y=np.r_[g["resid_q95"], g["resid_q05"][::-1]], fill="toself",
+                                     fillcolor=c, opacity=0.1, line=dict(width=0), hoverinfo="skip",
+                                     showlegend=False), i, 1)
+            fig.add_trace(go.Scatter(x=g["wl_bin"], y=g["resid_mean"], mode="lines", line=dict(color=c, width=2),
+                                     name=MODEL_LABEL[m], legendgroup=m, showlegend=(i == 1),
+                                     hovertemplate=MODEL_LABEL[m] + "<br>%{x} nm: %{y:.4f}<extra></extra>"), i, 1)
+        fig.add_hline(y=0, line=dict(color=AXIS, width=1), row=i, col=1)
+    fig.update_xaxes(title_text="wavelength (nm)", row=len(qs), col=1)
+    fig.update_yaxes(title_text="residual")
+    fig.update_layout(height=320 * len(qs), legend=dict(orientation="h", y=1.08))
+    show(fig)
+else:
+    no_data()
+```
+
+## Fit quality per leaf
+
+```{python}
+#| fig-cap: "Distribution of per-leaf RMSE of fitted quantities (fresh leaves), by run. Box = interquartile range."
+if len(fitl):
+    f = fitl[fitl["fitted"]].assign(run=lambda d: d.apply(run_label, axis=1))
+    fig = go.Figure()
+    for q in ["R", "T"]:
+        g = f[f["quantity"] == q]
+        if g.empty:
+            continue
+        fig.add_trace(go.Box(y=g["run"], x=g["rmse"], name=q, orientation="h", boxpoints=False,
+                             marker_color={"R": "#2a78d6", "T": "#eb6834"}[q]))
+    fig.update_layout(boxmode="group", xaxis_title="RMSE", height=max(350, 28 * f["run"].nunique()),
+                      margin=dict(l=380), legend=dict(orientation="h", y=1.1))
+    show(fig)
+```
+
+## Example leaves
+
+```{python}
+#| fig-cap: "Observed spectra (dark) and posterior 90 % prediction band (shaded) for example leaves; use the menu to switch leaf and run. Dotted lines = quantities not used in the fit (out-of-sample)."
+if len(spec):
+    keys = spec[["observation_id", "run_id"]].drop_duplicates().head(40)
+    fig = go.Figure()
+    buttons = []
+    ntr = []
+    for k, (oid, rid) in enumerate(keys.itertuples(index=False)):
+        g = spec[(spec["observation_id"] == oid) & (spec["run_id"] == rid)]
+        n0 = len(fig.data)
+        for q, h in g.groupby("quantity"):
+            h = h.sort_values("wavelength")
+            col = {"R": "#2a78d6", "T": "#eb6834", "A": "#1baf7a", "PA": "#eda100"}[q]
+            dash = "solid" if h["fitted"].iat[0] else "dot"
+            fig.add_trace(go.Scatter(x=np.r_[h["wavelength"], h["wavelength"][::-1]],
+                                     y=np.r_[h["yhat_q95"], h["yhat_q05"][::-1]], fill="toself",
+                                     fillcolor=col, opacity=0.25, line=dict(width=0), hoverinfo="skip",
+                                     visible=(k == 0), showlegend=False))
+            fig.add_trace(go.Scatter(x=h["wavelength"], y=h["y"], mode="lines", name=f"{q} observed",
+                                     line=dict(color=INK, width=1.5, dash=dash), visible=(k == 0)))
+        ntr.append((n0, len(fig.data)))
+    for k, (oid, rid) in enumerate(keys.itertuples(index=False)):
+        vis = [False] * len(fig.data)
+        for i in range(*ntr[k]):
+            vis[i] = True
+        buttons.append(dict(label=f"{oid} · {rid}", method="update", args=[{"visible": vis}]))
+    fig.update_layout(updatemenus=[dict(buttons=buttons, x=0, y=1.15, xanchor="left")],
+                      xaxis_title="wavelength (nm)", yaxis_title="R, T", height=450)
+    show(fig)
+```

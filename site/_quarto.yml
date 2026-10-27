@@ -1,0 +1,77 @@
+project:
+  type: website
+  output-dir: ../_site
+  execute-dir: project
+  resources:
+    - plotly.min.js
+
+website:
+  title: "Leaf RTM traits"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Overview
+      - text: Data
+        menu:
+          - href: data.qmd
+            text: Inventory
+          - href: species.qmd
+            text: Species resolution
+      - text: Methods
+        menu:
+          - href: methods-workflow.qmd
+            text: Workflow & data model
+          - href: models.qmd
+            text: Models, inversion & priors
+          - href: methods-rtms.qmd
+            text: RTM behaviour (interactive)
+          - href: methods-observation.qmd
+            text: Observation operator & replicates
+          - href: methods-error-models.qmd
+            text: How the error models work
+          - href: error-models.qmd
+            text: Error model comparison (pilot)
+      - text: "A · How good are leaf RTMs?"
+        menu:
+          - href: a-spectra.qmd
+            text: Spectral fit
+          - href: a-intercompare.qmd
+            text: Model intercomparison
+          - href: a-retrieval.qmd
+            text: Trait retrieval
+          - href: a-data-use.qmd
+            text: R only vs R + T
+          - href: a-state-protocol.qmd
+            text: Sample state & protocol
+          - href: a-diagnostics.qmd
+            text: Diagnostics
+      - text: "B · How do traits vary?"
+        menu:
+          - href: b-best.qmd
+            text: Best estimates
+          - href: b-variance.qmd
+            text: Within vs among species
+          - href: b-treatments.qmd
+            text: Treatments
+          - href: b-correlations.qmd
+            text: Trait correlations
+    right:
+      - icon: github
+        href: https://github.com/ashiklom/prospect-traits-manuscript
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    include-in-header:
+      text: <script src="plotly.min.js"></script>
+    toc: true
+    fig-responsive: true
+    mermaid:
+      theme: neutral
+    mainfont: 'system-ui, -apple-system, "Segoe UI", sans-serif'
+
+execute:
+  echo: false
+  warning: false
+  freeze: false

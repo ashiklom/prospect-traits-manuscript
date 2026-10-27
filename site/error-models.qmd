@@ -1,0 +1,58 @@
+---
+title: "Error models"
+---
+
+```{python}
+from _lib import *
+em = read("error_model_comparison")
+```
+
+[prospect-inversion-comparison](https://github.com/ashiklom/prospect-inversion-comparison)
+fitted 11 LOPEX/ANGERS leaves with iid normal errors and found:
+
+* Only 4 of 40 measured traits fell inside the 90 % credible intervals.
+* The 90 % prediction intervals for held-out transmittance covered only 27 % of it.
+* The residuals are smooth (AR(1) φ ≈ 0.999 at 1 nm), and are many times larger than
+  replicate noise.
+* The residuals' shape is shared across leaves. They are structural model error.
+
+The pilot therefore compares four structured error models:
+
+| ID | Model | Free per leaf | Notes |
+|---|---|---|---|
+| **ou** | Heteroskedastic scale $\sigma_0+\sigma_1\hat y$ with Ornstein–Uhlenbeck correlation $e^{-\lvert\Delta\lambda\rvert/\ell}$ | $\sigma_0,\sigma_1,\ell$ per quantity | Exact $O(n)$ on irregular grids. With a vague prior, $\ell$ runs to $10^3$–$10^4$ nm and the chains disagree; the prior below keeps it identifiable. |
+| **ss** | Heteroskedastic scale with Matérn-3/2 + nugget correlation | $\sigma_0,\sigma_1$ | $\ell$ and the nugget are learned from stage-1 residuals. Evaluated via a Vecchia factorization ($m=30$). |
+| **ld** | Learned shared discrepancy: mean bias $\mu_g(\lambda)$, $k$ factors $\Lambda$, per-band variance, Matérn leftover | one scale $\kappa$ per quantity | Learned per RTM × instrument class from stage-1 residuals, cross-fitted by dataset. Woodbury + Vecchia. |
+| **+rt** | Correlated R/T errors | $\rho$ (ou/ss) | ld: factors span the stacked [R; T] vector. |
+
+All four are $O(n)$ or $O(nk)$. They are tested against dense multivariate normal densities in
+`tests/test_likelihood.py`.
+
+## Pilot comparison
+
+```{python}
+#| tbl-cap: "Per run: mean 90 % coverage of measured traits, mean log-score (CRPS on log scale, lower is better), mean R² (log), held-out transmittance (fits that used R only), share of converged fits, and cost."
+if len(em):
+    em = em.assign(run=em.apply(run_label, axis=1))
+    cols = ["run", "traits", "coverage90", "crps_log", "r2_log", "heldout_T_rmse",
+            "heldout_T_coverage90", "converged", "median_seconds", "total_hours"]
+    show_table(fmt(em[[c for c in cols if c in em]].sort_values("crps_log")))
+else:
+    no_data()
+```
+
+```{python}
+#| fig-cap: "Calibration vs accuracy: mean coverage of the 90 % credible intervals for measured traits (ideal 0.9, dashed) against mean log-CRPS (lower is better). One marker per run; colour = error model, symbol = RTM."
+if len(em) and em["coverage90"].notna().any():
+    fig = go.Figure()
+    for err, g in em.groupby("errmodel"):
+        fig.add_trace(go.Scatter(
+            x=g["crps_log"], y=g["coverage90"], mode="markers", name=ERR_LABEL.get(err, err),
+            marker=dict(size=12, color=ERR_COLOR.get(err), symbol=[MODEL_SYMBOL.get(m, "circle") for m in g["model"]],
+                        line=dict(color=SURFACE, width=2)),
+            customdata=g["run"], hovertemplate="%{customdata}<br>CRPS %{x:.3f}<br>coverage %{y:.2f}<extra></extra>"))
+    fig.add_hline(y=0.9, line=dict(color=MUTED, width=1, dash="dash"))
+    fig.update_layout(xaxis_title="mean log-CRPS (lower = better)", yaxis_title="90 % interval coverage",
+                      height=420, legend=dict(orientation="h", y=1.12))
+    show(fig)
+```

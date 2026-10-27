@@ -1,0 +1,66 @@
+---
+title: "Trait correlations"
+---
+
+```{python}
+from _lib import *
+cor = read("correlations")
+win = read("within_species_correlations")
+```
+
+These are Spearman correlations among RTM-based trait estimates (`rtm:`) and with measured
+traits (`meas:`), including traits the RTMs cannot estimate (N, C, P, lignin, Vcmax, …).
+They are computed at two levels:
+
+* individual leaves
+* species means (species with ≥ 3 leaves)
+
+```{python}
+#| fig-cap: "Correlation matrices among RTM estimates and measured traits. Diverging scale: blue negative, red positive, gray zero."
+if len(cor):
+    from plotly.subplots import make_subplots
+    lv = [l for l in ["leaf", "species_mean"] if l in set(cor["level"])]
+    fig = make_subplots(rows=1, cols=len(lv), subplot_titles=lv, horizontal_spacing=0.18)
+    for i, l in enumerate(lv, 1):
+        c = cor[cor["level"] == l]
+        vars_ = sorted(set(c["var_a"]) | set(c["var_b"]))
+        M = pd.DataFrame(np.nan, index=vars_, columns=vars_)
+        for r in c.itertuples():
+            M.loc[r.var_a, r.var_b] = M.loc[r.var_b, r.var_a] = r.spearman
+        fig.add_trace(go.Heatmap(z=M.to_numpy(), x=vars_, y=vars_, zmin=-1, zmax=1, showscale=(i == 1),
+                                 colorscale=[[0, "#2a78d6"], [0.5, "#f0efec"], [1, "#e34948"]],
+                                 hovertemplate="%{y} × %{x}: %{z:.2f}<extra>" + l + "</extra>"), 1, i)
+    fig.update_layout(height=650)
+    show(fig)
+else:
+    no_data()
+```
+
+## Do within-species correlations match across-species correlations?
+
+For each pair of variables, the histogram shows the correlations within individual species
+(n ≥ 10 leaves). The vertical line marks the correlation among species means. A within-species
+distribution centred far from that line means the relationship across species does not hold
+within species.
+
+```{python}
+#| fig-cap: "Within-species Spearman correlations (histogram) vs the species-mean correlation (vertical line), for the variable pairs with the most species."
+if len(win) and len(cor):
+    pairs = win.groupby(["var_a", "var_b"]).size().sort_values(ascending=False).head(12).index
+    from plotly.subplots import make_subplots
+    nc = 3; nr = int(np.ceil(len(pairs) / nc))
+    fig = make_subplots(rows=nr, cols=nc, subplot_titles=[f"{a} × {b}" for a, b in pairs],
+                        vertical_spacing=0.12)
+    spm = cor[cor["level"] == "species_mean"].set_index(["var_a", "var_b"])["spearman"]
+    for i, (a, b) in enumerate(pairs):
+        r, c = i // nc + 1, i % nc + 1
+        w = win[(win["var_a"] == a) & (win["var_b"] == b)]
+        fig.add_trace(go.Histogram(x=w["spearman"], xbins=dict(start=-1, end=1, size=0.1),
+                                   marker=dict(color="#86b6ef", line=dict(color=SURFACE, width=1)),
+                                   showlegend=False, hovertemplate="r %{x}<br>%{y} species<extra></extra>"), r, c)
+        if (a, b) in spm.index:
+            fig.add_vline(x=spm[(a, b)], line=dict(color="#e34948", width=2), row=r, col=c)
+        fig.update_xaxes(range=[-1, 1], row=r, col=c)
+    fig.update_layout(height=260 * nr, bargap=0.05)
+    show(fig)
+```

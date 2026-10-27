@@ -1,0 +1,130 @@
+---
+title: "Models & priors"
+---
+
+```{python}
+from _lib import *
+import yaml
+pri = yaml.safe_load(open(ROOT / "config" / "priors.yaml"))
+mp = yaml.safe_load(open(ROOT / "config" / "rtm_traits.yaml"))
+```
+
+All RTMs are implemented twice: in NumPy as a reference, and in PyTensor for inference.
+They are vendored in `src/leafrtm/rtm/`, with provenance and citations in
+`src/leafrtm/rtm/data/PROVENANCE.md`.
+
+## PROSPECT 4, 5, 5B, D, PRO
+
+PROSPECT treats a leaf as $\mathcal{N}$ absorbing plates (Allen et al. 1969; Stokes 1862). The
+plate absorption is a linear combination of constituent concentrations $C_i$ and specific
+absorption coefficients $K_i(\lambda)$:
+
+$$k(\lambda) = \frac{1}{\mathcal{N}}\sum_i K_i(\lambda)\,C_i.$$
+
+The versions differ in their coefficients and constituents:
+
+* **4:** Cab, Cw, Cm.
+* **5:** adds Car.
+* **5B:** adds brown pigments.
+* **D:** adds anthocyanins, with new coefficients and refractive index.
+* **PRO:** replaces Cm with proteins and carbon-based constituents.
+
+All versions share one plate model, vendored from `prospect-inversion-comparison`. Its
+exponential integral is the NAG S13AAF Chebyshev expansion: a PyTensor Op with an analytic
+gradient and a native numba kernel. The forward models match the independent `prosail`
+package.
+
+## LIBERTY
+
+LIBERTY (Dawson et al. 1998) is a Python port of `rrtm::liberty`. Its parameters are:
+
+* cell diameter $D$
+* intercellular air space $x_u$
+* thickness
+* baseline absorption
+* "albino" absorption
+* chlorophyll, water, lignin + cellulose and nitrogen (protein)
+
+The port matches the R code solved to convergence to about 1e-12. rrtm's 50 fixed-point
+iterations are within about 3e-6 of that converged solution.
+
+$D$ multiplies every absorption term, so it cannot be identified separately from the
+concentrations; it is held at 40 µm.
+
+## LeafSIP
+
+LeafSIP (Wu et al. 2021) applies spectral invariants theory to the leaf. A photon
+recollision probability $p$ and a scattering asymmetry $q$, both functions of dry matter
+$C_m$, scale a single-scattering albedo computed from PROSPECT-D absorption.
+
+## Bayesian inversion
+
+**Unit of inference.** Each observation (one leaf or sample at one time) is inverted
+separately with each RTM.
+
+**Replicates.** All replicate spectra enter the likelihood through their mean on each
+wavelength grid and instrument. Suppose the model is $y_r = \hat y(\theta) + \delta + \varepsilon_r$,
+with a structural discrepancy $\delta$ shared by replicates and independent replicate noise
+$\varepsilon_r$. Then the mean is sufficient for $\theta$. Summing independent replicate
+likelihoods instead would wrongly treat systematic RTM error as noise that averages out.
+
+**Quantities.** Reflectance and transmittance, when both were measured, enter the same
+likelihood. Absorptance $A = 1-R-T$ and pseudo-absorbance $PA = \log_{10}(1/R)$ are
+deterministic functions of modeled R and T, so they can enter the same likelihood too (see
+the feasibility check on [Diagnostics](a-diagnostics.qmd)).
+
+**Observation operator (no resampling of data).** RTM output is mapped onto each spectrum's
+own observed bands. The RTM grids are 1 nm for PROSPECT and LeafSIP, and 5 nm for LIBERTY.
+The mapping is one of:
+
+* index selection, when the observed bands are on the RTM grid
+* linear interpolation otherwise
+* a Gaussian spectral response function, for band-averaged data sampled more coarsely than
+  8 nm
+
+Bands outside the RTM range are dropped. Detector joins start new segments of the
+correlated-error process.
+
+**Sampler.** NUTS as implemented in nutpie (numba backend), on a PyMC/PyTensor model:
+
+* The plate-model exponential integral uses a fast NAG S13AAF expansion, an Op with an
+  analytic gradient.
+* The model is compiled once per (RTM, error model, quantity set) and reused across leaves
+  by swapping data, which reproduces a fresh compile exactly (tested).
+* The pilot runs 4 chains × 600 warm-up + 600 draws.
+
+**Convergence** requires, for every RTM parameter:
+
+* rank-normalized $\hat R < 1.01$
+* bulk and tail ESS ≥ 200
+
+**Stored per fit:**
+
+* posterior summaries
+* 100 thinned draws
+* posterior predictive spectra on all observed bands, including quantities left out of the
+  fit
+
+**Comparison with measurements.** RTM parameters are converted to the units of the
+corresponding measured traits (table below). Comparisons are made at three levels:
+
+* **Leaf.** Metrics are accuracy, bias, slope, 90 % interval coverage, and CRPS on the log
+  scale.
+* **Pooled sample.** Plant-level traits are compared with the mean estimate over the
+  sample's leaves.
+* **Species mean.** Species means use the same leaves; posterior uncertainty is propagated
+  draw by draw.
+
+## Priors
+
+```{python}
+rows = [{"parameter": k, **v} for k, v in {**pri["rtm"], **pri["error"]}.items()]
+show_table(pd.DataFrame(rows).fillna(""))
+```
+
+## RTM parameters ↔ measured traits
+
+```{python}
+rows = [{"model": MODEL_LABEL.get(m, m), **e} for m, lst in mp.items() for e in lst]
+show_table(pd.DataFrame(rows).fillna(""))
+```

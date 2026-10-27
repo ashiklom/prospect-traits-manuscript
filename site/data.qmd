@@ -1,0 +1,119 @@
+---
+title: "Data inventory"
+---
+
+```{python}
+from _lib import *
+import plotly.express as px
+ds = read("inventory_datasets")
+sites = read("inventory_sites")
+cov = read("inventory_trait_coverage")
+states = read("inventory_states")
+qc = read("inventory_qc")
+```
+
+**Sources:**
+
+* **EcoSIS:** every package with target type "leaf", discovered through the EcoSIS API.
+* **ECOSTRESS spectral library:** VSWIR vegetation and leaf-litter spectra.
+* **NASA SHIFT** (ORNL DAAC 2244, 2233, 2337, 2295): dried and ground leaf spectra, fresh-leaf
+  LMA, water and chlorophyll, chemistry and plot metadata.
+* **[`spectra_db`](https://github.com/ashiklom/spectra_db):** only for datasets EcoSIS doesn't
+  provide (Barnes et al. 2017, Di Vittorio 2009, Wu et al. 2016, Yang et al. 2016, ACCP).
+
+Datasets published in several places (EcoSIS v1/v2 packages, spectra_db copies of EcoSIS
+packages, repeated uploads) are included once. The decisions are documented in each config
+and in `configs/README.md`.
+
+Every dataset is downloaded by code, converted by a per-dataset adapter config
+(`src/leafrtm/db/adapters/configs/`), and merged into one normalized database
+(`src/leafrtm/db/schema.py`):
+
+* **Hierarchy:** dataset → site → plot; entity (a physical leaf or sample) → observation (an
+  entity at one time and sample state) → spectra (replicates) and traits.
+* **Enums:** categorical metadata (sample state, foreoptic, quantity, canopy position,
+  treatment factor, growth form, …) use fixed enumerations.
+* **Units:** traits are converted to canonical units.
+
+## Datasets
+
+```{python}
+if len(ds):
+    cols = ["dataset_id", "source", "n_observations", "n_spectra", "n_species", "quantities",
+            "sample_states", "foreoptic", "traits", "treatments", "citation", "doi"]
+    show_table(ds[cols].sort_values("n_observations", ascending=False))
+else:
+    no_data()
+```
+
+## Where
+
+```{python}
+#| fig-cap: "Mean site location of each dataset (marker area ∝ number of observations). Hover for details."
+if len(sites):
+    s = sites.dropna(subset=["lat", "lon"])
+    fig = go.Figure(go.Scattergeo(
+        lat=s["lat"], lon=s["lon"], mode="markers",
+        marker=dict(size=np.clip(np.sqrt(s["n_obs"]) * 0.8, 5, 30), color="#2a78d6",
+                    line=dict(color=SURFACE, width=1), opacity=0.8),
+        customdata=np.c_[s["dataset_id"], s["name"], s["n_obs"]],
+        hovertemplate="%{customdata[0]}<br>%{customdata[1]}<br>%{customdata[2]} observations<extra></extra>"))
+    fig.update_geos(showcountries=True, countrycolor=AXIS, landcolor="#f0efec", showocean=True,
+                    oceancolor=SURFACE, coastlinecolor=AXIS, projection_type="natural earth")
+    fig.update_layout(height=460, margin=dict(l=0, r=0, t=10, b=0))
+    show(fig)
+```
+
+## Sample state, quantities and foreoptics
+
+```{python}
+#| fig-cap: "Observations by sample state and measured quantities (R reflectance, T transmittance, A absorptance, PA pseudo-absorbance)."
+if len(states):
+    st = states.groupby(["sample_state", "quantities"], as_index=False)["n"].sum()
+    order = ["fresh", "dried_intact", "pressed", "ground"]
+    fig = go.Figure()
+    for i, q in enumerate(sorted(st["quantities"].unique())):
+        d = st[st["quantities"] == q].set_index("sample_state").reindex(order).fillna(0)
+        fig.add_trace(go.Bar(y=order, x=d["n"], name=q, orientation="h",
+                             marker=dict(color=list(MODEL_COLOR.values())[i % 7],
+                                         line=dict(color=SURFACE, width=2)),
+                             hovertemplate="%{y}: %{x:,} observations<extra>" + q + "</extra>"))
+    fig.update_layout(barmode="stack", height=300, xaxis_title="observations",
+                      legend=dict(orientation="h", y=1.15))
+    show(fig)
+```
+
+## Trait coverage
+
+```{python}
+#| fig-cap: "Number of trait records (measured and derived) per dataset and trait. Hover for counts."
+if len(cov):
+    top = cov.groupby("trait")["n"].sum().sort_values(ascending=False).index[:30]
+    m = cov[cov["trait"].isin(top)].pivot_table(index="dataset_id", columns="trait", values="n").fillna(0)
+    m = m.loc[m.sum(axis=1).sort_values().index, top]
+    fig = go.Figure(go.Heatmap(z=np.log10(m.to_numpy() + 1), x=m.columns, y=m.index,
+                               colorscale=[[0, "#f0efec"], [0.01, "#cde2fb"], [1, "#104281"]],
+                               customdata=m.to_numpy(),
+                               hovertemplate="%{y}<br>%{x}: %{customdata:,}<extra></extra>",
+                               colorbar=dict(title="log₁₀(n+1)")))
+    fig.update_layout(height=max(400, 14 * len(m)), xaxis_tickangle=-45, margin=dict(l=220))
+    show(fig)
+```
+
+## Quality control
+
+Spectral QC flags are recorded, never applied to the values:
+
+* `out_of_range`: more than 5 % of bands outside [−0.02, 1.02]
+* `flat`
+* `sparse`
+* `jump`: a step at a detector join
+* `replicate_outlier`
+
+Spectra flagged `out_of_range`, `flat`, `sparse` or `replicate_outlier` are excluded from
+the inversions.
+
+```{python}
+if len(qc):
+    show_table(qc.pivot_table(index="dataset_id", columns="flag", values="n").fillna(0).astype(int).reset_index())
+```

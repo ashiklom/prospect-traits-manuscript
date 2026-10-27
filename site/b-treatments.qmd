@@ -1,0 +1,37 @@
+---
+title: "Treatment effects"
+---
+
+```{python}
+from _lib import *
+tr = read("treatments")
+```
+
+Many datasets come from experiments, with factors such as nitrogen, water, temperature,
+pathogens, herbivory and genotype. For each dataset, factor and trait, the effect of each
+level against the control is a log response ratio, $\ln(\bar y_{trt}/\bar y_{ctl})$, with
+bootstrap 90 % intervals. Effects are computed from RTM best estimates and from in-situ
+measurements; where both exist, they are shown side by side.
+
+```{python}
+#| fig-cap: "Log response ratio vs control (90 % bootstrap interval). Circles: RTM estimates; squares: measurements."
+if len(tr):
+    t = tr[tr["trait"].isin(TRAIT)].copy()
+    t["label"] = t["dataset_id"] + " · " + t["factor"] + "=" + t["level"].astype(str) + " · " + t["trait"].map(lambda x: trait_label(x, False))
+    t = t.sort_values(["dataset_id", "factor", "trait", "level"])
+    fig = go.Figure()
+    for src, sym, col in [("rtm", "circle", "#2a78d6"), ("measured", "square", "#eb6834")]:
+        g = t[t["source"] == src]
+        fig.add_trace(go.Scatter(x=g["lrr"], y=g["label"], mode="markers", name=src,
+                                 marker=dict(symbol=sym, size=9, color=col, line=dict(color=SURFACE, width=2)),
+                                 error_x=dict(type="data", symmetric=False, array=g["lrr_q95"] - g["lrr"],
+                                              arrayminus=g["lrr"] - g["lrr_q05"], color=col, thickness=1.5, width=0),
+                                 customdata=np.c_[g["n_treat"], g["n_control"]],
+                                 hovertemplate="%{y}<br>LRR %{x:.3f}<br>n = %{customdata[0]} vs %{customdata[1]}<extra>" + src + "</extra>"))
+    fig.add_vline(x=0, line=dict(color=AXIS, width=1))
+    fig.update_layout(height=max(400, 22 * t["label"].nunique()), margin=dict(l=420),
+                      xaxis_title="log response ratio", legend=dict(orientation="h", y=1.04))
+    show(fig)
+else:
+    no_data()
+```

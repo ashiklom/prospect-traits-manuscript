@@ -1,0 +1,34 @@
+---
+title: "Species resolution"
+---
+
+```{python}
+from _lib import *
+sp = read("inventory_species")
+rev = read("species_review")
+```
+
+Raw taxon names and codes are resolved in two passes (`src/leafrtm/db/species.py`):
+
+1. **USDA PLANTS.** Names and USDA codes are cleaned to binomials and matched against the
+   USDA PLANTS checklist distributed with `spectra_db`. Every name *not* found there was
+   reviewed by hand; the decisions are committed in `vocab/species_resolution.csv`.
+2. **GBIF backbone.** After the bulk of the work, every resolved name was re-checked against
+   the GBIF backbone taxonomy (`vocab/species_gbif.csv`: accepted name, status, family, match
+   type).
+
+```{python}
+if len(sp):
+    stats([(f"{len(sp):,}", "resolved taxa"), (f"{sp['family'].nunique()}", "families")])
+    show_table(sp[["scientific_name", "family", "growth_form", "leaf_type", "n_observations", "datasets"]]
+               .sort_values("n_observations", ascending=False))
+```
+
+## Names awaiting review
+
+```{python}
+if len(rev):
+    show_table(rev)
+else:
+    print("None.")
+```

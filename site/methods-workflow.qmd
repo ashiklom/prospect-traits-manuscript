@@ -1,0 +1,125 @@
+---
+title: "Workflow & data model"
+---
+
+## Workflow
+
+Everything from downloading data to rendering this site runs through
+[Snakemake](https://snakemake.readthedocs.io) (`Snakefile`, `workflow/rules/`):
+
+* **Python-native, no services.** Rules call the package directly, with no scheduler or
+  database to run.
+* **A file-based DAG with wildcards.** It maps naturally onto dataset → harmonize → (run ×
+  batch) fits → analyses → site.
+* **Resumable.** Interrupted runs pick up where they stopped. Each fit job also caches
+  per-leaf results, so a killed job restarts at the next leaf.
+* **Scalable.** The same rules run on a laptop and on a SLURM cluster. For the full fit, the
+  per-batch commands are written out as job files for YCRC's Dead Simple Queue (`docs/hpc.md`).
+
+```{mermaid}
+flowchart TB
+  subgraph data[Data]
+    direction LR
+    E[EcoSIS API] --> H
+    S[ECOSTRESS library] --> H
+    N[NASA SHIFT<br>ORNL DAAC] --> H
+    D[spectra_db<br>pinned commit] --> H
+    H[harmonize<br>adapters + schema + QC<br>+ species] --> DB[(normalized<br>parquet DB)]
+  end
+  DB --> SEL[select<br>fit set + batches]
+  subgraph fits[Inversions]
+    direction LR
+    SEL --> F1[stage 1 fits<br>ou error model]
+    F1 --> LR[learn<br>Matérn ℓ, discrepancy<br>cross-fitted]
+    LR --> F2[stage 2 fits<br>ss / ld error models]
+  end
+  F1 --> AG[aggregate]
+  F2 --> AG
+  AG --> AN[analyses<br>A: RTM evaluation<br>B: trait variation]
+  AN --> SD[site data<br>release asset]
+  SD --> W[this website]
+```
+
+**Fit sets** (`config/config.yaml`) select the observations and the runs, where a run is
+RTM × error model × R/T correlation × data use:
+
+| Fit set | Purpose |
+|---|---|
+| `smoke` | A 16-leaf end-to-end test of the whole chain. |
+| `pilot` | About 120 observations stratified by dataset, sample state and R+T availability; all error models. |
+| `feasibility` | Absorptance and pseudo-absorbance fits. |
+| `full` | Every observation, with the configuration chosen in the pilot. |
+
+## Data model
+
+Each source is downloaded by code and converted by a declarative, per-dataset YAML config
+(`src/leafrtm/db/adapters/configs/`). The config maps the provider's columns onto one
+normalized schema:
+
+```{mermaid}
+erDiagram
+  DATASET ||--o{ SITE : has
+  SITE ||--o{ PLOT : has
+  DATASET ||--o{ ENTITY : has
+  PLOT ||--o{ ENTITY : located
+  SPECIES ||--o{ ENTITY : is
+  ENTITY ||--o{ OBSERVATION : "measured at time / state"
+  OBSERVATION ||--o{ SPECTRUM : "replicates"
+  OBSERVATION ||--o{ TRAIT : "leaf-level"
+  ENTITY ||--o{ TRAIT : "pooled / plant-level"
+  OBSERVATION }o--o{ TREATMENT : "assigned"
+  SPECTRUM }o--|| WAVELENGTH_GRID : "native grid"
+  SPECTRUM }o--|| INSTRUMENT : "measured with"
+```
+
+* **Entity** is a physical leaf or sample. **Observation** is that entity at one time and in
+  one sample state, so the same leaf measured fresh and again after grinding gives one entity
+  with two observations. RTMs are inverted per observation.
+* **Spectra** keep their native wavelength grid; grids are deduplicated and shared. Values
+  are fractions (percent is converted per spectrum).
+* **Traits** are converted to canonical units with `pint`. Each carries its trait level (leaf,
+  or pooled sample / plant) and measurement method (e.g. optical chlorophyll meters are
+  flagged).
+* **Enums** cover the categorical metadata:
+
+  | Field | Values |
+  |---|---|
+  | sample state | fresh, dried intact, pressed, ground |
+  | target configuration | single leaf, leaf stack, needle array, single needle |
+  | foreoptic | integrating sphere, leaf clip, contact probe, bare fibre |
+  | quantity | R, T, A, PA |
+  | canopy position, sun/shade, leaf age | fixed levels |
+  | treatment factor | nitrogen, water, temperature, CO₂, light, pathogen, herbivory, pollutant, genotype, … |
+  | species attributes | growth form, leaf type, phenology, photosynthetic pathway |
+
+## Derived traits and QC
+
+**Derived traits** are added only when not measured, and flagged `derived`:
+
+* EWT $=$ LMA $\cdot W/(1-W)$, with $W$ the water fraction of fresh mass. A previous
+  compilation multiplied $W$ by LMA instead.
+* N and C per area from per-mass values and LMA.
+* Chlorophyll a+b from a and b.
+
+**Physically implausible trait values** are dropped and listed in the harmonization report.
+
+**Spectral QC flags** are recorded, never applied to the values:
+
+* `out_of_range`: more than 5 % of bands outside [−0.02, 1.02]
+* `flat`
+* `sparse`
+* `jump`: a step at a detector join
+* `replicate_outlier`: RMS distance from the replicate median
+
+Flagged spectra are excluded from the inversions.
+
+## Species
+
+There are two passes:
+
+1. **Manual review.** Names and USDA codes are matched to the USDA PLANTS checklist. Every
+   name not found there is reviewed by hand, and the decisions are committed.
+2. **GBIF re-check.** Every resolved name is checked against the GBIF backbone taxonomy
+   (accepted name, status, family).
+
+See [Species resolution](species.qmd).
