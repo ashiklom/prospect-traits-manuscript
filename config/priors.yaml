@@ -29,6 +29,9 @@ rtm:
 error:
   sigma0: {dist: halfnormal, sigma: 0.02}
   sigma1: {dist: halfnormal, sigma: 0.1}
-  ell:    {dist: lognormal, meanlog: 3.912, sdlog: 1.5}   # median 50 nm
+  # median 50 nm, 95% 11-220 nm. With a vague prior ell runs to 1e3-1e4 nm
+  # (residuals are smoother than OU), sigma and ell trade off and Cm/Cw become
+  # unidentified (multimodal chains in the pilot).
+  ell:    {dist: lognormal, meanlog: 3.912, sdlog: 0.75}
   kappa:  {dist: lognormal, meanlog: 0.0, sdlog: 0.7}
   rho:    {dist: beta, alpha: 2.0, beta: 2.0}             # rho = 2 * x - 1
