@@ -1,32 +1,64 @@
 dataset_id: yang_pheno
-source: spectra_db
-source_id: yang_pheno
+source: yang2016
+source_id: yang2016
 citation: "Yang, X., Tang, J., Mustard, J. F., Wu, J., Zhao, K., Serbin, S., Lee, J.-E. (2016). Seasonal variability of multiple leaf traits captured by leaf spectroscopy at two temperate deciduous forests. Remote Sens. Environ. 179, 1-12."
 doi: 10.1016/j.rse.2016.03.026
-# Weekly sampling of the same trees through the growing season (2011 Martha's
-# Vineyard: R only; 2012 Harvard Forest: R and T). Different leaves each date:
-# entity = tree x date, plant = tree. Season is a time series, not a treatment.
+url: https://github.com/ashiklom/LeafTraitSpectraSeasonality-Yangetal2016RSE
+# Weekly sampling of the same trees through the growing season: 2011 Martha's
+# Vineyard (3 red oaks; R only) and 2012 Harvard Forest (2 red oaks, 2 red
+# maples, 1 yellow birch; R and T). New leaves each date: entity = leaf sample
+# x date (same IDs as the former spectra_db version), plant = tree. The season
+# is a time series, not a treatment.
+#
+# Source: read from the authors' original files (adapters/yang2016.py documents
+# the layout) instead of spectra_db, whose copy is wrong:
+# * 2012 Harvard Forest spectra are circularly shifted against the wavelengths
+#   (value at wavelength w = raw value at w - 56 nm, wrapping around; red edge
+#   at ~765 nm), so this dataset previously dropped 2012.
+# * In both years spectra were attached to samples in alphabetical order of the
+#   sample names (AL1, AL2, ..., AUN1, ...), while the spectra columns follow
+#   the order of the traits workbook (AUN1, ..., AUS3, AL1, ...; for 2012 also
+#   the order in 2012HFReadMe.txt). Every leaf's traits were thus paired with
+#   another leaf's spectrum (2011: same tree, other branch). In the workbook
+#   order, chlorophyll correlates negatively with red/red-edge reflectance and
+#   LMA with the le Maire NDLMA index on every sampling day; in alphabetical
+#   order these correlations vanish or reverse. 2012 empty spectra columns
+#   coincide exactly with the leaves missing from the traits workbook.
+#
+# Instrument and foreoptic as before (ASD spectroradiometer with integrating
+# sphere; model not given in the data). Spectra are fractions; the provided
+# files are already smoothed. Upper/lower canopy branches; sun/shade follows
+# canopy position (as in spectra_db). 2011 upper-canopy leaves also carry
+# north/south side (column `aspect`, not mapped). LMA, C and N were measured on
+# pooled leaves (2012: both upper leaves of a branch; 2011 C and N: the 3 leaves
+# of a branch) and are repeated for each leaf of the pool.
 spectra:
-  quantity: {column: spectra_type, map: {R: R, T: T}}
+  quantity: {column: quantity, map: {R: R, T: T}}
+  scale: fraction
   foreoptic: integrating_sphere
   instrument: asd-other
   sample_state: fresh
   target_config: single_leaf
 ids:
-  entity: [observation_id]
-  plant: [tree_id]
-species: {name: scientific_name}
-date: {column: collectiondate}
-site: {column: description}
-lat: latitude
-lon: longitude
+  entity: [observation_id]   # "yang_pheno|<sample>|<DOY>|<year>"
+  plant: [site, tree]
+species:
+  name: species_code
+  map: {RO: Quercus rubra, RM: Acer rubrum, YB: Betula alleghaniensis}
+date: {column: year_doy, format: "%Y-%j"}
+site:
+  column: site
+  map: {MV: "Martha's Vineyard, MA, USA", HF: "Harvard Forest, Petersham, MA, USA"}
+lat: {column: site, map: {MV: 41.362, HF: 42.531}}
+lon: {column: site, map: {MV: -70.578, HF: -72.190}}
 ecosystem: forest
-sun_shade: {column: sun_shade, map: {sun: sun, shade: shade}}
+canopy_position: {column: canopy, map: {U: top, L: bottom}}
+sun_shade: {column: canopy, map: {U: sun, L: shade}}
 traits:
-  - {column: leaf_chltot_per_area, trait: chl_area, unit: "ug/cm**2"}
-  - {column: leaf_chla_per_area, trait: chla_area, unit: "ug/cm**2"}
-  - {column: leaf_chlb_per_area, trait: chlb_area, unit: "ug/cm**2"}
-  - {column: leaf_cartot_per_area, trait: car_area, unit: "ug/cm**2"}
-  - {column: leaf_mass_per_area, trait: lma, unit: "g/m**2"}
-  - {column: leaf_C_pct_mass, trait: c_mass, unit: percent}
-  - {column: leaf_N_pct_mass, trait: n_mass, unit: percent}
+  - {column: TotChl, trait: chl_area, unit: "ug/cm**2"}
+  - {column: Chla, trait: chla_area, unit: "ug/cm**2"}
+  - {column: Chlb, trait: chlb_area, unit: "ug/cm**2"}
+  - {column: Car, trait: car_area, unit: "ug/cm**2"}
+  - {column: LMA, trait: lma, unit: "g/m**2"}
+  - {column: TotC, trait: c_mass, unit: percent}
+  - {column: TotN, trait: n_mass, unit: percent}
