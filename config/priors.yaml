@@ -29,9 +29,12 @@ rtm:
 error:
   sigma0: {dist: halfnormal, sigma: 0.02}
   sigma1: {dist: halfnormal, sigma: 0.1}
-  # median 50 nm, 95% 11-220 nm. With a vague prior ell runs to 1e3-1e4 nm
-  # (residuals are smoother than OU), sigma and ell trade off and Cm/Cw become
-  # unidentified (multimodal chains in the pilot).
-  ell:    {dist: lognormal, meanlog: 3.912, sdlog: 0.75}
+  # OU correlation length (nm): median 50, truncated at 250. Within one leaf, a
+  # residual process correlated over thousands of nm acts as a free baseline that
+  # absorbs the broad dry-matter and water features: unbounded, the dominant
+  # posterior mode had ell 2500-4700 nm and Cm about half the measured LMA, and
+  # randomly started chains split between modes (R-hat ~1.5). Broad shared misfit
+  # is left to the learned discrepancy (ld), which is identified across leaves.
+  ell:    {dist: lognormal, meanlog: 3.912, sdlog: 0.75, upper: 250}
   kappa:  {dist: lognormal, meanlog: 0.0, sdlog: 0.7}
   rho:    {dist: beta, alpha: 2.0, beta: 2.0}             # rho = 2 * x - 1

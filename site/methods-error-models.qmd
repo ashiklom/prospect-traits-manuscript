@@ -141,11 +141,19 @@ $$z_i \mid z_{i-1} \sim \mathcal N\!\left(\phi_i z_{i-1},\; 1-\phi_i^2\right), \
 Gaps decorrelate naturally through $\Delta\lambda$, and detector joins start a new segment
 ($\phi_i = 0$). Here $\sigma_0, \sigma_1$ and $\ell$ are estimated per leaf.
 
-* **Problem in the pilot.** With a vague prior, $\ell$ ran off to $10^3$–$10^4$ nm, because
-  the residuals are smoother than an OU process can be. $\sigma$ and $\ell$ then trade off,
-  $C_m$ and $C_w$ became unidentified, and chains disagreed.
-* **Fix.** A lognormal prior on $\ell$ (median 50 nm, 95 % within 11–220 nm) removed the
-  problem.
+* **Problem in the pilot: confounding with the RTM.** Left free, $\ell$ runs to
+  $10^3$–$10^4$ nm. A residual correlated over thousands of nanometres is a free baseline:
+  it absorbs the broad dry-matter and water features that the RTM parameters should
+  explain. The dominant posterior mode then has $C_m$ at about half the measured LMA, and
+  randomly started chains split between modes ($\hat R \approx 1.5$).
+* **Fix.** $\ell$ has a lognormal prior (median 50 nm) truncated at 250 nm, so OU
+  describes *local* correlation only. Broad misfit that recurs across leaves is left to
+  the learned discrepancy (`ld`), which is identified because it is learned from many
+  leaves. With the bound, $\ell$ usually sits near 250 nm, which shows the data want
+  broader structure than one leaf can separate from absorption.
+* **Multimodality.** Every fit (all error models) first finds the posterior mode with a
+  two-stage optimization from eight starts: the RTM parameters with the error model held
+  at its prior medians, then all parameters. All chains start next to the best mode.
 
 **Matérn-3/2 with a nugget (`ss`).** This process is once differentiable, so its sample
 paths are smooth like the observed residuals rather than rough like OU:
