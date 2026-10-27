@@ -262,7 +262,8 @@ def to_tables(cfg: dict, meta: pd.DataFrame, wavelength, values, dataset_meta: d
     # --- datasets / sites / plots ---------------------------------------------
     out.tables["datasets"] = pd.DataFrame([{
         "dataset_id": ds, "title": cfg.get("title") or dataset_meta.get("title") or ds,
-        "source": cfg["source"], "source_id": cfg.get("source_id", ds),
+        "source": cfg["source"],
+        "source_id": "; ".join(np.atleast_1d(cfg.get("source_id", ds)).astype(str)),
         "url": cfg.get("url") or dataset_meta.get("url"),
         "doi": cfg.get("doi") or dataset_meta.get("doi"),
         "citation": cfg.get("citation") or dataset_meta.get("citation"),

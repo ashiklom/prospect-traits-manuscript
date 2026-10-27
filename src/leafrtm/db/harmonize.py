@@ -156,6 +156,13 @@ def harmonize(dataset_ids=None, rebuild=False) -> dict:
     db["wavelength_grids"] = pd.concat([p["wavelength_grids"] for p in parts]).drop_duplicates(
         "grid_id").reset_index(drop=True)
     raw = pd.concat([p["raw_species"] for p in parts], ignore_index=True)
+    db["datasets"]["source_id"] = db["datasets"]["source_id"].map(
+        lambda v: "; ".join(map(str, v)) if not isinstance(v, str) else v)
+    for t in ("sites", "plots"):  # numeric plot/site labels (e.g. plot 117) are names, not numbers
+        db[t]["name"] = db[t]["name"].map(lambda v: v if pd.isna(v) else str(v)).astype(object)
+    # datasets differ in date types (tz-aware, naive, missing): normalize to naive UTC dates
+    db["observations"]["date"] = pd.to_datetime(db["observations"]["date"], errors="coerce",
+                                                utc=True).dt.tz_localize(None)
     for c in ("value", "original_value"):  # empty per-dataset tables concat as object
         db["traits"][c] = pd.to_numeric(db["traits"][c], errors="coerce")
     db["traits"]["derived"] = db["traits"]["derived"].astype(bool)
