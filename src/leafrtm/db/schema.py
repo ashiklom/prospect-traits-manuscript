@@ -152,6 +152,7 @@ class Traits(_Table):
     original_name: Series[str]
     original_value: Series[float] = pa.Field(nullable=True)
     original_unit: Series[str] = pa.Field(nullable=True)
+    method: Series[str] = pa.Field(nullable=True)  # e.g. "extraction", "ccm300", "spad"
     derived: Series[bool]
 
 

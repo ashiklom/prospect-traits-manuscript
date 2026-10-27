@@ -108,12 +108,21 @@ def map_column(meta: pd.DataFrame, spec, default=None, enum=None) -> pd.Series:
     return s
 
 
+def _id_str(x) -> str:
+    """Stable string form of an ID value (1.0 -> "1"; missing -> "NA")."""
+    if x is None or (isinstance(x, float) and np.isnan(x)):
+        return "NA"
+    if isinstance(x, float) and x.is_integer():
+        return str(int(x))
+    return str(x).strip()
+
+
 def _id_cols(meta, cols):
     if not cols:
         return pd.Series("", index=meta.index)
     if isinstance(cols, str):
         cols = [cols]
-    return meta[cols].astype(str).map(lambda x: x.strip()).agg("|".join, axis=1)
+    return meta[cols].map(_id_str).agg("|".join, axis=1)
 
 
 def parse_dates(meta, spec) -> tuple[pd.Series, pd.Series]:
@@ -298,12 +307,13 @@ def to_tables(cfg: dict, meta: pd.DataFrame, wavelength, values, dataset_meta: d
         raw["name"] = sp_cfg["constant"]
     elif "name" in sp_cfg:
         cols = sp_cfg["name"] if isinstance(sp_cfg["name"], list) else [sp_cfg["name"]]
-        raw["name"] = meta[cols].astype(str).map(lambda x: x.strip()).agg(" ".join, axis=1).where(
-            meta[cols].notna().all(axis=1) | (len(cols) > 1), None)
+        parts = meta[cols].map(lambda x: x.strip() if isinstance(x, str) else x)
+        raw["name"] = parts.apply(lambda r: " ".join(str(v) for v in r if pd.notna(v) and str(v)),
+                                  axis=1).replace("", None)
         if "map" in sp_cfg:
             raw["name"] = raw["name"].map(lambda x: sp_cfg["map"].get(x, x))
     if "code" in sp_cfg:
-        raw["code"] = meta[sp_cfg["code"]].astype(str).str.strip().where(meta[sp_cfg["code"]].notna(), None)
+        raw["code"] = meta[sp_cfg["code"]].map(lambda x: str(x).strip() if pd.notna(x) else None)
         raw["code_type"] = sp_cfg.get("code_type", "usda")
         if "code_map" in sp_cfg:
             raw["name"] = raw["code"].map(sp_cfg["code_map"]).where(
@@ -402,7 +412,7 @@ def to_tables(cfg: dict, meta: pd.DataFrame, wavelength, values, dataset_meta: d
             "entity_id": entity_id, "trait": t["trait"], "value": v,
             "unit": trait_vocab()[t["trait"]]["unit"], "trait_level": level,
             "original_name": t["column"], "original_value": pd.to_numeric(meta[t["column"]], errors="coerce"),
-            "original_unit": t.get("unit"), "derived": False})
+            "original_unit": t.get("unit"), "method": t.get("method"), "derived": False})
         df = df[np.isfinite(df["value"])]
         # one value per observation (replicate rows repeat trait values)
         key = "observation_id" if level == "leaf" else "entity_id"

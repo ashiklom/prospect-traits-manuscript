@@ -47,6 +47,7 @@ traits:
   - {column: "LMA (g/m2)", trait: lma, unit: "g/m**2"}       # unit in pint syntax
   - {column: "N_area", trait: n_area, unit: "g/m**2", level: plant}   # level: leaf (default) | plant | plot | species
   - {column: "x", trait: starch_mass, unit: "percent", factor: 0.1}  # optional multiplier before conversion
+  - {column: "CHL", trait: chl_area, unit: "mg/m**2", method: ccm300}  # method: non-standard measurement (optical meter etc.)
 ```
 
 Mapped values (`map`) that aren't listed become missing. Enum values are
