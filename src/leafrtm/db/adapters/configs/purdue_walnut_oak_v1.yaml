@@ -1,0 +1,7 @@
+dataset_id: purdue_walnut_oak_v1
+source: ecosis
+source_id: purdue-leaf-spectral-and-functional-trait-data-used-in-plsr-modeling
+include: false
+exclude_reason: >-
+  Superseded duplicate. The package description says "DO NOT USE. This dataset has been superseded by ...
+  v2. The data resources in both versions are identical". v2 is included as purdue_walnut_oak.

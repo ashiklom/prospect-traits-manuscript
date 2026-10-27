@@ -1,0 +1,59 @@
+dataset_id: sierra_nevada_2023
+source: ecosis
+# UW EnSpec Sierra Nevada (CA) campaign, July 2023 (drought / fire-stress areas).
+# One bulk sample (sample_id, several leaves or a needle cohort of one plant) is
+# measured fresh (leaf clip / plant probe, SE PSR-3500+) and, after oven-drying or
+# freeze-drying, as ground powder (ASD FS3 contact probe). The package descriptions
+# say "dried and ground"; NIR R ~0.8 confirms powders. The two powders of one sample
+# share the entity and differ by `state` in ids.time.
+# The "dried-leaf-spectra-and-measured-traits-..." package is the union of the oven-
+# and freeze-dried packages (identical ids and spectra) and is excluded
+# (sierra_nevada_2023_dried_combined.yaml).
+source_id:
+  - fresh-leaf-spectra-and-measured-traits-from-the-sierra-nevada--ca--in-july-2023
+  - oven-dried-leaf-spectra-and-measured-traits-from-the-sierra-nevada--ca--in-july-2023
+  - freeze-dried-leaf-spectra-and-measured-traits-from-the-sierra-nevada--ca--in-july-2023
+citation: "Vanden Heuvel, C., Queally, N., Zheng, T., Berman, L., Breuer, Z., Cryer, J., Lapinskas, C., Majerus, A., Marsh, E., Townsend, P. (2023). Fresh / Oven Dried / Freeze Dried Leaf Spectra and Measured Traits from the Sierra Nevada (CA) in July 2023. EcoSIS. doi:10.21232/VjNddaj7; doi:10.21232/seiE5xAq"
+doi: 10.21232/VjNddaj7; 10.21232/seiE5xAq
+columns:
+  state: "`_package`.str.split('-').str[0]"            # fresh | oven | freeze
+  site_code: "`plot_name`.str.split('_').str[0]"       # area code (SL, HH, YV, ...)
+  foreoptic_code: "`Foreoptic Type`.fillna('CP')"      # dried packages: ASD contact probe
+  species_name: "`Latin Genus`.str.strip().fillna('').str.cat(`Latin Species`.str.strip().fillna(''), sep=' ').str.strip()"
+filter:
+  - "part_of_plant == 'Leaf'"          # drops flower and lichen samples
+spectra:
+  quantity: R
+  # The fresh export interleaves x.1 nm columns (the individual spectra) with integer
+  # columns that repeat each sample's first replicate: keep only the x.1 nm bands.
+  drop_integer_bands: [0]
+  scale: auto                          # fresh in fraction, dried in fraction (metadata says %)
+  foreoptic: {column: foreoptic_code, map: {LC: leaf_clip, PP: contact_probe, CP: contact_probe}}
+  instrument: {column: state, map: {fresh: se-psr3500, oven: asd-fs3, freeze: asd-fs3}}
+  sample_state: {column: state, map: {fresh: fresh, oven: ground, freeze: ground}}
+  target_config: {column: state, map: {fresh: single_leaf, oven: unknown, freeze: unknown}}
+ids:
+  # Fresh replicate spectra (LC_000xx) are not tied to a leaf id; they are treated as
+  # replicate spectra of the bulk sample.
+  entity: [sample_id]
+  time: [state]
+  plant: [sample_id]
+species:
+  name: species_name
+  map:
+    "": null                           # mint, grass, mixed forbs: no Latin name
+    "Chamaebatia": "Chamaebatia foliolosa"   # "mountain misery"
+date: {column: "Sample Collection Date", format: "%m/%d/%Y"}
+site: {column: site_code}
+plot: {column: plot_name}
+lat: Latitude
+lon: Longitude
+ecosystem: forest
+leaf_age: {column: needle_age, map: {Y: young, O: old}}   # conifer needle cohorts are separate samples
+traits:
+  # Measured once per bulk sample (fresh leaves) -> attached to the sample entity
+  # (level: plant), not repeated on each state's observation.
+  - {column: "LMA_value_g/m2", trait: lma, unit: "g/m**2", level: plant}
+  - {column: "leaf_water_content_percent", trait: lwc, unit: percent, level: plant}
+  # Opti-Sciences CCM-300 optical chlorophyll meter estimate (mg/m2), not an extraction.
+  - {column: "chlorophyll _mg/m2", trait: chl_area, unit: "mg/m**2", level: plant, method: ccm300}

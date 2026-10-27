@@ -1,0 +1,37 @@
+dataset_id: santa_barbara_leaf_drydown
+source: ecosis
+source_id: tabletop-leaf-drydowns-to-relate-leaf-spectra-and-leaf-water--santa-barbara--ca-
+# Allen, Anderegg, Roberts & Trugman (2025): benchtop drydowns of 48 detached leaves
+# (12 broadleaf species, each from one tree, Santa Barbara CA). ASD FS4 plant probe
+# with leaf clip, measured repeatedly at the same spot on each leaf, with leaf water per
+# area (lwa) and Scholander leaf water potential at each step.
+# entity = leaf (sample_id); time = measurement step (spec_id = date_file-number). One
+# spec_id is reused within leaf euca_1 for two steps with different lwa, so lwa is in the key too.
+# sample_state: all steps are "fresh". Leaves only dry to 58-93 % of their initial water
+# content (lwa/LMA >= 0.58 g/g, water potential down to -5.3 MPa). None is air-dry, so
+# none is dried_intact.
+columns:
+  meas_date: "`spec_id`.str.slice(0, 8)"
+spectra:
+  quantity: R
+  scale: auto
+  foreoptic: leaf_clip
+  instrument: asd-fs4
+  sample_state: fresh
+  target_config: single_leaf
+  segments: [1001, 1801]
+ids:
+  entity: [sample_id]
+  time: [spec_id, "lwa (g/cm2)"]
+species: {name: species_binom}
+date: {column: meas_date, format: "%Y%m%d"}
+site: {name: "Santa Barbara, CA"}
+lat: 34.41
+lon: -119.85
+ecosystem: urban
+traits:
+  - {column: "lwa (g/cm2)", trait: ewt, unit: "g/cm**2"}
+  # Scholander readings are reported as positive pressures (balance pressure); potential = -value
+  - {column: "lwp (MPa)", trait: water_potential, unit: MPa, factor: -1}
+  - {column: "Leaf mass per area (g/cm2)", trait: lma, unit: "g/cm**2"}   # per leaf, repeated at each step
+  # not mapped: turgor loss point (tlp, MPa) and capacitance (g/cm2/MPa), which are leaf-level hydraulic parameters

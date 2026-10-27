@@ -1,0 +1,26 @@
+dataset_id: zju_oilseed_rape_n
+source: ecosis
+source_id: leaf-reflectance-spectra-and-nitrogen-concentration-of-oilseed-rape
+# Wan et al., Zhejiang University glasshouse (Hangzhou), oilseed rape (Brassica napus cv. Zhe Da 630),
+# 5 N fertilization levels (the level is not in the export), 4 sampling dates Feb-Apr 2018.
+# ASD FS4 with leaf clip (description; package metadata says contact probe). There is no sample id,
+# so the row number is used.
+columns:
+  row_id: "index"
+spectra:
+  quantity: R
+  scale: auto
+  foreoptic: leaf_clip
+  instrument: asd-fs4
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [row_id]
+species: {constant: "Brassica napus"}
+date: {column: "Sampling time", format: "%Y/%m/%d"}
+site: {name: "Zhejiang University glasshouse, Hangzhou"}
+lat: 30.299
+lon: 120.087
+ecosystem: greenhouse
+traits:
+  - {column: "N%", trait: n_mass, unit: percent}

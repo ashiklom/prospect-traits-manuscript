@@ -1,0 +1,9 @@
+dataset_id: aquatic_vegetation_china
+source: ecosis
+source_id: the-hyperspectra-dataset-for-typical-aquatic-vegetation
+include: false
+exclude_reason: >-
+  Unusable export and not leaf-level. The EcoSIS export is transposed: columns are 134 sample numbers,
+  and the rows hold species / type / family / genus followed by spectral values, with no wavelength columns.
+  The measurements are also in-situ proximal spectra (bare fiber, sunlight, 15 nm smoothing) of whole aquatic plants,
+  mostly canopy, with leaf and flower targets not identifiable per spectrum.

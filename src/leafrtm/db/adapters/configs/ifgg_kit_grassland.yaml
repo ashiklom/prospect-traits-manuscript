@@ -1,0 +1,37 @@
+dataset_id: ifgg_kit_grassland
+source: ecosis
+source_id: leaf-reflectance-plant-functional-gradient-ifgg-kit
+# Kattenborn et al., KIT botanical garden (Karlsruhe), 2016-2017. 45 grassland herbs and
+# graminoids grown in 40x40 cm pots and measured about weekly with an ASD FS3 leaf clip
+# (400-2500 nm). There is no sample or pot id: each row (species + timestamp, and 15
+# species/timestamp pairs have 2 rows) is one leaf sample, keyed by row number.
+# Units in the column names lost their special characters: "( g/cm )" = ug/cm2,
+# "(mg/cm )" = mg/cm2, "SLA (g/cm )" = cm2/g (1/SLA reproduces (LFA-LWC)/area).
+# Not mapped:
+#  - pigment contents/concentrations (chl, car, anthocyanins). They exist for 734/739 rows,
+#    while the destructive traits are missing for 109 rows. So the pigments are probably
+#    spectral (PROSPECT-type) estimates, not extractions; "concentration (mg/g)" columns are
+#    also off by orders of magnitude.
+#  - LFA (leaf fresh mass per area).
+columns:
+  row_id: "index"
+  lma_from_sla: "1 / `SLA (g/cm )`"
+spectra:
+  quantity: R
+  scale: auto
+  foreoptic: leaf_clip
+  instrument: asd-fs3
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [species, timestamp, row_id]
+species: {name: species}
+date: {column: timestamp, format: "%m/%d/%Y %H:%M"}
+site: {name: "KIT botanical garden, Karlsruhe"}
+lat: 49.012
+lon: 8.414
+ecosystem: grassland
+traits:
+  - {column: lma_from_sla, trait: lma, unit: "g/cm**2"}
+  - {column: "LWC (mg/cm )", trait: ewt, unit: "mg/cm**2"}
+  - {column: "LDMC (g/g)", trait: ldmc, unit: "g/g"}

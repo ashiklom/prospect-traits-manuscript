@@ -1,0 +1,31 @@
+dataset_id: belgian_dunes_4_species
+source: ecosis
+source_id: leaf-spectra-of-4-plant-species-from-belgian-dune-grasslands---rosa-rugosa-from-the-northern-japan
+# Helsen et al.: 2399 individual plants of Hieracium umbellatum, Jacobaea vulgaris, Rubus
+# caesius (50 Belgian dune plots, summer 2018) and Rosa rugosa (25 Belgian plots, plus 25
+# native-range plots at Ishikari, Hokkaido, summer 2019). SVC HR-1024 plant probe (metadata:
+# leaf clip). One leaf per individual; each spectrum averages 2 scans of that leaf.
+# LMA, LDMC and EWT were measured on the same leaf. Same Belgian plots as
+# belgian_dunes_36_species_2018 (plot x species means of 2 other leaves).
+columns:
+  year: "2018 + (country == 'Japan')"
+spectra:
+  quantity: R
+  scale: auto
+  foreoptic: leaf_clip
+  instrument: svc-other                # SVC HR-1024 (not stated as HR-1024i)
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [ids]                        # "<plot> <species code> <individual>"
+species: {name: ["Latin Genus", "Latin Species"]}
+date: {year: year}
+site: {column: country, map: {Belgium: "Belgian North Sea coast", Japan: "Ishikari coast, Hokkaido"}}
+plot: {column: "Location Name"}
+lat: Latitude
+lon: Longitude
+ecosystem: grassland
+traits:
+  - {column: "Leaf mass per area (mg/cm2)", trait: lma, unit: "mg/cm**2"}
+  - {column: "EWT (mg/cm2)", trait: ewt, unit: "mg/cm**2"}
+  - {column: "Leaf dry matter content (mg/mg)", trait: ldmc, unit: "mg/mg"}

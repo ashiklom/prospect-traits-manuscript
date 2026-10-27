@@ -1,0 +1,48 @@
+dataset_id: cabo_dessain_2017
+source: ecosis
+source_id: dessain-project-reflectance-spectra
+# CABO Dessain MSc project (Montreal area, May-Aug 2017): fresh-leaf reflectance with an ASD
+# FS4 + RTS-3ZC integrating sphere (400-2400 nm), CABO trait protocol.
+# 65 of 200 samples (rows with DOI = 10.21232/deP7jVyq) are also published in
+# "fresh-leaf-cabo-spectra-from-herbarium-project-v2" (same sample_id); they are
+# dropped here so each leaf enters the database once.
+columns:
+  chl_ab: "chlA + chlB"
+filter:
+  - "DOI.isna()"
+spectra:
+  quantity: R
+  scale: auto                          # fraction
+  foreoptic: integrating_sphere
+  instrument: asd-fs4
+  sample_state: fresh
+  target_config: single_leaf
+  segments: [1001, 1801]
+ids:
+  entity: [sample_id]
+species: {name: ["Latin Genus", "Latin Species"]}
+date: {column: "Measurement Date", format: "%m/%d/%Y"}
+site: {column: "Location Name"}
+lat: Latitude
+lon: Longitude
+ecosystem: mixed
+traits:
+  # CABO units: LMA and EWT in kg/m2 (= mm water), LDMC mg/g, chemistry in % or mg/g dry mass.
+  - {column: LMA, trait: lma, unit: "kg/m**2"}
+  - {column: EWT, trait: ewt, unit: "kg/m**2"}
+  - {column: LDMC, trait: ldmc, unit: "mg/g"}
+  - {column: Cmass, trait: c_mass, unit: percent}
+  - {column: Nmass, trait: n_mass, unit: percent}
+  - {column: hemicellulose, trait: hemicellulose_mass, unit: percent}
+  - {column: cellulose, trait: cellulose_mass, unit: percent}
+  - {column: lignin, trait: lignin_mass, unit: percent}
+  # Pigments (92 of the 135 kept samples) in mg/g dry mass. Times LMA, chl a+b gives a median ~64 ug/cm2,
+  # which is high but within range.
+  - {column: chl_ab, trait: chl_mass, unit: "mg/g"}
+  - {column: car, trait: car_mass, unit: "mg/g"}
+  # Elements in mg/g dry mass (e.g. Ca 20.5 mg/g = 2.05 %)
+  - {column: P_mass, trait: p_mass, unit: "mg/g"}
+  - {column: K_mass, trait: k_mass, unit: "mg/g"}
+  - {column: Ca_mass, trait: ca_mass, unit: "mg/g"}
+  - {column: Mg_mass, trait: mg_mass, unit: "mg/g"}
+  # not mapped: solubles (fibre-analysis cell solubles), SLA (redundant with LMA), Al, B, Cu, Fe, Mn, Na, Zn

@@ -1,0 +1,41 @@
+dataset_id: macrophytes_villa_2016_2018
+source: ecosis
+source_id: leaf-reflectance-and-tratis-of-floating-and-emergent-macrophytes
+# Villa, Bolpagni, Pinardi & Toth: floating and emergent macrophytes (6 species) in Mantua lakes
+# (IT), Lake Varese (IT) and Kis-Balaton (HU), 2016-2018. SR-3500 contact probe with
+# internal halogen lamp, native ~1.5-2.5 nm grid (345-2503 nm). One spectrum per leaf (ID).
+# `code` is reused across dates/years for different leaves, so ID is the entity.
+# Traits (about half the leaves): pigments per area (ug/cm2; Chl a + b ~47 ug/cm2,
+# Chl/Car ~3.4), LMA (g/m2), DMC (g/g). Not mapped: chlorophyll fluorescence / PAM
+# parameters (Fv/Fm, ETRmax, alpha, Ik, qP, qN) and pigment ratios.
+columns:
+  chl_ab: "CaS + CbS"
+  lat: "45.16 * (Lake1 == 'Mantova') + 46.64 * (Lake1 == 'Kis-Balaton') + 45.82 * (Lake1 == 'Varese')"
+  lon: "10.79 * (Lake1 == 'Mantova') + 17.18 * (Lake1 == 'Kis-Balaton') + 8.73 * (Lake1 == 'Varese')"
+spectra:
+  quantity: R
+  scale: auto
+  foreoptic: contact_probe
+  instrument: se-other                 # Spectral Evolution SR-3500
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [ID]
+species:
+  name: ["Latin Genus", "Latin Species"]
+  code: "USDA Symbol"
+  code_map: {LUHE5: "Ludwigia hexapetala"}     # Latin name missing in the export
+  map:
+    "Phragmites australis ssp. australis": "Phragmites australis subsp. australis"
+date: {year: year}
+site: {column: Lake1, map: {Mantova: "Mantua lakes system", Kis-Balaton: "Lake Hidvegi (Kis-Balaton)", Varese: "Lake Varese"}}
+lat: lat                               # approximate lake centres
+lon: lon
+ecosystem: wetland
+traits:
+  - {column: chl_ab, trait: chl_area, unit: "ug/cm**2"}
+  - {column: CaS, trait: chla_area, unit: "ug/cm**2"}
+  - {column: CbS, trait: chlb_area, unit: "ug/cm**2"}
+  - {column: CxcS, trait: car_area, unit: "ug/cm**2"}
+  - {column: LMA, trait: lma, unit: "g/m**2"}
+  - {column: DMC, trait: ldmc, unit: "g/g"}

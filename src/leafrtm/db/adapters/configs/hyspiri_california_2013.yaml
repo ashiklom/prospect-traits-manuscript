@@ -1,0 +1,39 @@
+dataset_id: hyspiri_california_2013
+source: ecosis
+source_id: fresh-leaf-spectra-to-estimate-leaf-traits-for-california-ecosystems
+# Meerdink / Roberts (UCSB VIPER), NASA HyspIRI campaign 2013. 16 species x 3 replicate
+# plants at Santa Barbara, Sedgwick Reserve and the Sierra Nevada, sampled in spring,
+# summer and fall. Fresh leaves were measured at JPL within 48 h with an ASD FS3 and bare
+# fiber (no foreoptic). Leaf arrangement under the fiber is not documented -> target_config
+# unknown. One spectrum per sample (several leaves of one age class); traits were measured
+# on the same material. The same replicate plant is re-sampled each season.
+spectra:
+  quantity: R
+  scale: auto
+  foreoptic: bare_fiber
+  instrument: asd-fs3
+  sample_state: fresh
+  target_config: unknown
+  segments: [1001, 1801]
+ids:
+  entity: ["sample name", "Sample Collection Date"]
+  plant: ["site code", species, Replicate]
+species:
+  name: ["Latin Genus", "Latin Species"]
+  map:
+    "Abies Concolor": "Abies concolor"
+    "Arctostaphylos glauca/glandulosa": "Arctostaphylos"   # ambiguous between two species
+date: {column: "Sample Collection Date", format: excel}
+site: {column: "Location Name"}
+lat: Latitude
+lon: Longitude
+ecosystem: mixed
+leaf_age: {column: age, map: {Old: old, Young: young, Senesced: senescent}}
+traits:
+  - {column: "Leaf mass per area", trait: lma, unit: "g/m**2"}
+  - {column: "Leaf nitrogen content per leaf dry mass", trait: n_mass, unit: percent}
+  - {column: Lignin, trait: lignin_mass, unit: percent}
+  - {column: Cellulose, trait: cellulose_mass, unit: percent}
+  # Labelled "relative water content" in the EcoSIS schema, but the values (20-77 %, median 50)
+  # are water as % of fresh mass. True RWC of fresh leaves would be ~70-100 %.
+  - {column: "Leaf relative water content", trait: lwc, unit: percent}

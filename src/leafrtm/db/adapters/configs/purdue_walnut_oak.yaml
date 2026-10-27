@@ -1,0 +1,51 @@
+dataset_id: purdue_walnut_oak
+source: ecosis
+source_id: purdue-leaf-spectral-and-functional-trait-data-used-in-plsr-modeling-v2
+# Park, Cotrozzi, Couture et al. (Purdue): 1-year-old black walnut and northern red oak
+# seedlings in four greenhouse/controlled experiments, 2018-2019 (EEL and Wright Center).
+# SVC HR-1024i leaf clip. Unique_ID = experiment_date_species_plant_treatments_k, where
+# k = Foliar_Trait_Code says which trait set the spectrum belongs to: 1 = gas exchange,
+# 2 = SLA + leaf water content, 3 = N, sugars, gallic acid. The three are treated as separate
+# leaf samples of one plant (plant = experiment + species + Plant_ID; "p12"/"P12" unified).
+# v1 of this package is identical ("DO NOT USE"; excluded in purdue_walnut_oak_v1.yaml).
+columns:
+  plant_lc: "`Plant_ID`.str.lower()"
+  sla_num: "`Specific leaf area`.where(`Specific leaf area` != 'noData').astype('float64')"
+  lma_from_sla: "1 / sla_num"
+spectra:
+  quantity: R
+  scale: auto
+  foreoptic: leaf_clip
+  instrument: svc-hr1024i
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [Unique_ID]
+  plant: [Experiment_ID, "Common Name", plant_lc]
+species: {name: ["Latin Genus", "Latin Species"]}
+date: {column: Data_Collection_Date, format: "%Y%m%d"}
+site: {column: Site_Name}
+lat: Latitude
+lon: Longitude
+ecosystem: greenhouse
+# Each experiment has its own factor columns ("noTreatment" elsewhere -> unmapped).
+# Levels carry the experiment prefix so that treatment ids stay unique.
+treatments:
+  - {factor: pathogen, column: E18_Fungal_Infection, map: {Control: E18_control, Gm: E18_Geosmithia}, control: [E18_control]}
+  - {factor: other, column: E18_SoilTypes, map: {Forest: E18_soil_forest, Plantation: E18_soil_plantation, Sterile: E18_soil_sterile}}
+  - {factor: nitrogen, column: W18_Nitrogen_Deficiency, map: {Control: W18_control, N_deficit: W18_N_deficit}, control: [W18_control]}
+  - {factor: water, column: W18_Drought, map: {WW: W18_well_watered, WS: W18_water_stress}, control: [W18_well_watered]}
+  - {factor: pathogen, column: E19_Fungal_Infection, map: {Control: E19_control, Fs: E19_Fusarium, Gm: E19_Geosmithia, FsGm: E19_Fusarium_Geosmithia}, control: [E19_control]}
+  - {factor: water, column: E19_Drought, map: {WW: E19_well_watered, WS: E19_water_stress}, control: [E19_well_watered]}
+  - {factor: nitrogen, column: W19_Nitrogen_Deficiency, map: {Control: W19_control, N_deficit: W19_N_deficit}, control: [W19_control]}
+  - {factor: salinity, column: W19_Salt_Deposition, map: {Control: W19_control, Salt_app: W19_salt}, control: [W19_control]}
+traits:
+  # "noData" strings become missing
+  # Net CO2 assimilation (umol m-2 s-1). Measurement light level is not given in the package;
+  # assumed to be light-saturated.
+  - {column: CO2_assimilation_rate, trait: asat_area, unit: "umol/m**2/s"}
+  - {column: lma_from_sla, trait: lma, unit: "g/cm**2"}               # SLA in cm2/g (median 289)
+  - {column: Leaf_water_content, trait: lwc, unit: percent}
+  - {column: "Leaf nitrogen content per leaf dry mass", trait: n_mass, unit: percent}
+  - {column: Sugars, trait: sugar_mass, unit: percent}               # 4-16, assumed % dry mass
+  # Gallic_acid (11-378) not mapped: units not given (mg GAE/g would mean up to 38 % phenolics)

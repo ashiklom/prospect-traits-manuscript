@@ -1,0 +1,9 @@
+dataset_id: emit_vegetation_adjusted
+source: ecosis
+source_id: emit-manually-adjusted-vegetation-reflectance-spectra
+include: false
+exclude_reason: >-
+  Not measurements. The spectra are hand-edited (LOWESS smoothing, interpolation, extrapolation) versions of
+  spectra from the Hawaii 2000 vegetation and Santa Barbara urban libraries, which mix canopy,
+  leaf, branch and flower targets. The export has no metadata columns, so leaf rows cannot be identified;
+  the originals are available in their own packages.

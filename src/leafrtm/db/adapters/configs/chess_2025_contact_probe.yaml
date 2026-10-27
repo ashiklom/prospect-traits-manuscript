@@ -1,0 +1,8 @@
+dataset_id: chess_2025_contact_probe
+source: ecosis
+source_id: contact-probe-spectra-for-the-2025-colorado-headwaters-ecological-spectroscopy-study--chess-
+include: false
+exclude_reason: >-
+  No usable leaf spectra. The CHESS 2025 contact-probe endmember library is NPV, soil, rock, bark,
+  white reference and misc targets; the only green-vegetation row is a single aspen "cp_test"
+  spectrum with no traits.

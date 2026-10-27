@@ -1,0 +1,8 @@
+dataset_id: sierra_nevada_2023_dried_combined
+source: ecosis
+source_id: dried-leaf-spectra-and-measured-traits-from-the-sierra-nevada--ca--in-july-2023
+include: false
+exclude_reason: >-
+  Duplicate. This 2024 package (990 spectra) is the union of the oven-dried (498) and
+  freeze-dried (492) Sierra Nevada 2023 packages: identical individualspectra_id values and
+  spectra (max abs difference 0). Those packages are included in sierra_nevada_2023.

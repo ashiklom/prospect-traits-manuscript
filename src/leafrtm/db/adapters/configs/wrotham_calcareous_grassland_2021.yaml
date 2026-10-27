@@ -1,0 +1,24 @@
+dataset_id: wrotham_calcareous_grassland_2021
+source: ecosis
+source_id: calcareous-grassland-species-over-growing-season-at-the-leaf-level
+# Thornley et al., Wrotham Water (Kent, UK), 17 calcareous-grassland species measured
+# weekly on 13 dates (April-July 2021) with an SVC HR-1024i leaf clip, 5 leaves (L1-L5)
+# per species and date. Leaves are not tagged across dates, so each spectrum
+# ("spectra" id = site_doy_species_leaf) is its own entity. No traits.
+columns:
+  species_name: "`Latin Species`.str.replace('_', ' ')"
+spectra:
+  quantity: R
+  scale: auto                          # values in percent
+  foreoptic: leaf_clip
+  instrument: svc-hr1024i
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [spectra]
+species: {name: species_name}
+date: {column: date, format: "%d/%m/%Y"}
+site: {name: "Wrotham Water, Kent"}
+lat: 51.31
+lon: 0.33
+ecosystem: grassland

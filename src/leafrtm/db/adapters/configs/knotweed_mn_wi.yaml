@@ -1,0 +1,32 @@
+dataset_id: knotweed_mn_wi
+source: ecosis
+source_id: leaf-level-invasive-knotweed-spectral-data-with-morphology
+# Invasive knotweed (Reynoutria) populations in Minnesota and Wisconsin. Spectral
+# Evolution PSR+ 3500 with leaf clip, 400-2400 nm. 16 populations ("Location"), up to
+# 6 canes (stems) per population and 3 leaves per cane; Identifier = Location_Cane_Leaf.
+# Each leaf was measured on the adaxial (AD) and the abaxial (AB) side. Only adaxial
+# spectra are kept: the schema has no leaf-side attribute, and abaxial spectra would
+# otherwise be counted as replicates of the adaxial observation.
+# Morphology (leaf length, width, lobe lengths; cm) has no equivalent in traits.yaml. No date given.
+filter:
+  - "Leaf_side == 'AD'"
+spectra:
+  quantity: R
+  scale: auto                          # fraction; the description says "vector normalized",
+                                       # but the values are plain reflectance (NIR ~0.43)
+  foreoptic: leaf_clip
+  instrument: se-psr3500
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [Identifier]
+  plant: [Location, Cane]
+species:
+  name: Species
+  map:
+    japonica: "Reynoutria japonica"
+    compacta: "Reynoutria japonica var. compacta"
+    sachalinensis: "Reynoutria sachalinensis"
+    xbohemica: "Reynoutria x bohemica"
+site: {column: Location}
+ecosystem: mixed

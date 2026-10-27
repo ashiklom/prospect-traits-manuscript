@@ -1,0 +1,28 @@
+dataset_id: emit_drylands_library
+source: ecosis
+source_id: drylands-spectral-libraries-in-support-of-emit
+# EMIT drylands endmember library (Ochoa et al. 2024). Kept: green vegetation (level_1 = pv),
+# measured with the ASD FS4 leaf clip. Dropped: soil (contact probe) and NPV. JORN = Jornada
+# Experimental Range, NM (summer 2021); SR = Sedgwick Reserve and DP = Dangermond Preserve, CA
+# (SHIFT campaign, spring 2022). These are not the SHIFT dried/ground spectra (shift.yaml).
+# Authors: "we could have used single or multiple leaves" -> target_config unknown. No traits.
+columns:
+  year: "2021 + (`dataset` != 'JORN')"
+filter:
+  - "level_1 == 'pv'"
+spectra:
+  quantity: R
+  scale: auto
+  foreoptic: leaf_clip
+  instrument: asd-fs4
+  sample_state: fresh
+  target_config: unknown
+  segments: [1001, 1801]
+ids:
+  entity: [fname]
+species: {name: level_2, map: {"pv Unknown": null}}
+date: {year: year}
+site: {column: dataset, map: {JORN: "Jornada Experimental Range", SR: "Sedgwick Reserve", DP: "Dangermond Preserve"}}
+lat: Latitude
+lon: Longitude
+ecosystem: mixed
