@@ -7,6 +7,8 @@ import pytest
 
 from leafrtm.rtm import MODELS, get_model
 from leafrtm.rtm.e1 import e1_fast_np
+from leafrtm.rtm.liberty import ABSORBERS
+from liberty_rrtm import liberty_rrtm
 from scipy.special import exp1
 
 # Representative parameter sets per model (typical, thick, thin/pale).
@@ -23,6 +25,10 @@ CASES = {
                   dict(N=1.5, Cab=400, Car=100, Canth=30, Cbrown=3, Cw=0.08, Cm=0.05)],
     "prospectpro": [dict(N=1.5, Cab=40, Car=10, Canth=2, Cbrown=0.1, Cw=0.01, Cprot=0.001, Ccbc=0.008),
                     dict(N=2.0, Cab=60, Car=12, Canth=1, Cbrown=0.0, Cw=0.02, Cprot=0.002, Ccbc=0.015)],
+    "liberty": [dict(xu=0.045, thick=1.6, baseline=0.0006, element=2, c_factor=200, w_factor=100,
+                     l_factor=40, p_factor=1),
+                dict(xu=0.02, thick=3.4, baseline=0.0004, element=1, c_factor=400, w_factor=250,
+                     l_factor=60, p_factor=1.5)],
 }
 
 
@@ -114,6 +120,47 @@ def test_prospect5_is_5b_without_brown():
                                get_model("prospect5b").simulate({**c5, "Cbrown": 0.0})[0], atol=1e-14)
 
 
+@pytest.mark.parametrize("case", CASES["liberty"])
+def test_liberty_matches_converged_rrtm(case):
+    m = get_model("liberty")
+    R, T, Rinf = m.simulate(case, return_rinf=True)
+    Ro, To, Rinfo = liberty_rrtm(m.K, m.fixed["D"], **case, n_iter=20000)
+    np.testing.assert_allclose(R, Ro, atol=1e-11)
+    np.testing.assert_allclose(T, To, atol=1e-11)
+    np.testing.assert_allclose(Rinf, Rinfo, atol=1e-11)
+    # rrtm's 50 iterations are close to, but not exactly at, the fixed point
+    Ro50, To50, _ = liberty_rrtm(m.K, m.fixed["D"], **case)
+    assert np.abs(R - Ro50).max() < 1e-4
+
+
+@pytest.mark.parametrize("thick", [1.2, 2.0, 2.7, 3.0, 4.0, 6.5])
+def test_liberty_integer_layers_match_loop(thick):
+    m = get_model("liberty")
+    case = {**CASES["liberty"][0], "thick": thick}
+    R, T = m.simulate(case)
+    Ro, To, _ = liberty_rrtm(m.K, m.fixed["D"], **case, n_iter=20000)
+    np.testing.assert_allclose(R, Ro, atol=1e-11)
+    np.testing.assert_allclose(T, To, atol=1e-11)
+
+
+@pytest.mark.parametrize("k", [2, 3, 4])
+def test_liberty_continuous_across_integer_thickness(k):
+    m = get_model("liberty")
+    base = CASES["liberty"][0]
+    lo = m.simulate({**base, "thick": k - 1e-9})
+    hi = m.simulate({**base, "thick": k + 1e-9})
+    # Benford's fractional step goes from 1 to 2 layers as fraction 0 -> 1;
+    # the 64/3 cubic correction makes the junction continuous to ~1e-3.
+    assert np.abs(lo[0] - hi[0]).max() < 5e-3
+    assert np.abs(lo[1] - hi[1]).max() < 5e-3
+
+
+def test_liberty_no_real_root_region_is_nan():
+    m = get_model("liberty")
+    R, _ = m.simulate({**CASES["liberty"][0], "xu": 0.1, "baseline": 0.0001})
+    assert np.isnan(R).any()
+
+
 def _compile(m):
     sym = {p: pt.scalar(p) for p in m.params}
     R, T = m.simulate_pt(sym)
@@ -137,3 +184,7 @@ def test_pytensor_matches_numpy_and_gradients(name):
             dn = m.simulate({**case, p: case[p] - h})
             fd = ((up[0] - dn[0]).sum() + 0.5 * (up[1] - dn[1]).sum()) / (2 * h)
             assert g == pytest.approx(fd, rel=1e-4, abs=1e-6), (name, p)
+
+
+def test_liberty_absorber_order():
+    assert ABSORBERS == ("c_factor", "w_factor", "element", "l_factor", "p_factor")
