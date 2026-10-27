@@ -1,0 +1,27 @@
+dataset_id: cedar_creek_fab_light_2018
+source: ecosis
+source_id: fab-leaf-spectra-across-a-light-gradient-at-cedar-creek-lter
+# Kothari, Montgomery & Cavender-Bares: top fully expanded leaves of 8 broadleaf
+# tree species in the Forests and Biodiversity experiment (FAB, e271), mid-July 2018.
+# One leaf (one averaged measurement) per tree; tree = Plot + Location. No traits.
+spectra:
+  quantity: R
+  scale: auto                      # metadata says %, values are fractions
+  foreoptic: leaf_clip
+  instrument: se-psr3500
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [Plot, Location]
+  plant: [Plot, Location]
+species: {name: ["Latin Genus", "Latin Species"]}
+date: 2018
+site: {name: "Cedar Creek LTER"}
+plot: {column: Plot}
+lat: 45.405
+lon: -93.188
+ecosystem: forest
+treatments:
+  # Designed diversity treatment that creates the light gradient (shaded bicultures
+  # = monoculture trees shaded by fast-growing neighbours).
+  - {factor: other, column: Treatment, control: [Monoculture]}

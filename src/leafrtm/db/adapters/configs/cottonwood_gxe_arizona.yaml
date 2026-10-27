@@ -1,0 +1,31 @@
+dataset_id: cottonwood_gxe_arizona
+source: ecosis
+source_id: genetic-and-environmental-effects-on-hyperspectral-leaf-reflectance-in-fremont-cottonwood
+# Corbin et al. (2025, Plant Cell Environ., doi:10.1111/pce.15263): Populus fremontii
+# genotypes from 16 source populations grown in three Arizona/Utah common gardens
+# (Hot = Yuma, Mid = Agua Fria, Cold = Canyonlands Research Center), plus trees measured
+# at their home (source) sites ("HOME"), 2020. ASD FieldSpec 3 + leaf clip.
+# ~5 (gardens) or ~10 (HOME) spectra per tree; within-tree spectra differ like separate
+# leaves, so each `spectra` id is one leaf and Tree is the plant. No traits.
+# No coordinates are given per site (`Elevation m` is the source-population elevation).
+spectra:
+  quantity: R
+  scale: auto
+  foreoptic: leaf_clip
+  instrument: asd-fs3
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [spectra]
+  plant: [Tree]
+species: {name: ["Latin Genus", "Latin Species"]}
+date: 2020
+site: {column: "Location Name"}
+plot: {column: Plot}
+ecosystem: forest                  # riparian woodland species; gardens are planted
+treatments:
+  # common-garden climate (HOME = trees at their source sites: not a garden level)
+  - {factor: temperature, column: Garden, map: {Hot: hot_garden, Mid: mid_garden, Cold: cold_garden}}
+  # source population (provenance) is the designed genetic factor; clone ids in
+  # `Genotype` are nested within it and not mapped separately
+  - {factor: genotype, column: Population}

@@ -1,0 +1,42 @@
+dataset_id: alberta_boreal_potted_trees
+source: ecosis
+source_id: leaf-spectra-of-boreal-tree-species-from-alberta-potted-tree-experiment
+# Wang, Springer & Gamon: seasonal (Nov 2015 - Feb 2017) leaf reflectance of potted
+# boreal trees (6 species x up to 30 individuals) on a rooftop at the University of
+# Alberta. PP Systems UniSpec (VIS-NIR only), bare fiber (0.6 mm FOV) + halogen lamp.
+# One spectrum per tree per date; leaves are not tracked across dates, so entity = ID
+# (date + tree) and the tree is the plant. No traits.
+columns:
+  # Dates are written without zero padding (2016122 = 2016-01-22, 2016104 = 2016-10-04);
+  # ambiguous ones resolved from the chronological row order of the file.
+  date_iso: >-
+    Date.astype('str').replace(
+    ['2016122', '2016130', '2016210', '2016226', '2016311', '201641', '2016420', '201654',
+    '2016519', '201661', '2016616', '2016628', '2016713', '2016729', '2016812', '2016826',
+    '2016914', '2016104', '20161020', '2016114', '2016123', '20161222', '2017126', '2017214'],
+    ['20160122', '20160130', '20160210', '20160226', '20160311', '20160401', '20160420', '20160504',
+    '20160519', '20160601', '20160616', '20160628', '20160713', '20160729', '20160812', '20160826',
+    '20160914', '20161004', '20161020', '20161104', '20161203', '20161222', '20170126', '20170214'])
+  conifer: "Initial.isin(['Pg', 'Pb', 'Pm', 'Ll'])"
+filter:
+  # 8 spectra that are essentially dark (median R < 0.02 over 400-1100 nm); some needle spectra still reach 0 in the blue
+  - "~ID.isin(['201641Pg26', '201654Pm28', '201661Ll8', '2016628Pg22', '2016826Pg16', '2016914Ll1', '20161020Pg26', '20161020Ll11'])"
+sentinels: [-999, -9999, -99999, 999]   # 999 fills the noisy UV end of some spectra
+spectra:
+  quantity: R
+  scale: fraction
+  foreoptic: bare_fiber
+  instrument: unknown              # PP Systems UniSpec: not in instruments.yaml
+  sample_state: fresh
+  # needle arrangement under the 0.6 mm fiber is not documented for conifers
+  target_config: {column: conifer, map: {true: unknown, false: single_leaf}}
+  wavelength_range: [430, 1100]    # UniSpec edges are noise (999 fills, zeros below ~430 nm for dark needles)
+ids:
+  entity: [ID]
+  plant: [Initial, Individual]
+species: {name: FullName}
+date: {column: date_iso, format: "%Y%m%d"}
+site: {name: "University of Alberta rooftop"}
+lat: Latitude
+lon: Longitude
+ecosystem: forest

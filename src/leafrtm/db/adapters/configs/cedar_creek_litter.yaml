@@ -1,0 +1,46 @@
+dataset_id: cedar_creek_litter
+source: ecosis
+source_id: intact--and-ground-leaf-litter-spectra-from-cedar-creek-and-minneapolis
+# Kothari, Hobbie & Cavender-Bares (2024; bioRxiv 10.1101/2023.11.27.568939; data
+# doi:10.5061/dryad.hdr7sqvrk). SENESCED LEAF LITTER (not green leaves) of 11 tree
+# species from the Forests and Biodiversity experiment (FAB1, Cedar Creek LTER) and a
+# residential property in Minneapolis. Each litter sample (ID) was measured twice:
+# intact (dried whole leaves, SE PSR+ 3500 + leaf clip) and ground (powder, benchtop
+# reflectance probe). Traits (C, N, LMA, fibre fractions) describe the litter.
+# The export has no column telling the two files apart. The EcoSIS spectra API
+# (ecosis.filename) shows that the first row of each ID comes from ground_spec.csv and the
+# second from intact_spec.csv (checked for all 643 rows); the first row is also brighter
+# and smoother. GEN_1_BEPA_7 has only an intact spectrum.
+# Several of these trees also appear in cedar_creek_pressed_2018 (green pressed leaves).
+columns:
+  # False = ground (first row of an ID), True = intact (second row; GEN_1_BEPA_7 is intact only)
+  is_intact: "ID.duplicated() | (ID == 'GEN_1_BEPA_7')"
+  site_name: "Latitude.replace([45.4, 44.95], ['Cedar Creek LTER', 'Minneapolis'])"
+  conifer: "species.isin(['PIBA', 'PIRE', 'PIST'])"
+spectra:
+  quantity: R
+  scale: auto                      # metadata says %, values are fractions
+  instrument: se-psr3500
+  foreoptic: {column: is_intact, map: {true: leaf_clip, false: other}}
+  sample_state: {column: is_intact, map: {true: dried_intact, false: ground}}
+  # powders and conifer needle litter: no leaf geometry
+  target_config: {columns: [is_intact, conifer], sep: "_", map: {True_False: single_leaf, True_True: unknown, False_False: unknown, False_True: unknown}}
+ids:
+  entity: [ID]
+  time: [is_intact]
+  plant: [plot, individual, species]
+species: {name: ["Latin Genus", "Latin Species"]}
+site: {column: site_name}
+plot: {column: plot}
+lat: Latitude
+lon: Longitude
+ecosystem: forest
+leaf_age: senescent
+traits:
+  # measured once per litter sample; attached to both the intact and the ground observation
+  - {column: Nmass, trait: n_mass, unit: percent}
+  - {column: Cmass, trait: c_mass, unit: percent}
+  - {column: LMA, trait: lma, unit: "g/m**2"}
+  - {column: hemicellulose, trait: hemicellulose_mass, unit: percent}
+  # Narea/Carea = LMA * N/Cmass exactly (derived, not mapped); solubles and recalcitrant
+  # (cellulose + lignin) fibre fractions have no trait in traits.yaml.

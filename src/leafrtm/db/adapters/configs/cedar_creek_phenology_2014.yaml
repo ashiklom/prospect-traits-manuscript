@@ -1,0 +1,34 @@
+dataset_id: cedar_creek_phenology_2014
+source: ecosis
+source_id: phenology-leaf-spectra-cedar-creek-biodiversity-experiment-2014
+# Wang, Gamon & Cavender-Bares (2018, Photosynthetica, doi:10.1007/s11099-018-0777-9):
+# leaf reflectance of 17 prairie species in the E120 biodiversity experiment, every 1-2
+# weeks from late May to early Oct 2014 (Day = day of year). 3 random leaves per plant,
+# 5 plants per species and date. PP Systems UniSpec with needle leaf clip (0.6 mm FOV,
+# internal halogen lamp). ID = Day_Species.Plot.Plant.Leaf. Leaves were picked anew on
+# each date, so each ID is one leaf observed once; the plant id includes Day because
+# individuals are not documented as tracked across dates. No traits.
+# Same plots/year as the ESR contact data (cedar_creek_esr_2014_contact) but a different
+# instrument and different leaves: not a duplicate.
+columns:
+  date_num: "Day + 2014000"        # -> %Y%j
+  # 61 IDs occur twice with clearly different spectra (different leaves, mislabelled)
+  dup: "ID.duplicated()"
+spectra:
+  quantity: R
+  scale: auto
+  foreoptic: leaf_clip
+  instrument: unknown              # PP Systems UniSpec: not in instruments.yaml
+  sample_state: fresh
+  target_config: single_leaf       # includes grass blades under the 0.6 mm FOV
+  wavelength_range: [425, 1000]    # negative/noisy values below ~420 nm
+ids:
+  entity: [ID, dup]
+  plant: [Day, "#Plot", Abbreviation, "#Plant"]
+species: {name: SpeciesFullName}
+date: {column: date_num, format: "%Y%j"}
+site: {name: "Cedar Creek LTER"}
+plot: {column: "#Plot"}
+lat: 45.4018
+lon: -93.1975
+ecosystem: grassland

@@ -1,0 +1,38 @@
+dataset_id: cedar_creek_pressed_2018
+source: ecosis
+source_id: 2018-cedar-creek-pressed-leaves
+# Kothari et al. pressed-leaf study (Cedar Creek LTER, summer/fall 2018).
+# Each sample ID (several leaves of one plant) appears twice: the first row is the
+# spectrum averaged over only the leaves weighed fresh ("RWC" file; carries LMA,
+# EWT, LDMC, area), the second row averages all leaves of the sample ("all" file;
+# carries C and N). They are kept as two observations of the same entity,
+# distinguished by `all_leaves_avg` in ids.time, so each spectrum keeps the traits measured
+# on the same leaves. For 103 samples both averages are identical.
+columns:
+  all_leaves_avg: "ID.duplicated()"   # False = RWC-leaves average, True = all-leaves average
+spectra:
+  quantity: R
+  scale: auto                      # metadata says %, values are fractions
+  foreoptic: leaf_clip
+  instrument: se-psr3500
+  sample_state: pressed
+  # conifer needle arrangement is not documented
+  target_config: {column: FunctionalGroup, map: {broadleaf: single_leaf, herb: single_leaf, conifer: unknown}}
+ids:
+  entity: [ID]
+  time: [all_leaves_avg]
+species: {name: ["Latin Genus", "Latin Species"], map: {"Mirabilia albida": "Mirabilis albida"}}
+date: 2018
+site: {name: "Cedar Creek LTER"}
+plot: {column: Plot}
+lat: Latitude
+lon: Longitude
+ecosystem: mixed
+traits:
+  # LMA and EWT are in kg/m2 (= dry_mass / area: 0.1561 g / 7.87 cm2 = 0.198 kg/m2)
+  - {column: LMA, trait: lma, unit: "kg/m**2"}
+  - {column: EWT, trait: ewt, unit: "kg/m**2"}
+  - {column: LDMC, trait: ldmc, unit: "mg/g"}
+  - {column: N, trait: n_mass, unit: percent}
+  - {column: C, trait: c_mass, unit: percent}
+  # `area` is the summed area of the weighed leaves of a sample, not single-leaf area: not mapped.

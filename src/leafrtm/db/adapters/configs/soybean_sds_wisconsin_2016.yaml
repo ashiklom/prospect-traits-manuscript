@@ -1,0 +1,35 @@
+dataset_id: soybean_sds_wisconsin_2016
+source: ecosis
+source_id: leaf-and-canopy-level-detection-of-fusarium-virguliforme--sudden-death-syndrome--in-soybean
+# Herrmann et al. (2018, Remote Sens. 10:426): soybean plants inoculated or not with
+# Fusarium virguliforme (sudden death syndrome) at Arlington and Hancock research stations
+# (Wisconsin), measured ~weekly June-Aug 2016 with an ASD FieldSpec 4 + leaf clip
+# (5 nm export grid). Canopy spectra (tractor-mounted Piccolo Doppio; rows without
+# Site/Plant/Date, 400-1630 nm) are dropped. One spectrum per plant and date; leaves are
+# not tracked across dates, so entity = SampleNumber and Site + Plant is the plant.
+columns:
+  site_lat: "Site.replace(['arlington', 'hancock'], [43.30, 44.12])"
+  site_lon: "Site.replace(['arlington', 'hancock'], [-89.35, -89.53])"
+filter:
+  - "Site.notna()"                 # leaf rows only
+  # Hancock 2016-07-29: 190 of ~250 rows carry Plant = 238 and Inoculation = 1 (a fill-down
+  # error), so their plant and treatment labels are wrong: dropped.
+  - "~((Site == 'hancock') & (Date == 20160729) & (Plant == 238))"
+spectra:
+  quantity: R
+  scale: auto
+  foreoptic: leaf_clip
+  instrument: asd-fs4
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [SampleNumber]
+  plant: [Site, Plant]
+species: {constant: "Glycine max"}
+date: {column: Date, format: "%Y%m%d.0"}   # stored as float, e.g. 20160613.0
+site: {column: Site}
+lat: site_lat
+lon: site_lon
+ecosystem: cropland
+treatments:
+  - {factor: pathogen, column: Inoculation, map: {0: not_inoculated, 1: inoculated}, control: [not_inoculated]}
