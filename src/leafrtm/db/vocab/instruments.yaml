@@ -17,4 +17,5 @@ pe-lambda1050:  {manufacturer: Perkin Elmer, model: Lambda 1050, fwhm_nm: 2}
 pe-other:       {manufacturer: Perkin Elmer, model: other, fwhm_nm: null}
 foss-nirs6500:  {manufacturer: FOSS, model: NIRSystems 6500, fwhm_nm: 10}
 oo-usb2000:     {manufacturer: Ocean Optics, model: USB2000, fwhm_nm: 1.5}
+oo-usb4000:     {manufacturer: Ocean Optics, model: USB4000, fwhm_nm: 1.5}
 unknown:        {manufacturer: null, model: null, fwhm_nm: null}

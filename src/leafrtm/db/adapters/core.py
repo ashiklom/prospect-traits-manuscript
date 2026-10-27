@@ -231,6 +231,7 @@ def to_tables(cfg: dict, meta: pd.DataFrame, wavelength, values, dataset_meta: d
     meta, values, quantity = meta[keep].reset_index(drop=True), values[keep], quantity[keep].reset_index(drop=True)
     rep["rows_with_quantity"] = len(meta)
 
+    wavelength = wavelength * sp.get("wavelength_scale", 1.0)  # e.g. 1000 for micrometres
     lo, hi = sp.get("wavelength_range", [-np.inf, np.inf])
     inr = (wavelength >= lo) & (wavelength <= hi)
     wavelength, values = wavelength[inr], values[:, inr]
