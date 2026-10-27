@@ -22,7 +22,10 @@ spectra:
   instrument: asd-fs3                # id in vocab/instruments.yaml (or {column, map})
   sample_state: fresh | dried_intact | pressed | ground   (or {column, map})
   target_config: single_leaf | leaf_stack | needle_array | single_needle | unknown
-  wavelength_range: [350, 2500]      # optional crop
+  wavelength_range: [350, 2500]      # optional crop (applied after scaling)
+  wavelength_scale: 1000             # multiply wavelengths (e.g. micrometres -> nm)
+  drop_integer_bands: true | [0]     # keep only non-integer wavelength columns (all packages,
+                                     # or only the listed package indices)
   segments: [1000, 1800]             # detector joins: wavelengths that start a new segment
 
 ids:
@@ -53,3 +56,29 @@ traits:
 Mapped values (`map`) that aren't listed become missing. Enum values are
 validated against `leafrtm.db.schema`. Trait names come from
 `vocab/traits.yaml`.
+
+## spectra_db datasets not used
+
+`spectra_db` (pinned commit in `sources/spectra_db.py`) is used only for datasets that EcoSIS
+doesn't provide. These directories duplicate EcoSIS packages and are read from EcoSIS
+instead:
+
+| spectra_db | EcoSIS dataset(s) used instead |
+|---|---|
+| `lopex`, `angers` | `lopex`, `angers` |
+| `nasa_fft` | `nasa_fft` |
+| `nasa_hyspiri` | `uw_bnl_hyspiri_2013_2015` |
+| `ngee_arctic` | `ngee_arctic_*` (EcoSIS adds transmittance; only chlorophyll/carotenoids of 35 leaves from 2015 are not on EcoSIS) |
+| `ngee_tropics` | `ngee_tropics_panama_2016` (EcoSIS adds PSR+ spectra, LMA, water, C/N) |
+| `ecosis_californiatraits` | `hyspiri_california_2013` |
+| `ecosis_cedarcreek_biodiversity` | `cedar_creek_esr_2014_contact` |
+| `ecosis_cornvarieties` | `corn_varieties_wmars_2014` |
+| `ecosis_milkweed_stress` | `milkweed_water_temperature` |
+| `ecosis_missoulats` | `missoula_lodgepole_sagebrush_2012` |
+| `ecosis_pepper` | `herrmann_pepper_nk` |
+| `ecosis_pvy_solanum` | `pvy_potato_hawaii_2014` |
+| `ecosis_soybean_aphid` | `soybean_aphid_2013` |
+| `ecosis_spectral_variation_leafcanopy` | `amaranth_leaf_canopy_2013` |
+| `ecosis_hawaii2000` | excluded (`hawaii_2000_vegetation`: branch/canopy-level spectra) |
+| `ecosis_santamonica` | not used: mixed vegetation/soil/NPV library without traits or leaf-level metadata |
+| `foster_beetle` | excluded (continuum-removed spectra only) |
