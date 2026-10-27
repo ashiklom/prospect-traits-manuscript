@@ -38,6 +38,24 @@ def screen_traits(traits: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     return traits[ok].copy(), traits[~ok].copy()
 
 
+def red_edge(v: np.ndarray, w: np.ndarray) -> float | None:
+    """Wavelength of the steepest rise between 650 and 850 nm (5-nm smoothed).
+
+    None when there is no clear red edge (rise < 0.1, e.g. senescent or
+    non-green material). Green leaves have it at about 690-740 nm."""
+    sel = (w >= 650) & (w <= 850)
+    if sel.sum() < 20:
+        return None
+    ws, vs = w[sel], v[sel]
+    grid = np.arange(650.0, 850.0, 1.0)
+    y = np.interp(grid, ws, vs)
+    y = np.convolve(y, np.ones(5) / 5, mode="same")
+    if np.nanmax(y[150:195]) - np.nanmin(y[5:40]) < 0.1:  # NIR (800-845) minus red (655-690)
+        return None
+    d = np.gradient(y)
+    return float(grid[3:-3][np.argmax(d[3:-3])])
+
+
 def spectral_flags(values: np.ndarray, wavelength: np.ndarray, quantity: str) -> list[str]:
     flags = []
     m = (wavelength >= 400) & (wavelength <= 2500)
@@ -50,6 +68,13 @@ def spectral_flags(values: np.ndarray, wavelength: np.ndarray, quantity: str) ->
             flags.append("out_of_range")
     if np.std(v) < 0.002:
         flags.append("flat")
+    if quantity in ("R", "T"):
+        edge = red_edge(v, w)
+        # green leaves: 690-740 nm. Above 750 nm the wavelength axis is almost surely
+        # offset from the values (spectra_db yang_pheno 2012: ~765 nm). No lower bound:
+        # dried and ground material legitimately reaches ~655 nm.
+        if edge is not None and edge > 750:
+            flags.append("red_edge")
     for join in (1000.0, 1800.0):
         i = np.searchsorted(w, join)
         if 5 <= i < len(w) - 5 and w[i] - w[i - 1] <= 3:
