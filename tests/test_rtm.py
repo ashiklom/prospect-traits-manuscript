@@ -21,6 +21,8 @@ CASES = {
                   dict(N=2.5, Cab=90, Car=20, Canth=5, Cbrown=0.5, Cw=0.03, Cm=0.02),
                   dict(N=1.1, Cab=1, Car=0.1, Canth=0.01, Cbrown=0.001, Cw=0.002, Cm=0.001),
                   dict(N=1.5, Cab=400, Car=100, Canth=30, Cbrown=3, Cw=0.08, Cm=0.05)],
+    "prospectpro": [dict(N=1.5, Cab=40, Car=10, Canth=2, Cbrown=0.1, Cw=0.01, Cprot=0.001, Ccbc=0.008),
+                    dict(N=2.0, Cab=60, Car=12, Canth=1, Cbrown=0.0, Cw=0.02, Cprot=0.002, Ccbc=0.015)],
 }
 
 
@@ -81,6 +83,29 @@ def test_prospect5b_matches_prosail(case):
     Rp, Tp = _prosail("5", case)
     np.testing.assert_allclose(R, Rp, atol=1e-7)
     np.testing.assert_allclose(T, Tp, atol=1e-7)
+
+
+@pytest.mark.parametrize("case", CASES["prospectpro"])
+def test_prospectpro_matches_prosail_with_combined_dry_matter(case):
+    # PRO = PROSPECT-D with the dry-matter term split into protein + CBC; an
+    # independent check passes K_prot*Cprot + K_cbc*Ccbc to prosail as km with cm = 1.
+    m = get_model("prospectpro")
+    R, T = m.simulate(case, e1="exact")
+    K = dict(zip(m.constituents, m.K.T))
+    km = K["Cprot"] * case["Cprot"] + K["Ccbc"] * case["Ccbc"]
+    Rp, Tp = _prosail("D", {**case, "Cm": 1.0}, km=km)
+    np.testing.assert_allclose(R, Rp, atol=1e-8)
+    np.testing.assert_allclose(T, Tp, atol=1e-8)
+
+
+def test_prospectpro_argument_order():
+    # Regression for the old Julia code, which swapped Cprot and Ccbc.
+    m = get_model("prospectpro")
+    case = CASES["prospectpro"][0]
+    swapped = {**case, "Cprot": case["Ccbc"], "Ccbc": case["Cprot"]}
+    assert not np.allclose(m.simulate(case)[0], m.simulate(swapped)[0])
+    K = dict(zip(m.constituents, m.K.T))
+    assert K["Cprot"][0] == 0  # protein absorbs only in the NIR/SWIR
 
 
 def test_prospect5_is_5b_without_brown():
