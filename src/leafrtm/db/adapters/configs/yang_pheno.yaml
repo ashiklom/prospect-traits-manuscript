@@ -12,9 +12,11 @@ url: https://github.com/ashiklom/LeafTraitSpectraSeasonality-Yangetal2016RSE
 #
 # Source: read from the authors' original files (adapters/yang2016.py documents
 # the layout) instead of spectra_db, whose copy is wrong:
-# * 2012 Harvard Forest spectra are circularly shifted against the wavelengths
-#   (value at wavelength w = raw value at w - 56 nm, wrapping around; red edge
-#   at ~765 nm), so this dataset previously dropped 2012.
+# * 2012 Harvard Forest spectra are circularly shifted against the wavelengths:
+#   the raw rows (385-2500 nm) were put on a wavelength vector that starts at
+#   434 nm, skips 494-500 nm like the 2011 grid and wraps to 385 nm, so the value
+#   at w is the raw value at w - 56 nm (w - 49 below 494 nm, w - 57 above
+#   1934 nm); red edge at ~765 nm. This dataset therefore used to drop 2012.
 # * In both years spectra were attached to samples in alphabetical order of the
 #   sample names (AL1, AL2, ..., AUN1, ...), while the spectra columns follow
 #   the order of the traits workbook (AUN1, ..., AUS3, AL1, ...; for 2012 also
@@ -32,6 +34,10 @@ url: https://github.com/ashiklom/LeafTraitSpectraSeasonality-Yangetal2016RSE
 # north/south side (column `aspect`, not mapped). LMA, C and N were measured on
 # pooled leaves (2012: both upper leaves of a branch; 2011 C and N: the 3 leaves
 # of a branch) and are repeated for each leaf of the pool.
+filter:
+  # two failed 2011 scans in the raw files: AL1 DOY 257 is dark (R ~ -0.006 at
+  # all wavelengths); AUS1 DOY 159 has NIR R ~ 0.07 and negative SWIR values
+  - "~observation_id.isin(['yang_pheno|AL1|257|2011', 'yang_pheno|AUS1|159|2011'])"
 spectra:
   quantity: {column: quantity, map: {R: R, T: T}}
   scale: fraction

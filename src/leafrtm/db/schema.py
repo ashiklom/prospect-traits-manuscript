@@ -22,7 +22,7 @@ from pandera.typing import Series
 # ---------------------------------------------------------------------------
 # Enums
 # ---------------------------------------------------------------------------
-SOURCES = ["ecosis", "ecostress", "shift", "spectra_db"]
+SOURCES = ["ecosis", "ecostress", "shift", "spectra_db", "yang2016"]
 SAMPLE_STATE = ["fresh", "dried_intact", "pressed", "ground"]
 TARGET_CONFIG = ["single_leaf", "leaf_stack", "needle_array", "single_needle", "unknown"]
 FOREOPTIC = ["integrating_sphere", "leaf_clip", "contact_probe", "bare_fiber", "other", "unknown"]

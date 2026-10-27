@@ -276,10 +276,14 @@ def to_tables(cfg: dict, meta: pd.DataFrame, wavelength, values, dataset_meta: d
         site_name = pd.Series(site_spec.get("name", ds) if isinstance(site_spec, dict) else site_spec,
                               index=meta.index)
     site_id = ds + ":" + site_name.astype(str)
-    lat = pd.to_numeric(meta[cfg["lat"]], errors="coerce") if isinstance(cfg.get("lat"), str) else \
-        pd.Series(cfg.get("lat", np.nan), index=meta.index, dtype=float)
-    lon = pd.to_numeric(meta[cfg["lon"]], errors="coerce") if isinstance(cfg.get("lon"), str) else \
-        pd.Series(cfg.get("lon", np.nan), index=meta.index, dtype=float)
+    def _coord(spec):  # column name, {column, map} or constant
+        if isinstance(spec, str):
+            return pd.to_numeric(meta[spec], errors="coerce")
+        if isinstance(spec, dict):
+            return pd.to_numeric(map_column(meta, spec), errors="coerce").astype(float)
+        return pd.Series(np.nan if spec is None else spec, index=meta.index, dtype=float)
+
+    lat, lon = _coord(cfg.get("lat")), _coord(cfg.get("lon"))
     if cfg.get("crs"):
         from pyproj import Transformer  # optional; only for projected coordinates
         tr = Transformer.from_crs(cfg["crs"], "EPSG:4326", always_xy=True)

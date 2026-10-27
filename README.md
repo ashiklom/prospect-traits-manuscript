@@ -7,8 +7,9 @@ individual to global scales" by Alexey N. Shiklomanov and colleagues.
 The repository contains three things:
 
 1. **A harmonized database** of leaf spectra and paired trait measurements, built entirely by
-   code from EcoSIS, the ECOSTRESS spectral library, NASA SHIFT (ORNL DAAC) and
-   [`spectra_db`](https://github.com/ashiklom/spectra_db).
+   code from EcoSIS, the ECOSTRESS spectral library, NASA SHIFT (ORNL DAAC),
+   [`spectra_db`](https://github.com/ashiklom/spectra_db) and the
+   [Yang et al. (2016) data repository](https://github.com/ashiklom/LeafTraitSpectraSeasonality-Yangetal2016RSE).
 2. **Bayesian inversions** of seven leaf radiative transfer models (RTMs): PROSPECT-4, 5,
    5B, D and PRO, LIBERTY and LeafSIP. They use PyMC with the nutpie sampler, every replicate
    R and T spectrum of a leaf, and structured error models.

@@ -7,7 +7,7 @@ below is ignored.
 
 ```yaml
 dataset_id: lopex                 # required; equals the file name
-source: ecosis                    # ecosis | spectra_db | ecostress | shift
+source: ecosis                    # ecosis | spectra_db | ecostress | shift | yang2016
 source_id: <package name or list of packages>
 include: true                     # false = documented exclusion (give `exclude_reason`)
 title / citation / doi / url / license: optional overrides of source metadata
@@ -40,6 +40,7 @@ date: {column: Date, format: "%Y%m%d"} | {year: Year} | 2014 | "2014-07-01"
 site: {column: Site} | {name: "Ispra"}
 plot: {column: Plot}
 lat: Latitude    lon: Longitude    crs: "EPSG:32616"   # crs only for projected coordinates
+                  # (or a constant, or {column: Site, map: {A: 41.36, B: 42.53}})
 ecosystem: forest | grassland | ... (schema.ECOSYSTEM)
 canopy_position: {column: X, map: {T: top, M: middle, B: bottom}}
 sun_shade:       {column: X, map: {...}}
