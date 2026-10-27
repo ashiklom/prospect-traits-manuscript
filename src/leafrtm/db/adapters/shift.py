@@ -27,8 +27,7 @@ def load(cfg: dict) -> DatasetTables:
     spectra = []
     for prep, f in (("oven_dried", "Ovendried_Spectra.csv"), ("freeze_dried", "Flashfrozen_Spectra.csv")):
         df = _read("SHIFT_DriedGround_Leaf_Reflec", f)
-        df["prep"] = prep
-        spectra.append(df)
+        spectra.append(df.assign(prep=prep))
     spec = pd.concat(spectra, ignore_index=True)
     spec["sample_number"] = pd.to_numeric(spec["sample_number"], errors="coerce")
     wl_cols = [c for c in spec.columns if c.isdigit()]
