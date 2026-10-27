@@ -1,0 +1,40 @@
+dataset_id: shift
+source: shift
+source_id: shift
+citation: "Zheng, T., Queally, N., Chadwick, K. D., et al. (2023). SHIFT: Reflectance Measurements for Dried and Ground Leaf Materials. ORNL DAAC, doi:10.3334/ORNLDAAC/2244; Chadwick, K. D., et al. (2023). SHIFT: Photosynthetic and Leaf Traits, Santa Barbara County, 2022. ORNL DAAC, doi:10.3334/ORNLDAAC/2233."
+# Composite samples of sunlit leaves of one species in a plot (Santa Barbara
+# County, Feb-Sep 2022). Spectra: ASD FS3 on ground material in 3D-printed
+# trays, 6 scans per sample, for oven-dried and for freeze-dried (flash-frozen)
+# portions; both are ground powders, so preparation is part of the
+# observation key. LMA/LWC are of fresh leaves of the sample; chlorophyll is
+# a CCM-300 optical estimate (mg m-2), not an extraction.
+spectra:
+  quantity: R
+  scale: fraction
+  foreoptic: other
+  instrument: asd-fs3
+  sample_state: ground
+  target_config: unknown
+  segments: [1001, 1801]
+ids:
+  entity: [sample_number]
+  time: [prep]
+species: {name: species_name}
+date: {column: sample_date}
+site: {column: site}
+plot: {column: plot_name}
+lat: latitude
+lon: longitude
+ecosystem: mixed
+traits:
+  - {column: LMA, trait: lma, unit: "g/m**2"}
+  - {column: LWC, trait: lwc, unit: percent}
+  - {column: CHL, trait: chl_area, unit: "mg/m**2", method: ccm300}
+  - {column: Nitrogen_perc, trait: n_mass, unit: percent}
+  - {column: Phosphorus_perc, trait: p_mass, unit: percent}
+  - {column: Potassium_perc, trait: k_mass, unit: percent}
+  - {column: Calcium_perc, trait: ca_mass, unit: percent}
+  - {column: Magnesium_perc, trait: mg_mass, unit: percent}
+  - {column: Sulfur_perc, trait: s_mass, unit: percent}
+  - {column: cellulose_perc, trait: cellulose_mass, unit: percent}
+  - {column: lignin_perc, trait: lignin_mass, unit: percent}
