@@ -1,0 +1,59 @@
+dataset_id: neon_across
+source: ecosis
+source_id:
+  - fresh-leaf-spectra-to-estimate-foliar-functional-traits-across-neon-domains
+  - dry-leaf-spectra-to-estimate-foliar-functional-traits-across-neon-domains
+citation: "Wang, Z., Townsend, P. A., Kruger, E. L. (2022). Leaf spectroscopy reveals divergent inter- and intra-species foliar trait covariation and trait-environment relationships across NEON domains. New Phytol. 235, 923-938."
+# Fresh PSR+ sample spectra (2017 + 2018) and dried/ground ASD spectra (2018 only).
+# Fresh rows come as two PLSR training subsets: FS_C_### (pigments) and FS_P_###
+# (phenolics), with independent numbering but largely the same samples (71 spectra
+# identical). No shared sample ID exists, so a sample is identified as
+# site | date | species | occurrence-within-that-group (per ID series and state),
+# which joins FS_C/FS_P rows of the same sample and links DS_### dried rows to the
+# fresh rows of 2018. Mis-pairing is possible only between samples of the same
+# species, site and date.
+# The 2017 fresh rows are the same physical samples as dataset neon_east_2017
+# (ASD spectra there, PSR+ here; different measurements, not duplicate files).
+columns:
+  sp_key: "`USDA Symbol`.fillna('NA')"
+  date_key: "Sample_Date.fillna(0).astype('int64')"   # 3 dried rows lack a date
+  series: "Sample_ID.str.replace('[0-9]+$', '', regex=True)"
+  occ: "Sample_ID.groupby([series, Site, date_key, sp_key]).cumcount()"
+  state: "_package_index"
+spectra:
+  quantity: R
+  scale: auto
+  foreoptic: contact_probe
+  instrument: {column: state, map: {0: se-psr3500, 1: asd-fs3}}
+  # dried package: same spectral levels/protocol as the eastern 'dried, ground' package
+  sample_state: {column: state, map: {0: fresh, 1: ground}}
+  target_config: {column: state, map: {0: single_leaf, 1: unknown}}
+  # PSR+ fresh spectra are biased high below ~410 nm (+0.18 at 350 nm vs ASD of the same leaves)
+  wavelength_range: [400, 2500]
+ids:
+  entity: [Site, date_key, sp_key, occ]
+  time: [state]
+species:
+  name: ["Latin Genus", "Latin Species"]
+  code: "USDA Symbol"
+  code_map: {"ABsp": Abies, "Absp": Abies}
+date: {column: Sample_Date, format: "%Y%m%d"}
+site: {column: Site}
+ecosystem: mixed
+traits:
+  # fresh-leaf pigments (FS_C rows)
+  - {column: "Chl_AB_area (ug/cm2)", trait: chl_area, unit: "ug/cm**2"}
+  - {column: "Car_area (ug/cm2)", trait: car_area, unit: "ug/cm**2"}
+  - {column: "Chl_mass (mg/g)", trait: chl_mass, unit: "mg/g"}
+  - {column: "Car_mass (mg/g)", trait: car_mass, unit: "mg/g"}
+  # chemistry measured on the dried/ground sample -> entity level
+  - {column: "Phenolics (mg/g)", trait: phenolics_mass, unit: "mg/g", level: plant}
+  - {column: "Nitrogen (mg/g)", trait: n_mass, unit: "mg/g", level: plant}
+  - {column: "Carbon (mg/g)", trait: c_mass, unit: "mg/g", level: plant}
+  - {column: "Phosphorus (mg/g)", trait: p_mass, unit: "mg/g", level: plant}
+  - {column: "Potassium (mg/g)", trait: k_mass, unit: "mg/g", level: plant}
+  - {column: "Cellulose (mg/g)", trait: cellulose_mass, unit: "mg/g", level: plant}
+  - {column: "Lignin (mg/g)", trait: lignin_mass, unit: "mg/g", level: plant}
+  - {column: "NSC (mg/g)", trait: nsc_mass, unit: "mg/g", level: plant}
+  - {column: "Starch (mg/g)", trait: starch_mass, unit: "mg/g", level: plant}
+  - {column: "Sugar (mg/g)", trait: sugar_mass, unit: "mg/g", level: plant}

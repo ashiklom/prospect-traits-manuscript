@@ -1,0 +1,39 @@
+dataset_id: uw_biotron_2008
+source: ecosis
+source_id: 2008-university-of-wisconsin-biotron-fresh-leaf-spectra-and-gas-exchange-leaf-traits
+citation: "Serbin, S. P., Dillaway, D. N., Kruger, E. L., Townsend, P. A. (2012). Leaf optical properties reflect variation in photosynthetic metabolism and its sensitivity to temperature. J. Exp. Bot. 63, 489-502."
+# Potted aspen / cottonwood of several provenances grown in UW Biotron rooms at
+# three temperature regimes. Plant = provenance + house (room) + plant number;
+# Rep 1 (late Sep) and Rep 2 (mid Oct) are different leaves with their own LMA/N
+# (destructive), so Rep is part of the entity.
+spectra:
+  quantity: R
+  scale: auto                        # stored in percent
+  foreoptic: leaf_clip               # ASD leaf clip
+  instrument: asd-fs3
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [Geo_Species_Info, House_Num, Plant_Number, Rep]
+  plant: [Geo_Species_Info, House_Num, Plant_Number]
+species: {name: ["Latin Genus", "Latin Species"], code: "USDA Symbol"}
+date: {column: "Measurement Date", format: "%m/%d/%y"}
+site: {name: "UW Biotron, Madison WI"}
+plot: {column: House_Num}
+lat: 43.0745
+lon: -89.4118
+ecosystem: greenhouse
+treatments:
+  # growth temperature regime (night/day, degC); no explicit control
+  - {factor: temperature, column: Room_Temp}
+  # provenance (N/S aspen; K, M, W cottonwood sources) is a designed factor
+  - {factor: genotype, column: Geo_Species_Info}
+traits:
+  - {column: LMA_gDW_m2, trait: lma, unit: "g/m**2"}
+  # 'Specific leaf area' is in m2/kg and redundant with LMA (1000/SLA == LMA); not mapped
+  - {column: Nmass_percent, trait: n_mass, unit: percent}
+  - {column: Narea, trait: n_area, unit: "g/m**2"}
+  # Vcmax at the LI-6400 measurement leaf temperature (not normalized to 25 C)
+  - {column: Vcmax_LI6400_Temperature, trait: vcmax_area, unit: "umol/m**2/s"}
+  - {column: LI6400_Measurement_Temperature_degC, trait: leaf_temperature, unit: degC}
+  # Vcmax_PLSR_Temperature is a PLSR prediction: not mapped

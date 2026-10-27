@@ -1,0 +1,32 @@
+dataset_id: chlus_3d_lma
+source: ecosis
+source_id: 3d-lma-leaf-level-spectra
+citation: "Chlus, A., Kruger, E. L., Townsend, P. A. (2020). Mapping three-dimensional variation in leaf mass per area with imaging spectroscopy and lidar in a temperate broadleaf forest. Remote Sens. Environ. 250, 112043."
+# The only ID column ('Unnamed: 0') reads plotNN_YYYY_<tree>_<NNNN>_<leaf>, e.g.
+# plot01_2016_tsa_0075_01. Each row has its own LMA, so every row is a separate
+# leaf (3 leaves, occasionally 4-5, per tree x sampling point). The 4-digit field is
+# probably the sampling height (3D sampling); it has no schema field and is kept
+# only inside the entity id. Plant = plot + tree tag.
+columns:
+  sid: "`Unnamed: 0`"
+  plot_: "sid.str.split('_').str[0]"
+  year: "sid.str.split('_').str[1].astype('int64')"
+  tree: "sid.str.split('_').str[2]"
+spectra:
+  quantity: R
+  scale: auto                        # stored as fraction although metadata says %
+  foreoptic: leaf_clip
+  # package lists both ASD FieldSpec 3 and SE PSR+ 3500 with no per-spectrum column
+  instrument: unknown
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [sid]
+  plant: [plot_, tree]
+species: {}                          # no species information in the package
+date: {year: year}
+site: {name: "3D-LMA forest plots"}
+plot: {column: plot_}
+ecosystem: forest
+traits:
+  - {column: lma_g_m2, trait: lma, unit: "g/m**2"}
