@@ -1,0 +1,31 @@
+dataset_id: ecostress
+source: ecostress
+source_id: ecostress
+# ECOSTRESS spectral library v1.0, VSWIR vegetation and non-photosynthetic
+# vegetation (NPV) spectra (ASD; reported as bidirectional reflectance in %).
+# Fresh leaves processed within ~48 h of collection (HyspIRI campaign
+# 2013-2015, Huntington Gardens, NSF Macrosystems at Harvard Forest). The
+# foreoptic and leaf arrangement are not documented per spectrum, so both are
+# "unknown". NPV leaves/needles are senescent litter (dried_intact); bark,
+# branches, flowers and lichen are dropped. No traits are published.
+filter:
+  - "~Class.str.lower().isin(['bark', 'branches', 'flowers', 'lichen'])"
+spectra:
+  quantity: R
+  scale: percent
+  foreoptic: unknown
+  instrument: asd-other
+  sample_state: {column: Type, regex: [["non photosynthetic", dried_intact]], default: fresh}
+  target_config: unknown
+ids:
+  entity: ["Sample No."]
+species: {name: [Genus, Species], map: {"none none": null}}
+date: {column: "Collection Date", format: "%m/%d/%Y"}
+site:
+  column: Description
+  regex: [["Huntington", "Huntington Gardens"], ["HyspIRI", "Santa Barbara HyspIRI campaign"], ["Macrosystem", "Harvard Forest / NE USA"]]
+  default: unknown
+lat: lat
+lon: lon
+ecosystem: mixed
+leaf_age: {column: Type, regex: [["non photosynthetic", senescent]]}
