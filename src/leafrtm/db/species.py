@@ -85,8 +85,11 @@ def _read_vocab(name, **kw) -> pd.DataFrame:
 def resolve(raw: pd.DataFrame) -> pd.DataFrame:
     """Map raw (name, code) pairs to resolved names.
 
-    Returns raw with columns ``resolved`` and ``resolution`` (usda_code,
-    usda_name, manual, cleaned, unresolved)."""
+    Order: manual decisions (vocab/species_resolution.csv), then the cleaned
+    name if it is in USDA PLANTS, then the USDA code (code first for datasets
+    with ``species.prefer_code``, whose names were derived from the codes), then the cleaned name
+    (flagged for review). Returns raw with columns ``resolved`` and
+    ``resolution`` (manual, usda_name, usda_code, cleaned, unresolved)."""
     u = usda()
     by_code = dict(zip(u["species_code"].str.upper(), u["name"]))
     usda_names = set(u["name"])
@@ -99,22 +102,28 @@ def resolve(raw: pd.DataFrame) -> pd.DataFrame:
         out["name"] = None
     if "code" not in out:
         out["code"] = None
+    prefer_code = out["prefer_code"].fillna(False).astype(bool) if "prefer_code" in out else \
+        pd.Series(False, index=out.index)
     res, how = [], []
-    for name, code in zip(out["name"], out["code"]):
+    for name, code, pc in zip(out["name"], out["code"], prefer_code):
         key = ("" if pd.isna(name) or name is None else str(name),
                "" if pd.isna(code) or code is None else str(code))
         if key in man:
             res.append(man[key])
             how.append("manual")
             continue
-        if key[1] and key[1].upper() in by_code:
+        # a name supplied by the dataset wins over the code: datasets often use
+        # truncated USDA symbols (ACSM for Acer saccharum is Acacia smallii in USDA)
+        c = clean_name(key[0])
+        if pc and key[1] and key[1].upper() in by_code:
             res.append(by_code[key[1].upper()])
             how.append("usda_code")
-            continue
-        c = clean_name(key[0])
-        if c in usda_names:
+        elif c in usda_names:
             res.append(c)
             how.append("usda_name")
+        elif key[1] and key[1].upper() in by_code:
+            res.append(by_code[key[1].upper()])
+            how.append("usda_code")
         elif c:
             res.append(c)
             how.append("cleaned")  # not in USDA: needs manual review

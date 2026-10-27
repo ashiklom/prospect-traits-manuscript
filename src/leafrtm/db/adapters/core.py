@@ -317,6 +317,8 @@ def to_tables(cfg: dict, meta: pd.DataFrame, wavelength, values, dataset_meta: d
     if "code" in sp_cfg:
         raw["code"] = meta[sp_cfg["code"]].map(lambda x: str(x).strip() if pd.notna(x) else None)
         raw["code_type"] = sp_cfg.get("code_type", "usda")
+        # names derived from the codes by the data provider are no better than the codes
+        raw["prefer_code"] = bool(sp_cfg.get("prefer_code", False))
         if "code_map" in sp_cfg:
             raw["name"] = raw["code"].map(sp_cfg["code_map"]).where(
                 raw["code"].isin(sp_cfg["code_map"]), raw.get("name"))
