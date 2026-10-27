@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-REMOTE=${1:-"discover:~/projects"}
-
-rsync -avz --progress \
-  "$REMOTE"/prospect-traits-manuscript/data/results/ \
-  ./data/results/
