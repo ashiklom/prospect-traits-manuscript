@@ -54,6 +54,12 @@ def load(cfg: dict) -> DatasetTables:
             .merge(traits[tcols].drop_duplicates("sample_number"), on="sample_number", how="left")
             .merge(elem[ecols].drop_duplicates("sample_number"), on="sample_number", how="left")
             .merge(fiber[fcols].drop_duplicates("sample_number"), on="sample_number", how="left"))
+    # ~220 spectra samples are missing from the field sample list, but the chemistry and
+    # trait files carry species_or_type for most of them (chemistry first: where both are
+    # in the sample list, the chemistry files agree with it and the trait file sometimes not)
+    alt = (pd.concat([d[["sample_number", "species_or_type"]] for d in (elem, fiber, traits)])
+           .dropna().drop_duplicates("sample_number").set_index("sample_number")["species_or_type"])
+    meta["species_or_type"] = meta["species_or_type"].fillna(meta["sample_number"].map(alt))
     sp = meta["species_or_type"].fillna("").str.split(" - ").str[0].str.strip()
     meta["species_name"] = sp.where(sp.str.match(r"^[A-Z][a-z]+ [a-z]"), None)
     meta["site"] = meta["plot_name"].fillna("").str[:3].map(

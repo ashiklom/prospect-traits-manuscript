@@ -1,0 +1,1336 @@
+raw_name,raw_code,resolved_name,note,source
+Petalostemum purpureum,,Dalea purpurea,Petalostemum/Petalostemon = Dalea,gbif_synonym
+Petalostemum villosum,,Dalea villosa,Petalostemum/Petalostemon = Dalea,gbif_synonym
+Petalostemum candidum,,Dalea candida,Petalostemum/Petalostemon = Dalea,gbif_synonym
+Amphicarpa bracteata,,Amphicarpaea bracteata,orthographic variant,gbif_synonym
+Bulk sample,,,SHIFT bulk (mixed-species) sample,non_taxon
+Agonis flexuosa,,Agonis flexuosa,,gbif_exact
+primula vulgaris,,Primula vulgaris,case,manual_typo
+pilosella officinarum,,Pilosella officinarum,case,manual_typo
+inula conyzae,,Pentanema squarrosum,case; Inula conyzae (Griess.) Meikle (ploughman's spikenard) = Pentanema squarrosum in GBIF/POWO; GBIF match ambiguous (homonyms),manual_synonym
+,CAGL,Carya glabra,NEON base code CAGL: CAGL8,usda_code_context
+Annual grass,,,SHIFT unidentified annual grass(es); Poaceae,non_taxon
+,CAOV,Carya ovata,NEON base code CAOV: CAOV2,usda_code_context
+,PAVI,Panicum virgatum,NEON base code PAVI: PAVI2,usda_code_context
+,FRAM,Fraxinus americana,NEON base code FRAM: FRAM2,usda_code_context
+,HEAN,Helianthus annuus,NEON base code HEAN: HEAN3,usda_code_context
+Leucadendron salignum,,Leucadendron salignum,,gbif_exact
+Acacia fleckii,,Senegalia fleckii,Acacia fleckii Schinz -> Senegalia fleckii,gbif_synonym
+Phalaris arundinaceae,,Phalaris arundinacea,,manual_typo
+Lonchocarpus nelsii,,Philenoptera nelsii,Lonchocarpus nelsii (Schinz) Heering & Grimme -> Philenoptera nelsii,gbif_synonym
+Calamagrostis epigejos,,Calamagrostis epigejos,,gbif_exact
+Protea neriifolia,,Protea neriifolia,,gbif_exact
+Pelargonium reniforme,,Pelargonium reniforme,,gbif_exact
+Protea eximia,,Protea eximia,,gbif_exact
+Protea lorifolia,,Protea lorifolia,,gbif_exact
+Baikiaea plurijuga,,Baikiaea plurijuga,,gbif_exact
+Grewia bicolor,,Grewia bicolor,,gbif_exact
+Cussonia spicata,,Cussonia spicata,,gbif_exact
+Protea repens,,Protea repens,,gbif_exact
+Ruschia virgata,,Ruschia virgata,,gbif_exact
+Cymbopogon marginatus,,Cymbopogon marginatus,,gbif_exact
+Schotia latifolia,,Schotia latifolia,,gbif_exact
+Anthospermum aethiopicum,,Anthospermum aethiopicum,,gbif_exact
+Berzelia lanuginosa,,Berzelia lanuginosa,,gbif_exact
+Pappea capensis,,Pappea capensis,,gbif_exact
+Protea nitida,,Protea nitida,,gbif_exact
+Rhus tenuinervis,,Searsia tenuinervis,Rhus tenuinervis Engl. -> Searsia tenuinervis,gbif_synonym
+,QUMR,Quercus margarettae,"NEON base code QUMR: JERC sand post oak, inferred",usda_code_context
+Leucadendron laureolum,,Leucadendron laureolum,,gbif_exact
+Leucospermum cuneiforme,,Leucospermum cuneiforme,,gbif_exact
+Burkea africana,,Burkea africana,,gbif_exact
+Passerina obtusifolia,,Passerina obtusifolia,,gbif_exact
+Pterocelastrus tricuspidatus,,Pterocelastrus tricuspidatus,,gbif_exact
+Pteronia incana,,Pteronia incana,,gbif_exact
+Cliffortia ilicifolia,,Cliffortia ilicifolia,,gbif_exact
+Indigofera denudata,,Indigofera denudata,,gbif_exact
+Protea tenax,,Protea tenax,,gbif_exact
+,BRDI,Bromus diandrus,NEON base code BRDI: BRDI3 (SJER),usda_code_context
+Hypodiscus striatus,,Hypodiscus striatus,,gbif_exact
+Dodonaea angustifolia,,Dodonaea angustifolia,,gbif_exact
+,HEDA,,"NEON base code HEDA: unknown D06 forb (USDA HEDA2 = Helianthus dalyi, doubtful)",unresolved
+Euphorbia mauritanica,,Euphorbia mauritanica,,gbif_exact
+Cyclopia intermedia,,Cyclopia intermedia,,gbif_exact
+Elytropappus rhinocerotis,,Dicerothamnus rhinocerotis,Elytropappus rhinocerotis (L.fil.) Less. -> Dicerothamnus rhinocerotis,gbif_synonym
+Acmispon glaber,,Acmispon glaber,,gbif_exact
+Baphia massaiensis,,Baphia massaiensis,,gbif_exact
+Senecio linifolius,,Senecio linifolius,,gbif_exact
+Chrysanthemoides monilifera,,Osteospermum moniliferum,Chrysanthemoides monilifera (L.) Norl. -> Osteospermum moniliferum,gbif_synonym
+Tetraria involucrata,,Tetraria involucrata,,gbif_exact
+Aspalathus kougaensis,,Aspalathus kougaensis,,gbif_exact
+Thesium nigromontanum,,Thesium nigromontanum,,gbif_exact
+Anthospermum galioides,,Anthospermum galioides,,gbif_exact
+Pelargonium tetragonum,,Pelargonium tetragonum,,gbif_exact
+Boscia albitrunca,,Boscia albitrunca,,gbif_exact
+Rhus longispina,,Searsia longispina,Rhus longispina Eckl. & Zeyh. -> Searsia longispina,gbif_synonym
+Ficinia deusta,,Ficinia deusta,,gbif_exact
+Erica hispidula,,Erica hispidula,,gbif_exact
+Crassula rupestris,,Crassula rupestris,,gbif_exact
+Acacia haematoxylon,,Vachellia haematoxylon,Acacia haematoxylon Willd. -> Vachellia haematoxylon,gbif_synonym
+Pentaschistis eriostoma,,Pentameris eriostoma,Pentaschistis eriostoma (Nees) Stapf -> Pentameris eriostoma,gbif_synonym
+Oedera squarrosa,,Oedera squarrosa,,gbif_exact
+Leucadendron eucalyptifolium,,Leucadendron eucalyptifolium,,gbif_exact
+Bobartia indica,,Bobartia indica,,gbif_exact
+Lycium cinereum,,Lycium cinereum,,gbif_exact
+Quercus crysolepis,,Quercus chrysolepis,,manual_typo
+Clutia alaternoides,,Clutia alaternoides,,gbif_exact
+Azima tetracantha,,Azima tetracantha,,gbif_exact
+Thesium virgatum,,Thesium virgatum,,gbif_exact
+Pelargonium ovale,,Pelargonium ovale,,gbif_exact
+Acacia luederitzii,,Vachellia luederitzii,GBIF match ambiguous (two heterotypic synonyms); Kalahari plant = V. luederitzii,gbif_synonym
+Ziziphus mucronata,,Ziziphus mucronata,,gbif_exact
+Agathosma capensis,,Agathosma capensis,,gbif_exact
+,HADI,Halesia diptera,NEON base code HADI: HADI3 (D08),usda_code_context
+Pentaschistis curvifolia,,Pentameris curvifolia,Pentaschistis curvifolia (Schrad.) Stapf -> Pentameris curvifolia,gbif_synonym
+Osteospermum polygaloides,,Osteospermum polygaloides,,gbif_exact
+Thesium pseudovirgatum,,Thesium pseudovirgatum,,gbif_exact
+Tetraria compar,,Tetraria compar,,gbif_exact
+Helichrysum felinum,,Helichrysum felinum,,gbif_exact
+Chrysocoma ciliata,,Chrysocoma ciliata,,gbif_exact
+Cannomois virgata,,Cannomois virgata,,gbif_exact
+Protea punctata,,Protea punctata,,gbif_exact
+Rhus rosmarinifolia,,Searsia rosmarinifolia,Rhus rosmarinifolia Vahl,gbif_synonym
+Hypodiscus albo-aristatus,,Hypodiscus alboaristatus,spelling via GBIF fuzzy match (Hypodiscus alboaristatus (Nees) Mast.),manual_typo
+Bulbine latifolia,,Bulbine latifolia,,gbif_exact
+Erica coccinea,,Erica coccinea,,gbif_exact
+Merxmuellera arundinacea,,Capeochloa arundinacea,Merxmuellera arundinacea (P.J.Bergius) Conert -> Capeochloa arundinacea,gbif_synonym
+Cotyledon velutina,,Cotyledon velutina,,gbif_exact
+Protea mundii,,Protea mundii,,gbif_exact
+Solanum tomentosum,,Solanum tomentosum,,gbif_exact
+Quercus Linnaeus,,Quercus,"author string, no epithet",genus_only
+Agathosma mucronulata,,Agathosma mucronulata,,gbif_exact
+Zygophyllum flexuosum,,Roepera flexuosa,Zygophyllum flexuosum Eckl. & Zeyh. -> Roepera flexuosa,gbif_synonym
+Thesium strictum,,Thesium strictum,,gbif_exact
+Thesium carinatum,,Thesium carinatum,,gbif_exact
+Ehrharta ramosa,,Ehrharta ramosa,,gbif_exact
+Penaea mucronata,,Penaea mucronata,,gbif_exact
+Cassine peragua,,Cassine peragua,,gbif_exact
+Tetraria thermalis,,Tetraria thermalis,,gbif_exact
+Gazania krebsiana,,Gazania krebsiana,,gbif_exact
+Senecio pauciflosculosus,,Senecio pauciflosculosus,,gbif_exact
+Leucadendron pubibracteolatum,,Leucadendron pubibracteolatum,,gbif_exact
+Euclea undulata,,Euclea undulata,,gbif_exact
+Felicia filifolia,,Felicia filifolia,,gbif_exact
+Dilatris pillansii,,Dilatris pillansii,,gbif_exact
+Adromischus maculatus,,Adromischus maculatus,,gbif_exact
+Zygophyllum morgsana,,Roepera morgsana,Zygophyllum morgsana L. -> Roepera morgsana,gbif_synonym
+Rhus undulata,,Searsia undulata,Rhus undulata Jacq.,gbif_synonym
+Hermas villosa,,Hermas villosa,,gbif_exact
+Leucadendron nobile,,Leucadendron nobile,,gbif_exact
+Lobelia coronopifolia,,Lobelia coronopifolia,,gbif_exact
+Lobostemon fruticosus,,Lobostemon fruticosus,,gbif_exact
+Leucadendron uliginosum,,Leucadendron uliginosum,,gbif_exact
+Loxostylis alata,,Loxostylis alata,,gbif_exact
+Podocarpus gracilior,,Afrocarpus gracilior,Podocarpus gracilior Pilg.,gbif_synonym
+Ischyrolepis capensis,,Restio capensis,Ischyrolepis capensis (L.) H.P.Linder -> Restio capensis,gbif_synonym
+Phylica paniculata,,Phylica paniculata,,gbif_exact
+Smelophyllum capense,,Smelophyllum capense,,gbif_exact
+Senecio hollandii,,Senecio hollandii,,gbif_exact
+Grewia robusta,,Grewia robusta,,gbif_exact
+Gnidia imbricata,,Gnidia imbricata,,gbif_exact
+Crassula cotyledonis,,Crassula cotyledonis,,gbif_exact
+Hieronyma clusioides,,Hieronyma clusioides,,gbif_exact
+Hypodiscus aristatus,,Hypodiscus aristatus,,gbif_exact
+Nymania capensis,,Nymania capensis,,gbif_exact
+Morella quercifolia,,Morella quercifolia,,gbif_exact
+Brunia nodiflora,,Brunia nodiflora,GBIF accepted Brunia nodiflora L. (alternative),gbif_exact
+Pelargonium sidoides,,Pelargonium sidoides,,gbif_exact
+Metalasia pungens,,Metalasia pungens,,gbif_exact
+Osteospermum junceum,,Osteospermum junceum,,gbif_exact
+Osyris compressa,,Osyris compressa,,gbif_exact
+Cassine schinoides,,Elaeodendron schinoides,Cassine schinoides (Spreng.) R.H.Archer -> Elaeodendron schinoides,gbif_synonym
+Pelargonium laevigatum,,Pelargonium laevigatum,,gbif_exact
+Centella virgata,,Centella virgata,,gbif_exact
+,TADI,Taxodium distichum,NEON base code TADI: TADI2,usda_code_context
+Agathosma venusta,,Agathosma venusta,,gbif_exact
+,PINU4,,NEON base code PINU4: unknown (Madison; PINU2/PINU4 not USDA symbols),unresolved
+,GIBI,Ginkgo biloba,NEON base code GIBI: GIBI2,usda_code_context
+Alciope tabularis,,Capelio tabularis,Alciope tabularis (Thunb.) DC. -> Capelio tabularis,gbif_synonym
+Asparagus capensis,,Asparagus capensis,,gbif_exact
+Struthiola ciliata,,Struthiola ciliata,,gbif_exact
+Aloe speciosa,,Aloe speciosa,,gbif_exact
+Thamnochortus cinereus,,Thamnochortus cinereus,,gbif_exact
+Tetraria microstachys,,Tetraria microstachys,,gbif_exact
+Strychnos pungens,,Strychnos pungens,,gbif_exact
+Syncarpha vestita,,Syncarpha vestita,,gbif_exact
+Tetraria fasciata,,Tetraria fasciata,,gbif_exact
+Tetraria cuspidata,,Schoenus cuspidatus,Tetraria cuspidata (Rottb.) C.B.Clarke -> Schoenus cuspidatus,gbif_synonym
+Tetraria crassa,,Schoenus crassus,Tetraria crassa Levyns -> Schoenus crassus,gbif_synonym
+,PINU2,,NEON base code PINU2: unknown (Madison; PINU2/PINU4 not USDA symbols),unresolved
+Elegia filacea,,Elegia filacea,,gbif_exact
+Crossyne guttata,,Crossyne guttata,,gbif_exact
+Stoebe spiralis,,Seriphium spirale,Stoebe spiralis Less. -> Seriphium spirale,gbif_synonym
+Osmitopsis asteriscoides,,Osmitopsis asteriscoides,,gbif_exact
+Carissa bispinosa,,Carissa bispinosa,,gbif_exact
+Chironia linoides,,Chironia linoides,,gbif_exact
+Pelargonium triste,,Pelargonium triste,,gbif_exact
+Lycopersicum esculentum,,Solanum lycopersicum,GBIF backbone lists Lycopersicum esculentum as accepted; current name Solanum lycopersicum (USDA),manual_synonym
+Leucadendron tinctum,,Leucadendron tinctum,,gbif_exact
+Merxmuellera cincta,,Capeochloa cincta,Merxmuellera cincta (Nees) Conert -> Capeochloa cincta,gbif_synonym
+Montinia caryophyllacea,,Montinia caryophyllacea,,gbif_exact
+Berzelia abrotanoides,,Berzelia abrotanoides,,gbif_exact
+Cannomois scirpoides,,Cannomois scirpoides,,gbif_exact
+Protea laurifolia,,Protea laurifolia,,gbif_exact
+Putterlickia pyracantha,,Putterlickia pyracantha,,gbif_exact
+Cotyledon woodii,,Cotyledon woodii,,gbif_exact
+Helichrysum dasyanthum,,Helichrysum dasyanthum,,gbif_exact
+Hermannia velutina,,Hermannia velutina,,gbif_exact
+Helichrysum odoratissimum,,Helichrysum odoratissimum,,gbif_exact
+Crassula lactea,,Crassula lactea,,gbif_exact
+Haworthia viscosa,,Haworthia viscosa,,gbif_exact
+Helichrysum nudifolium,,Helichrysum nudifolium,,gbif_exact
+Ischyrolepis gaudichaudiana,,Restio gaudichaudianus,Ischyrolepis gaudichaudiana (Kunth) H.P.Linder -> Restio gaudichaudianus,gbif_synonym
+Combretum collinum,,Combretum collinum,,gbif_exact
+Bobartia gladiata,,Bobartia gladiata,,gbif_exact
+Restio bifurcus,,Restio bifurcus,,gbif_exact
+Ruschia cradockensis,,Ruschia cradockensis,,gbif_exact
+Quercus virginana,,Quercus virginiana,,manual_typo
+Rapanea melanophloeos,,Myrsine melanophloeos,Rapanea melanophloeos (L.) Mez -> Myrsine melanophloeos,gbif_synonym
+Rhus laevigata,,Searsia laevigata,Rhus laevigata L.,gbif_synonym
+Erica imbricata,,Erica imbricata,,gbif_exact
+Euclea polyandra,,Euclea polyandra,,gbif_exact
+Agathosma ovata,,Agathosma ovata,,gbif_exact
+Ficinia nigrescens,,Ficinia nigrescens,,gbif_exact
+Ficinia oligantha,,Ficinia oligantha,,gbif_exact
+Erica demissa,,Erica demissa,,gbif_exact
+Crassula perforata,,Crassula perforata,,gbif_exact
+Syncarpha canescens,,Syncarpha canescens,,gbif_exact
+Elegia juncea,,Elegia juncea,,gbif_exact
+Phylica buxifolia,,Phylica buxifolia,,gbif_exact
+Phylica axillaris,,Phylica axillaris,,gbif_exact
+,PIKO,Pinus koraiensis,NEON base code PIKO: PIKO2 (Madison),usda_code_context
+,PIGB,Pinus glabra,"NEON base code PIGB: PIGL2 (JERC), inferred",usda_code_context
+Edmondia sesamoides,,Edmondia sesamoides,,gbif_exact
+Diospyros glabra,,Diospyros glabra,,gbif_exact
+Disparago ericoides,,Disparago ericoides,,gbif_exact
+Crassula pellucida,,Crassula pellucida,,gbif_exact
+Tarchonanthus camphoratus,,Tarchonanthus camphoratus,,gbif_exact
+Syncarpha milleflora,,Syncarpha milleflora,,gbif_exact
+Tetraria capillacea,,Tetraria capillacea,,gbif_exact
+Tristachya leucothrix,,Tristachya leucothrix,,gbif_exact
+Thamnochortus platypteris,,Thamnochortus platypteris,,gbif_exact
+Thamnochortus lucens,,Thamnochortus lucens,,gbif_exact
+Thamnochortus gracilis,,Thamnochortus gracilis,,gbif_exact
+Trachyandra falcata,,Trachyandra falcata,,gbif_exact
+Phylica lachneaeoides,,Phylica lachneaeoides,,gbif_exact
+Phylica imberbis,,Phylica imberbis,,gbif_exact
+Podalyria calyptrata,,Podalyria calyptrata,,gbif_exact
+Protea aurea,,Protea aurea,,gbif_exact
+Psoralea pinnata,,Psoralea pinnata,,gbif_exact
+Protea scolopendriifolia,,Protea scolopendriifolia,,gbif_exact
+Athrixia heterophylla,,Athrixia heterophylla,,gbif_exact
+Asparagus rubicundus,,Asparagus rubicundus,,gbif_exact
+Maytenus acuminata,,Gymnosporia acuminata,Maytenus acuminata (L.fil.) Loes. -> Gymnosporia acuminata,gbif_synonym
+Leucadendron rubrum,,Leucadendron rubrum,,gbif_exact
+Lobelia pinifolia,,Lobelia pinifolia,,gbif_exact
+Othonna quinquedentata,,Othonna quinquedentata,,gbif_exact
+Nebelia paleacea,,Brunia paleacea,Nebelia paleacea (P.J.Bergius) Sweet -> Brunia paleacea,gbif_synonym
+Olea capensis,,Olea capensis,,gbif_exact
+Mesembryanthemum junceum,,Mesembryanthemum junceum,,gbif_exact
+Macrostylis villosa,,Macrostylis villosa,,gbif_exact
+Paranomus esterhuyseniae,,Paranomus esterhuyseniae,,gbif_exact
+Passerina paleacea,,Passerina paleacea,,gbif_exact
+Pachypodium succulentum,,Pachypodium succulentum,,gbif_exact
+Othonna carnosa,,Crassothonna cacalioides,Othonna carnosa Less. -> Crassothonna cacalioides,gbif_synonym
+Catophractes alexandri,,Catophractes alexandri,,gbif_exact
+Stoebe plumosa,,Seriphium plumosum,Stoebe plumosa (L.) Thunb. -> Seriphium plumosum,gbif_synonym
+Hibiscus aethiopicus,,Hibiscus aethiopicus,,gbif_exact
+Stoebe capitata,,Stoebe capitata,,gbif_exact
+Gnidia juniperifolia,,Gnidia juniperifolia,,gbif_exact
+Helichrysum zeyheri,,Helichrysum zeyheri,,gbif_exact
+Bulbine abyssinica,,Bulbine abyssinica,,gbif_exact
+Calopsis membranacea,,Restio parvispiculus,Calopsis membranacea (Pillans) H.P.Linder -> Restio parvispiculus,gbif_synonym
+Laurophyllus capensis,,Laurophyllus capensis,,gbif_exact
+Jatropha capensis,,Jatropha capensis,,gbif_exact
+Hermannia saccifera,,Hermannia saccifera,,gbif_exact
+Capeobolus brevicaulis,,Capeobolus brevicaulis,,gbif_exact
+Puya venusta,,Puya venusta,,gbif_exact
+Relhania speciosa,,Oedera speciosa,Relhania speciosa (DC.) Harv. -> Oedera speciosa,gbif_synonym
+Rhus glauca,,Searsia glauca,Rhus glauca Thunb.,gbif_synonym
+Crassula atropurpurea,,Crassula atropurpurea,,gbif_exact
+Staberoha cernua,,Staberoha cernua,,gbif_exact
+Selago corymbosa,,Selago corymbosa,,gbif_exact
+Schoenoxiphium ecklonii,,Carex capensis,Schoenoxiphium ecklonii Nees -> Carex capensis,gbif_synonym
+Saltera sarcocolla,,Saltera sarcocolla,,gbif_exact
+Commelina africana,,Commelina africana,,gbif_exact
+Felicia macrorrhiza,,Felicia macrorrhiza,,gbif_exact
+Euclea schimperi,,Euclea racemosa,Euclea schimperi (A.DC.) Dandy -> Euclea racemosa,gbif_synonym
+Eriocephalus africanus,,Eriocephalus africanus,,gbif_exact
+Erica strigilifolia,,Erica strigilifolia,,gbif_exact
+Pteronia glomerata,,Pteronia glomerata,,gbif_exact
+Corymbium africanum,,Corymbium africanum,,gbif_exact
+Blepharis capensis,,Blepharis capensis,,gbif_exact
+Erica newdigateae,,Erica newdigatei,spelling via GBIF fuzzy match (Erica newdigatei Dulfer),manual_typo
+Erica muscosa,,Erica muscosa,,gbif_exact
+Erica subcapitata,,Erica subcapitata,,gbif_exact
+Erica breviflora,,Erica plukenetii,Erica breviflora Dulfer -> Erica plukenetii,gbif_synonym
+Elytropappus scaber,,Myrovernix scaber,Elytropappus scaber (L.fil.) Druce -> Myrovernix scaber,gbif_synonym
+Epischoenus quadrangularis,,Schoenus quadrangularis,Epischoenus quadrangularis (Boeckeler) C.B.Clarke -> Schoenus quadrangularis,gbif_synonym
+Elegia stipularis,,Elegia stipularis,,gbif_exact
+Erica articularis,,Erica articularis,,gbif_exact
+Diastella divaricata,,Diastella divaricata,,gbif_exact
+Agathosma mundtii,,Agathosma mundtii,,gbif_exact
+Adenandra villosa,,Adenandra villosa,,gbif_exact
+Arctopus echinatus,,Arctopus echinatus,,gbif_exact
+Apium decumbens,,Apium decumbens,,gbif_exact
+Agathosma imbricata,,Agathosma imbricata,,gbif_exact
+Watsonia vanderspuyiae,,Watsonia vanderspuyae,spelling via GBIF fuzzy match (Watsonia vanderspuyae L.Bolus),manual_typo
+Abutilon sonneratianum,,Abutilon sonneratianum,,gbif_exact
+Merxmuellera rufa,,Geochloa rufa,Merxmuellera rufa (Nees) Conert -> Geochloa rufa,gbif_synonym
+Elegia persistens,,Elegia persistens,,gbif_exact
+Lobelia setacea,,Lobelia setacea,,gbif_exact
+,ACNI,Acer nigrum,NEON base code ACNI: ACNI5 (D08 broadleaf),usda_code_context
+pachygone laurifolia,,Cocculus laurifolius,case; GBIF backbone and USDA treat Pachygone laurifolia as Cocculus laurifolius,gbif_synonym
+Didelta spinosa,,Didelta spinosa,,gbif_exact
+Crassula rogersii,,Crassula rogersii,,gbif_exact
+Tylecodon wallichii,,Tylecodon wallichii,,gbif_exact
+Thamnochortus karooica,,Thamnochortus karooica,,gbif_exact
+Cullumia aculeata,,Cullumia aculeata,,gbif_exact
+Cunonia capensis,,Cunonia capensis,,gbif_exact
+Cyphia digitata,,Cyphia digitata,,gbif_exact
+Zygophyllum procumbens,,Roepera spinosa,Zygophyllum procumbens Adamson -> Roepera spinosa,gbif_synonym
+Tetraria flexuosa,,Tetraria flexuosa,,gbif_exact
+Willdenowia incurvata,,Willdenowia incurvata,,gbif_exact
+Metalasia densa,,Metalasia densa,,gbif_exact
+Mimetes cucullatus,,Mimetes cucullatus,,gbif_exact
+Tephrosia capensis,,Tephrosia capensis,,gbif_exact
+Asparagus retrofractus,,Asparagus retrofractus,,gbif_exact
+Tetragonia nigrescens,,Tetragonia nigrescens,,gbif_exact
+Erica cerinthoides,,Erica cerinthoides,,gbif_exact
+Ehrharta dura,,Ehrharta dura,,gbif_exact
+Ursinia pilifera,,Ursinia pilifera,,gbif_exact
+Willdenowia glomerata,,Willdenowia glomerata,,gbif_exact
+Asparagus burchellii,,Asparagus burchellii,,gbif_exact
+Erica anguliger,,Erica anguliger,,gbif_exact
+Diospyros austro-africana,,Diospyros austroafricana,accepted SA species (De Winter); GBIF fuzzy synonym of D. pubescens rejected,manual_keep
+Aloe comptonii,,Aloe comptonii,,gbif_exact
+Nivenia levynsiae,,Nivenia levynsiae,,gbif_exact
+Ocotea bullata,,Ocotea bullata,,gbif_exact
+Muraltia pageae,,Muraltia pageae,,gbif_exact
+Othonna auriculifolia,,Othonna auriculifolia,,gbif_exact
+Leucadendron gandogeri,,Leucadendron gandogeri,,gbif_exact
+Hypodiscus willdenowia,,Hypodiscus willdenowia,,gbif_exact
+Indigofera brachystachya,,Indigofera brachystachya,,gbif_exact
+Muraltia squarrosa,,Muraltia squarrosa,,gbif_exact
+Myrsine africana,,Myrsine africana,,gbif_exact
+Chascanum cuneifolium,,Chascanum cuneifolium,,gbif_exact
+Lampranthus promontorii,,Lampranthus promontorii,,gbif_exact
+Lanaria lanata,,Lanaria lanata,,gbif_exact
+Knowltonia capensis,,Knowltonia capensis,,gbif_exact
+Knowltonia vesicatoria,,Knowltonia vesicatoria,,gbif_exact
+Cedrus atlantica,,Cedrus atlantica,,gbif_exact
+Cheilanthes parviloba,,Cheilanthes parviloba,,gbif_exact
+Chenolea diffusa,,Chenolea diffusa,,gbif_exact
+Aristida congesta,,Aristida congesta,,gbif_exact
+Senecio acaulis,,Curio acaulis,Senecio acaulis (L.f.) Sch.Bip.,gbif_synonym
+Senecio halimifolius,,Senecio halimifolius,,gbif_exact
+Aristea racemosa,,Aristea racemosa,,gbif_exact
+Erica corifolia,,Erica corifolia,,gbif_exact
+Tetraria bromoides,,Tetraria bromoides,,gbif_exact
+Sutera denudata,,Chaenostoma denudatum,Sutera denudata (Benth.) Kuntze -> Chaenostoma denudatum,gbif_synonym
+Stachys rugosa,,Stachys rugosa,,gbif_exact
+Stilbe ericoides,,Stilbe ericoides,,gbif_exact
+Stipagrostis zeyheri,,Stipagrostis zeyheri,,gbif_exact
+Tetragonia decumbens,,Tetragonia decumbens,,gbif_exact
+Juncus kraussii,,Juncus kraussii,,gbif_exact
+Kalanchoe rotundifolia,,Kalanchoe rotundifolia,,gbif_exact
+Kedrostis nana,,Kedrostis nana,,gbif_exact
+Helichrysum patulum,,Helichrysum patulum,,gbif_exact
+Ischyrolepis cincinnata,,Restio cincinnatus,Ischyrolepis cincinnata (Mast.) H.P.Linder -> Restio cincinnatus,gbif_synonym
+Hypodiscus argenteus,,Hypodiscus argenteus,,gbif_exact
+Indigofera candolleana,,Indigofera candolleana,,gbif_exact
+Pentameris macrocalycina,,Pentameris macrocalycina,,gbif_exact
+Pentaschistis ampla,,Pentameris ampla,Pentaschistis ampla (Nees) McClean -> Pentameris ampla,gbif_synonym
+Pelargonium oreophilum,,Pelargonium oreophilum,,gbif_exact
+Oxalis flava,,Oxalis flava,,gbif_exact
+Peltophorum africanum,,Peltophorum africanum,,gbif_exact
+Chironia melampyrifolia,,Chironia melampyrifolia,,gbif_exact
+Pelargonium praemorsum,,Pelargonium praemorsum,,gbif_exact
+Pelargonium articulatum,,Pelargonium articulatum,,gbif_exact
+Schizaea pectinata,,Schizaea pectinata,,gbif_exact
+Ruschia grisea,,Ruschia grisea,,gbif_exact
+Restio dispar,,Restio dispar,,gbif_exact
+Restio filiformis,,Restio filiformis,,gbif_exact
+Ruschia muelleri,,Ruschia muelleri,,gbif_exact
+Roella ciliata,,Roella ciliata,,gbif_exact
+Serruria glomerata,,Serruria glomerata,,gbif_exact
+Erica thamnoides,,Erica thamnoides,,gbif_exact
+Erica pulchella,,Erica pulchella,,gbif_exact
+Eriocephalus purpureus,,Eriocephalus purpureus,,gbif_exact
+Senecio pinifolius,,Senecio pinifolius,,gbif_exact
+Senecio cardaminifolius,,Senecio cardaminifolius,,gbif_exact
+Brachychiton discolor,,Brachychiton discolor,,gbif_exact
+Brachychiton rupestris,,Brachychiton rupestris,,gbif_exact
+Passerina glomerata,,Passerina glomerata,GBIF: heterotypic synonym of P. ericoides or P. truncata (ambiguous); kept as recorded,manual_keep
+Passerina vulgaris,,Passerina corymbosa,Passerina vulgaris (Meisn.) Thoday -> Passerina corymbosa,gbif_synonym
+Pegolettia baccaridifolia,,Pegolettia baccaridifolia,,gbif_exact
+Caesalpinia cacalaco,,Tara cacalaco,,gbif_synonym
+Pelargonium longifolium,,Pelargonium longifolium,,gbif_exact
+Brabejum stellatifolium,,Brabejum stellatifolium,,gbif_exact
+Bulbine succulenta,,Bulbine succulenta,,gbif_exact
+Hertia kraussii,,Hertia kraussii,,gbif_exact
+Hippobromus pauciflorus,,Hippobromus pauciflorus,,gbif_exact
+Hirpicium alienatum,,Gorteria alienata,Hirpicium alienatum (Thunb.) Druce -> Gorteria alienata,gbif_synonym
+Hermannia cuneifolia,,Hermannia cuneifolia,,gbif_exact
+Crassula fascicularis,,Crassula fascicularis,,gbif_exact
+Crassula mollis,,Crassula mollis,,gbif_exact
+Polyarrhena reflexa,,Polyarrhena reflexa,,gbif_exact
+Polygala fruticosa,,Polygala fruticosa,,gbif_exact
+Peucedanum tenuifolium,,Notobubon tenuifolium,Peucedanum tenuifolium Thunb. (homonyms),gbif_synonym
+Helichrysum cymosum,,Helichrysum cymosum,,gbif_exact
+Felicia muricata,,Felicia muricata,,gbif_exact
+Ficinia indica,,Ficinia indica,,gbif_exact
+Ficinia monticola,,Ficinia monticola,,gbif_exact
+Exomis microphylla,,Exomis microphylla,,gbif_exact
+Boscia oleoides,,Boscia oleoides,,gbif_exact
+Rhus incisa,,Searsia incisa,Rhus incisa L.fil. -> Searsia incisa,gbif_synonym
+Euryops munitus,,Euryops munitus,,gbif_exact
+Euryops rehmannii,,Euryops rehmannii,,gbif_exact
+Euryops spathaceus,,Euryops spathaceus,,gbif_exact
+Euphorbia erythrina,,Euphorbia genistoides,Euphorbia erythrina Link -> Euphorbia genistoides,gbif_synonym
+Rhus scytophylla,,Searsia scytophylla,Rhus scytophylla Eckl. & Zeyh. -> Searsia scytophylla,gbif_synonym
+Rhus tomentosa,,Searsia tomentosa,Rhus tomentosa L. -> Searsia tomentosa,gbif_synonym
+Restio triticeus,,Restio triticeus,,gbif_exact
+Retzia capensis,,Retzia capensis,,gbif_exact
+Rhodocoma capensis,,Rhodocoma capensis,,gbif_exact
+Rhodocoma fruticosa,,Rhodocoma fruticosa,,gbif_exact
+Rhoicissus digitata,,Rhoicissus digitata,,gbif_exact
+Rhus angustifolia,,Searsia angustifolia,Rhus angustifolia L.,gbif_synonym
+Gymnodiscus capillaris,,Gymnodiscus capillaris,,gbif_exact
+Gymnosporia buxifolia,,Gymnosporia buxifolia,,gbif_exact
+Podocarpus latifolius,,Podocarpus latifolius,,gbif_exact
+Crassula ericoides,,Crassula ericoides,,gbif_exact
+Grubbia tomentosa,,Grubbia tomentosa,,gbif_exact
+Ficus craterostoma,,Ficus craterostoma,,gbif_exact
+Pterocelastrus rostratus,,Pterocelastrus rostratus,,gbif_exact
+Cannomois parviflora,,Cannomois parviflora,,gbif_exact
+Athanasia pinnata,,Athanasia pinnata,,gbif_exact
+Gibbaria scabra,,Gibbaria scabra,,gbif_exact
+Psoralea aphylla,,Psoralea aphylla,,gbif_exact
+Athanasia linifolia,,Athanasia linifolia,,gbif_exact
+Aulax umbellata,,Aulax umbellata,,gbif_exact
+Babiana sambucina,,Babiana sambucina,,gbif_exact
+Barleria obtusa,,Barleria obtusa,,gbif_exact
+Euphorbia rhombifolia,,Euphorbia rhombifolia,,gbif_exact
+Corymbium glabrum,,Corymbium glabrum,,gbif_exact
+Rafnia perfoliata,,Rafnia perfoliata,GBIF ambiguous (homonyms); kept as recorded,manual_keep
+Clutia ericoides,,Clutia ericoides,,gbif_exact
+Ficinia stolonifera,,Ficinia stolonifera,,gbif_exact
+Rafnia capensis,,Rafnia capensis,,gbif_exact
+Pteronia teretifolia,,Pteronia teretifolia,,gbif_exact
+Pteronia villosa,,Pteronia villosa,,gbif_exact
+Protea intonsa,,Protea intonsa,,gbif_exact
+Ficinia bulbosa,,Ficinia bulbosa,,gbif_exact
+Pteronia glauca,,Pteronia glauca,,gbif_exact
+Pyllostachys vivax,,Phyllostachys vivax,,manual_typo
+Cliffortia ruscifolia,,Cliffortia ruscifolia,,gbif_exact
+Cleretum maughanii,,Cleretum maughanii,,gbif_exact
+Lobostemon echioides,,Lobostemon echioides,,gbif_exact
+Cliffortia stricta,,Cliffortia stricta,,gbif_exact
+Cliffortia subsetacea,,Cliffortia subsetacea,,gbif_exact
+Cissampelos capensis,,Cissampelos capensis,,gbif_exact
+Leucospermum conocarpodendron,,Leucospermum conocarpodendron,,gbif_exact
+Leucospermum wittebergense,,Leucospermum wittebergense,,gbif_exact
+Muraltia ericifolia,,Muraltia ericifolia,,gbif_exact
+Muraltia ericoides,,Muraltia ericoides,,gbif_exact
+Monsonia emarginata,,Monsonia emarginata,,gbif_exact
+Lobelia capillifolia,,Lobelia capillifolia,,gbif_exact
+Thesium euphorbioides,,Thesium euphorbioides,,gbif_exact
+Trichocephalus stipularis,,Trichocephalus stipularis,,gbif_exact
+Diospyros dichrophylla,,Diospyros dichrophylla,,gbif_exact
+Diospyros scabrida,,Diospyros scabrida,,gbif_exact
+Drosanthemum candens,,Drosanthemum candens,,gbif_exact
+,RACO,Ratibida columnifera,NEON base code RACO: RACO3 (Konza forb),usda_code_context
+Albizia harveyi,,Albizia harveyi,,gbif_exact
+,Sedge,,NEON base code Sedge: non-taxon: unidentified sedge (Cyperaceae),non_taxon
+,TOKA,,NEON base code TOKA: unknown (D08 broadleaf),unresolved
+Diosma hirsuta,,Diosma hirsuta,,gbif_exact
+,FRAX,Fraxinus,NEON base code FRAX: genus code,usda_code_context
+Widdringtonia nodiflora,,Widdringtonia nodiflora,,gbif_exact
+Chondropetalum ebracteatum,,Elegia ebracteata,Chondropetalum ebracteatum (Kunth) Pillans -> Elegia ebracteata,gbif_synonym
+,HAVI,Hamamelis virginiana,NEON base code HAVI: HAVI4,usda_code_context
+Acmadenia latifolia,,Acmadenia latifolia,,gbif_exact
+Aloe bainesii,,Aloidendron barberae,,gbif_synonym
+Wahlenbergia neorigida,,Wahlenbergia neorigida,,gbif_exact
+Watsonia fourcadei,,Watsonia fourcadei,,gbif_exact
+Acmadenia trigona,,Acmadenia trigona,,gbif_exact
+Alciope lanata,,Capelio tomentosa,Alciope lanata (Thunb.) DC. -> Capelio tomentosa,gbif_synonym
+Albuca concordiana,,Albuca concordiana,,gbif_exact
+Antimima gracillima,,Antimima gracillima,,gbif_exact
+Willdenowia arescens,,Willdenowia arescens,,gbif_exact
+Melateuca lanceolata,,Melaleuca lanceolata,,manual_typo
+,MACO,,NEON base code MACO: unknown (D09_WOOD),unresolved
+,MAGR,Magnolia grandiflora,NEON base code MAGR: MAGR4 (OSBS),usda_code_context
+Agathosma recurvifolia,,Agathosma recurvifolia,,gbif_exact
+,UNKN1,,nasa_fft 'UNKN1': unidentified plant,non_taxon
+,leppe,,"cedar_creek_esr lab code (plot 45); not an E120 species code, probably 'luppe' (Lupinus perennis) or 'lesca' (Lespedeza capitata)",unresolved
+,ARVI,Arctostaphylos viscida,NEON base code ARVI: ARVI4 (SJER),usda_code_context
+Drimia physodes,,Fusifilum physodes,Drimia physodes (Jacq.) Jessop -> Fusifilum physodes,gbif_synonym
+,QUCO,Quercus coccinea,NEON base code QUCO: QUCO2,usda_code_context
+,SERE,Serenoa repens,NEON base code SERE: SERE2 (DSNY),usda_code_context
+Arctotis acaulis,,Arctotis acaulis,,gbif_exact
+Tetraria exilis,,Schoenus exilis,Tetraria exilis Levyns -> Schoenus exilis,gbif_synonym
+Tetraria eximia,,Tetraria eximia,,gbif_exact
+Tetraria fimbriolata,,Tetraria fimbriolata,,gbif_exact
+Thesium spicatum,,Thesium spicatum,,gbif_exact
+Thesium viridifolium,,Thesium viridifolium,,gbif_exact
+Tetraria ustulata,,Tetraria ustulata,,gbif_exact
+Triraphis andropogonoides,,Triraphis andropogonoides,,gbif_exact
+Thesium lineatum,,Lacomucinaea lineata,Thesium lineatum L.f.,gbif_synonym
+Muraltia heisteria,,Muraltia heisteria,,gbif_exact
+Moraea bifida,,Moraea bifida,,gbif_exact
+Muraltia alopecuroides,,Muraltia alopecuroides,,gbif_exact
+Citharexylum montevidense,,Citharexylum montevidense,,gbif_exact
+Leucospermum mundii,,Leucospermum mundii,,gbif_exact
+Cliffortia ferruginea,,Cliffortia ferruginea,,gbif_exact
+Chondropetalum tectorum,,Elegia tectorum,Chondropetalum tectorum (L.f.) Raf. -> Elegia tectorum,gbif_synonym
+Cliffortia hexandra,,Cliffortia hexandra,,gbif_exact
+Cliffortia polygonifolia,,Cliffortia polygonifolia,,gbif_exact
+Malephora crassa,,Malephora crassa,,gbif_exact
+Erica serrata,,Erica serrata,,gbif_exact
+Ficinia brevifolia,,Ficinia brevifolia,,gbif_exact
+Pteronia glabrata,,Pteronia glabrata,,gbif_exact
+Pteronia pallens,,Pteronia pallens,,gbif_exact
+Berkheya glabrata,,Berkheya glabrata,,gbif_exact
+Quadrella cynophallophora,,Quadrella cynophallophora,,gbif_exact
+Restio arcuatus,,Restio arcuatus,,gbif_exact
+Protea laevis,,Protea laevis,,gbif_exact
+Protea lepidocarpodendron,,Protea lepidocarpodendron,,gbif_exact
+Galenia fruticosa,,Aizoon fruticosum,Galenia fruticosa (L.fil.) Sond. -> Aizoon fruticosum,gbif_synonym
+Galenia sarcophylla,,Aizoon sarcophyllum,Galenia sarcophylla Fenzl ex Harv. & Sond. -> Aizoon sarcophyllum,gbif_synonym
+Ficinia trichodes,,Ficinia trichodes,,gbif_exact
+Freylinia undulata,,Freylinia undulata,,gbif_exact
+Galenia africana,,Aizoon africanum,Galenia africana L. -> Aizoon africanum,gbif_synonym
+Cotula nudicaulis,,Cotula nudicaulis,,gbif_exact
+Crassula biplanata,,Crassula biplanata,,gbif_exact
+Crassula capensis,,Crassula capensis,,gbif_exact
+Clutia polifolia,,Clutia polifolia,,gbif_exact
+Euphorbia tuberosa,,Euphorbia tuberosa,,gbif_exact
+Convolvulus capensis,,Convolvulus capensis,,gbif_exact
+Pseudopentameris macrantha,,Pseudopentameris macrantha,,gbif_exact
+Protea acaulos,,Protea acaulos,,gbif_exact
+Asparagus striatus,,Asparagus striatus,,gbif_exact
+Phylica ericoides,,Phylica ericoides,,gbif_exact
+Augea capensis,,Augea capensis,,gbif_exact
+Gleichenia polypodioides,,Gleichenia polypodioides,,gbif_exact
+Gnidia geminiflora,,Gnidia geminiflora,,gbif_exact
+Grubbia rosmarinifolia,,Grubbia rosmarinifolia,,gbif_exact
+Gerbera crocea,,Gerbera crocea,,gbif_exact
+Gibbaria ilicifolia,,Osteospermum ilicifolium,Gibbaria ilicifolia (L.) Norl. -> Osteospermum ilicifolium,gbif_synonym
+Haworthia mucronata,,Haworthia mucronata,,gbif_exact
+Gnidia oppositifolia,,Gnidia oppositifolia,,gbif_exact
+Ficus platypoda,,Ficus platypoda,,gbif_exact
+Halleria lucida,,Halleria lucida,,gbif_exact
+Phylica pinea,,Phylica pinea,,gbif_exact
+Phylica rigidifolia,,Phylica rigidifolia,,gbif_exact
+Campylostachys cernua,,Campylostachys cernua,,gbif_exact
+Searsia burchellii,,Searsia burchellii,,gbif_exact
+Restio perplexus,,Restio perplexus,,gbif_exact
+Restio quinquefarius,,Restio quinquefarius,,gbif_exact
+Restio brachiatus,,Restio brachiatus,,gbif_exact
+Restio macer,,Restio macer,,gbif_exact
+Robsonodendron maritimum,,Robsonodendron maritimum,,gbif_exact
+Rhigozum,,Rhigozum,recorded as 'Rhigozum spp',genus_only
+Blechnum tabulare,,Lomariocycas tabularis,Blechnum tabulare (Thunb.) Kuhn -> Lomariocycas tabularis,gbif_synonym
+Rhus dentata,,Searsia dentata,Rhus dentata Thunb. -> Searsia dentata,gbif_synonym
+Euryops speciosissimus,,Euryops speciosissimus,,gbif_exact
+Felicia hirta,,Felicia hirta,,gbif_exact
+Euryops abrotanifolius,,Euryops abrotanifolius,,gbif_exact
+Ficinia dunensis,,Ficinia dunensis,,gbif_exact
+Erica rosacea,,Erica rosacea,,gbif_exact
+Phylica leipoldtii,,Phylica leipoldtii,,gbif_exact
+Polygala garcinii,,Polygala garcini,spelling via GBIF fuzzy match (Polygala garcini DC.),manual_typo
+Platycaulos compressus,,Platycaulos compressus,,gbif_exact
+Polygala bracteolata,,Polygala bracteolata,,gbif_exact
+Heliophila collina,,Heliophila collina,,gbif_exact
+Hermannia flammea,,Hermannia flammea,,gbif_exact
+Pentaschistis malouinensis,,Pentameris malouinensis,Pentaschistis malouinensis (Steud.) Clayton -> Pentameris malouinensis,gbif_synonym
+Brunia albiflora,,Berzelia albiflora,Brunia albiflora E.Phillips -> Berzelia albiflora,gbif_synonym
+Brunsvigia bosmaniae,,Brunsvigia bosmaniae,,gbif_exact
+Phaenocoma prolifera,,Phaenocoma prolifera,,gbif_exact
+Calandrinia menzieszii,,Calandrinia menziesii,,manual_typo
+Calicarpa bodinieri,,Callicarpa bodinieri,,manual_typo
+Pelargonium cucullatum,,Pelargonium cucullatum,,gbif_exact
+Selago glabrata,,Selago glabrata,,gbif_exact
+Senecio umbellatus,,Senecio umbellatus,,gbif_exact
+Septulina glauca,,Septulina glauca,,gbif_exact
+Serruria aitonii,,Serruria aitonii,,gbif_exact
+Senecio erosus,,Senecio erosus,,gbif_exact
+Staavia radiata,,Staavia radiata,,gbif_exact
+Serruria villosa,,Serruria villosa,,gbif_exact
+Erica plumosa,,Erica plumosa,,gbif_exact
+Eriocephalus namaquensis,,Eriocephalus namaquensis,,gbif_exact
+Eriocephalus punctulatus,,Eriocephalus punctulatus,,gbif_exact
+Euchlora hirsuta,,Euchlora hirsuta,,gbif_exact
+Erica versicolor,,Erica versicolor,,gbif_exact
+Eriocephalus decussatus,,Eriocephalus decussatus,,gbif_exact
+Erica curviflora,,Erica curviflora,,gbif_exact
+Erica ericoides,,Erica ericoides,,gbif_exact
+Eriocephalus spinescens,,Eriocephalus spinescens,,gbif_exact
+Roella decurrens,,Roella decurrens,,gbif_exact
+Satyrium erectum,,Satyrium erectum,,gbif_exact
+Schismus schismoides,,Schismus schismoides,,gbif_exact
+Restio dodii,,Restio dodii,,gbif_exact
+Pelargonium rapaceum,,Pelargonium rapaceum,,gbif_exact
+Pelargonium scabrum,,Pelargonium scabrum,,gbif_exact
+Pelargonium ternatum,,Pelargonium ternatum,,gbif_exact
+Penaea cneorum,,Penaea cneorum,,gbif_exact
+Pentameris distichophylla,,Pentameris dregeana,Pentameris distichophylla (Lehm.) Nees -> Pentameris dregeana,gbif_synonym
+Pelargonium magenteum,,Pelargonium magenteum,,gbif_exact
+Pelargonium myrrhifolium,,Pelargonium myrrhifolium,,gbif_exact
+Oxalis obtusa,,Oxalis obtusa,,gbif_exact
+Peltophorum dubium,,Peltophorum dubium,,gbif_exact
+Indigofera nigromontana,,Indigofera nigromontana,,gbif_exact
+Ischyrolepis monanthos,,Restio monanthos,Ischyrolepis monanthos (Mast.) H.P.Linder -> Restio monanthos,gbif_synonym
+Ischyrolepis paludosa,,Restio paludosus,Ischyrolepis paludosa (Pillans) H.P.Linder -> Restio paludosus,gbif_synonym
+Ischyrolepis subverticillata,,Restio subverticillatus,Ischyrolepis subverticillata Steud. -> Restio subverticillatus,gbif_synonym
+Indigofera flabellata,,Indigofera flabellata,,gbif_exact
+Indigofera frutescens,,Indigofera frutescens,,gbif_exact
+Itasina filifolia,,Itasina filifolia,,gbif_exact
+Helichrysum obtusum,,Helichrysum obtusum,,gbif_exact
+Struthiola tomentosa,,Struthiola tomentosa,,gbif_exact
+Tetragonia fruticosa,,Tetragonia fruticosa,,gbif_exact
+Erica hirtiflora,,Erica hirtiflora,,gbif_exact
+Erica labialis,,Erica labialis,,gbif_exact
+Erica laeta,,Erica laeta,,gbif_exact
+Erica langebergensis,,Erica langebergensis,,gbif_exact
+Erica lasciva,,Erica lasciva,,gbif_exact
+Erica glabella,,Erica glabella,,gbif_exact
+Erica gnaphaloides,,Erica gnaphaloides,,gbif_exact
+Erica nudiflora,,Erica nudiflora,,gbif_exact
+Erica obliqua,,Erica obliqua,,gbif_exact
+Dimorphotheca cuneata,,Dimorphotheca cuneata,,gbif_exact
+Erica mammosa,,Erica mammosa,,gbif_exact
+Argyrolobium collinum,,Argyrolobium collinum,,gbif_exact
+Aristea africana,,Aristea africana,,gbif_exact
+Aristea pusilla,,Aristea pusilla,,gbif_exact
+Stoebe cinerea,,Seriphium cinereum,Stoebe cinerea (L.) Thunb.,gbif_synonym
+Aspalathus microphylla,,Aspalathus microphylla,,gbif_exact
+Senecio arenarius,,Senecio arenarius,,gbif_exact
+Aspalathus ciliaris,,Aspalathus ciliaris,,gbif_exact
+Senecio ficoides,,Curio ficoides,Senecio ficoides (L.) Sch.Bip. -> Curio ficoides,gbif_synonym
+Helichrysum revolutum,,Helichrysum revolutum,,gbif_exact
+Centella difformis,,Centella difformis,,gbif_exact
+Othonna undulosa,,Othonna undulosa,,gbif_exact
+Centella villosa,,Centella villosa,,gbif_exact
+Cheiridopsis namaquensis,,Cheiridopsis namaquensis,,gbif_exact
+Chironia baccifera,,Chironia baccifera,,gbif_exact
+Leucadendron coniferum,,Leucadendron coniferum,,gbif_exact
+Lampranthus bicolor,,Lampranthus bicolor,,gbif_exact
+Leucadendron xanthoconus,,Leucadendron xanthoconus,,gbif_exact
+Ifloga glomerata,,Ifloga glomerata,,gbif_exact
+Leucadendron microcephalum,,Leucadendron microcephalum,,gbif_exact
+Leucadendron nitidum,,Leucadendron nitidum,,gbif_exact
+Nevillea obtusissima,,Nevillea obtusissimus,spelling via GBIF fuzzy match (Nevillea obtusissimus (Steud.) H.P.Linder),manual_typo
+Oedera genistifolia,,Oedera genistifolia,,gbif_exact
+Oedera imbricata,,Oedera imbricata,,gbif_exact
+Diosma oppositifolia,,Diosma oppositifolia,,gbif_exact
+Ursinia quinquepartita,,Ursinia quinquepartita,,gbif_exact
+Aloe microstigma,,Aloe microstigma,,gbif_exact
+Amphithalea ericifolia,,Amphithalea ericifolia,,gbif_exact
+Anaxeton laeve,,Anaxeton laeve,,gbif_exact
+Ursinia paleacea,,Ursinia paleacea,,gbif_exact
+Asparagus lignosus,,Asparagus lignosus,,gbif_exact
+Trachyandra divaricata,,Trachyandra divaricata,,gbif_exact
+Trachyandra jacquiniana,,Trachyandra jacquiniana,,gbif_exact
+Erica abietina,,Erica abietina,,gbif_exact
+Erica clavisepala,,Erica clavisepala,,gbif_exact
+Epischoenus gracilis,,Schoenus gracillimus,Epischoenus gracilis Levyns -> Schoenus gracillimus,gbif_synonym
+Ehretia austin-smithii,,Ehretia latifolia,,gbif_synonym
+Ehretia rigida,,Ehretia rigida,,gbif_exact
+Ehrharta bulbosa,,Ehrharta bulbosa,,gbif_exact
+Ehrharta melicoides,,Ehrharta melicoides,,gbif_exact
+Erica axillaris,,Erica axillaris,,gbif_exact
+Struthiola dodecandra,,Struthiola dodecandra,,gbif_exact
+Aspalathus retroflexa,,Aspalathus retroflexa,,gbif_exact
+Syncarpha gnaphaloides,,Syncarpha gnaphaloides,,gbif_exact
+Syncarpha speciosissima,,Syncarpha speciosissima,,gbif_exact
+Oedera sedifolia,,Oedera sedifolia,,gbif_exact
+Oscularia steenbergensis,,Oscularia steenbergensis,,gbif_exact
+Microdon dubius,,Microdon dubius,,gbif_exact
+Microloma sagittatum,,Microloma sagittatum,,gbif_exact
+Mimetes fimbriifolius,,Mimetes fimbriifolius,,gbif_exact
+Mesembryanthemum nitidum,,Mesembryanthemum nitidum,,gbif_exact
+Metalasia muricata,,Metalasia muricata,,gbif_exact
+Metrosideros angustifolia,,Metrosideros angustifolia,Cape species M. angustifolia (L.) Sm.; GBIF matched the homonym Dum.Cours. (= Callistemon),manual_keep
+Uvularia sessifolia,,Uvularia sessilifolia,,manual_typo
+Villarsia capensis,,Villarsia capensis,,gbif_exact
+Willdenowia teres,,Willdenowia teres,,gbif_exact
+Elegia cuspidata,,Elegia cuspidata,,gbif_exact
+Willdenowia bolusii,,Willdenowia bolusii,,gbif_exact
+Drosanthemum karrooense,,Drosanthemum karrooense,,gbif_exact
+Croton setiger,,Croton setiger,,gbif_exact
+Elegia capensis,,Elegia capensis,,gbif_exact
+Dicoma spinosa,,Macledium spinosum,Dicoma spinosa (L.) Druce -> Macledium spinosum,gbif_synonym
+Crassula tetragona,,Crassula tetragona,,gbif_exact
+Ursinia chrysanthemoides,,Ursinia chrysanthemoides,,gbif_exact
+Cyanella lutea,,Cyanella lutea,,gbif_exact
+Massonia depressa,,Massonia depressa,,gbif_exact
+Mastersiella purpurea,,Mastersiella purpurea,,gbif_exact
+Maytenus oleoides,,Gymnosporia laurina,Maytenus oleoides (Lam.) Loes. -> Gymnosporia laurina,gbif_synonym
+Acer paxii,,Acer paxii,,gbif_exact
+Agathosma puberula,,Agathosma puberula,,gbif_exact
+Mesembryanthemum guerichianum,,Mesembryanthemum guerichianum,,gbif_exact
+Lonchocarpus,,Lonchocarpus,recorded as 'Lonchocarpus spp' (Botswana; probably Philenoptera),genus_only
+Leysera gnaphalodes,,Leysera gnaphalodes,,gbif_exact
+Leysera tenella,,Leysera tenella,,gbif_exact
+Chlorophytum undulatum,,Chlorophytum undulatum,,gbif_exact
+Acmadenia nivenii,,Acmadenia nivenii,,gbif_exact
+Agathosma bifida,,Agathosma bifida,,gbif_exact
+Agathosma ciliaris,,Agathosma ciliaris,,gbif_exact
+Agathosma hookeri,,Agathosma hookeri,,gbif_exact
+Agathosma lanceolata,,Agathosma lanceolata,,gbif_exact
+Androcymbium volutare,,Colchicum volutare,Androcymbium volutare Burch. -> Colchicum volutare,gbif_synonym
+Anemonastrum canadense,,Anemonastrum canadense,,gbif_exact
+Anginon fruticosum,,Anginon fruticosum,,gbif_exact
+Anisodontea triloba,,Anisodontea triloba,,gbif_exact
+Anthochortus capensis,,Anthochortus capensis,,gbif_exact
+Anthospermum bergianum,,Anthospermum bergianum,,gbif_exact
+Anthospermum dregei,,Anthospermum dregei,,gbif_exact
+Anthospermum spathulatum,,Anthospermum spathulatum,,gbif_exact
+Amphiglossa tomentosa,,Amphiglossa tomentosa,,gbif_exact
+Amphiglossa triflora,,Pterothrix spinescens,Amphiglossa triflora DC. -> Pterothrix spinescens,gbif_synonym
+Amphithalea cymbifolia,,Amphithalea cymbifolia,,gbif_exact
+Amphithalea violacea,,Amphithalea violacea,,gbif_exact
+Amphithalea williamsonii,,Amphithalea williamsonii,,gbif_exact
+Anaxeton nycthemerum,,Anaxeton nycthemerum,,gbif_exact
+Ursinia punctata,,Ursinia punctata,,gbif_exact
+Ursinia sericea,,Ursinia sericea,,gbif_exact
+Ursinia tenuifolia,,Ursinia tenuifolia,,gbif_exact
+Tritoniopsis antholyza,,Tritoniopsis antholyza,,gbif_exact
+Tylecodon paniculatus,,Tylecodon paniculatus,,gbif_exact
+Tylecodon reticulatus,,Tylecodon reticulatus,,gbif_exact
+Aptosimum spinescens,,Aptosimum spinescens,,gbif_exact
+Arctotis adpressa,,Arctotis adpressa,,gbif_exact
+Arctotis aspera,,Arctotis aspera,,gbif_exact
+Ursinia trifida,,Ursinia trifida,,gbif_exact
+Diosma prama,,Diosma prama,,gbif_exact
+Ursinia cakilefolia,,Ursinia cakilefolia,,gbif_exact
+Ursinia nana subsp nana,,Ursinia nana,cleaned from 'Ursinia nana subsp nana',gbif_exact
+Cussonia thyrsiflora,,Cussonia thyrsiflora,,gbif_exact
+Cyathocoma ecklonii,,Cyathocoma ecklonii,,gbif_exact
+Cyphia bulbosa,,Cyphia bulbosa,,gbif_exact
+Cyphia volubilis,,Cyphia volubilis,,gbif_exact
+Crassula umbella,,Crassula umbella,,gbif_exact
+Cullumia squarrosa,,Cullumia squarrosa,,gbif_exact
+Todea barbara,,Todea barbara,,gbif_exact
+Toxicoscordion fremontii,,Toxicoscordion fremontii,,gbif_exact
+Thamnochortus arenarius,,Thamnochortus arenarius,,gbif_exact
+Thamnochortus fruticosus,,Thamnochortus fruticosus,,gbif_exact
+Thesidium fragile,,Thesium confusum,Thesidium fragile (Thunb.) Sond. -> Thesium confusum,gbif_synonym
+Thesium acuminatum,,Thesium acuminatum,,gbif_exact
+Thesium ericifolium,,Thesium ericiifolium,spelling via GBIF fuzzy match (Thesium ericiifolium A.DC.),manual_typo
+Ursinia anthemoides,,Ursinia anthemoides,,gbif_exact
+Asparagus ovatus,,Asparagus ovatus,,gbif_exact
+Trachyandra hirsutiflora,,Trachyandra hirsutiflora,,gbif_exact
+Trachyandra revoluta,,Trachyandra revoluta,,gbif_exact
+Tribolium brachystachyum,,Tribolium brachystachyum,,gbif_exact
+Trichogyne ambigua,,Ifloga ambigua,Trichogyne ambigua (L.) Druce -> Ifloga ambigua,gbif_synonym
+Thesium hispidulum,,Thesium hispidulum,,gbif_exact
+Thesium horridum,,Thesium horridum,,gbif_exact
+Thesium subnudum,,Thesium subnudum,,gbif_exact
+Elytropappus gnaphaloides,,Myrovernix gnaphaloides,Elytropappus gnaphaloides (L.) Levyns -> Myrovernix gnaphaloides,gbif_synonym
+Elytropappus intricata,,Myrovernix intricata,"spelling via GBIF fuzzy match (Elytropappus intricatus (Levyns), synonym)",gbif_synonym
+Elytropappus longifolius,,Myrovernix longifolius,Elytropappus longifolius (DC.) Levyns -> Myrovernix longifolius,gbif_synonym
+Dilatris corymbosa,,Dilatris corymbosa,,gbif_exact
+Dilatris ixioides,,Dilatris ixioides,,gbif_exact
+Dimorphotheca acutifolia,,Dimorphotheca acutifolia,,gbif_exact
+Aspalathus triquetra,,Aspalathus triquetra,,gbif_exact
+Aspalathus vulnerans,,Aspalathus vulnerans,,gbif_exact
+Monechma spartioides,,Monechma spartioides,,gbif_exact
+Mesembryanthemum resurgens,,Mesembryanthemum resurgens,,gbif_exact
+Metalasia brevifolia,,Metalasia brevifolia,,gbif_exact
+Metalasia cephalotes,,Metalasia cephalotes,,gbif_exact
+Metalasia galpinii,,Metalasia galpinii,,gbif_exact
+Metalasia lichtensteinii,,Metalasia lichtensteinii,,gbif_exact
+Metalasia massonii,,Metalasia massonii,,gbif_exact
+Osteospermum acanthospermum,,Osteospermum acanthospermum,,gbif_exact
+Muraltia divaricata,,Muraltia divaricata,,gbif_exact
+Moraea amabilis,,Moraea amabilis,,gbif_exact
+Moraea brachygyne,,Moraea brachygyne,,gbif_exact
+Moraea ciliata,,Moraea ciliata,,gbif_exact
+Moraea falcifolia,,Moraea falcifolia,,gbif_exact
+Moraea fenestrata,,Moraea fenestrata,,gbif_exact
+Moraea pritzeliana,,Moraea pritzeliana,,gbif_exact
+Metrosideros excelsa,,Metrosideros excelsa,,gbif_exact
+Cladoraphis spinosa,,Cladoraphis spinosa,,gbif_exact
+Limeum aethiopicum,,Limeum aethiopicum,,gbif_exact
+Limonium scabrum,,Limonium scabrum,,gbif_exact
+Linum africanum,,Linum africanum,,gbif_exact
+Liparia parva,,Liparia parva,,gbif_exact
+Morella kraussiana,,Morella kraussiana,,gbif_exact
+Morella serrata,,Morella serrata,,gbif_exact
+Muraltia ciliaris,,Muraltia ciliaris,,gbif_exact
+Cliffortia atrata,,Cliffortia atrata,,gbif_exact
+Cliffortia burchellii,,Cliffortia burchellii,,gbif_exact
+Cliffortia densa,,Cliffortia densa,,gbif_exact
+Cliffortia filicaulis,,Cliffortia filicaulis,,gbif_exact
+Chondropetalum mucronatum,,Elegia mucronata,Chondropetalum mucronatum (Nees) Pillans -> Elegia mucronata,gbif_synonym
+Chondropetalum nudum,,Elegia nuda,Chondropetalum nudum Rottb. -> Elegia nuda,gbif_synonym
+Chrysitrix capensis,,Chrysitrix capensis,,gbif_exact
+Chrysitrix junciformis,,Chrysitrix junciformis,,gbif_exact
+Lapeirousia plicata,,Lapeirousia plicata,,gbif_exact
+Laurembergia repens,,Laurembergia repens,,gbif_exact
+Lebeckia cytisoides,,Calobota cytisoides,Lebeckia cytisoides (P.J.Bergius) Thunb. -> Calobota cytisoides,gbif_synonym
+Leipoldtia schultzei,,Leipoldtia schultzei,,gbif_exact
+Leucadendron brunioides,,Leucadendron brunioides,,gbif_exact
+Leucadendron dubium,,Leucadendron dubium,,gbif_exact
+Lachnospermum fasciculatum,,Lachnospermum fasciculatum,,gbif_exact
+Lachnospermum umbellatum,,Lachnospermum umbellatum,,gbif_exact
+Muraltia rosmarinifolia,,Muraltia rosmarinifolia,,gbif_exact
+Ilex mitis,,Ilex mitis,,gbif_exact
+Indigofera angustifolia,,Indigofera angustifolia,,gbif_exact
+Leucadendron glaberrimum,,Leucadendron glaberrimum,,gbif_exact
+Leucadendron pubescens,,Leucadendron pubescens,,gbif_exact
+Leucadendron remotum,,Leucadendron remotum,,gbif_exact
+Leucadendron spissifolium,,Leucadendron spissifolium,,gbif_exact
+Leucospermum calligerum,,Leucospermum calligerum,,gbif_exact
+Ombu tree,,Phytolacca dioica,'ombu' is the common name of Phytolacca dioica,manual_common_name
+Ornithogalum tanquanum,,Ornithogalum tanquanum,,gbif_exact
+Ornithoglossum parviflorum,,Ornithoglossum parviflorum,,gbif_exact
+Oscularia deltoides,,Oscularia deltoides,,gbif_exact
+Nemesia cheiranthus,,Nemesia cheiranthus,,gbif_exact
+Nemesia leipoldtii,,Nemesia leipoldtii,,gbif_exact
+Nenax cinerea,,Nenax cinerea,,gbif_exact
+Muraltia juniperifolia,,Muraltia juniperifolia,,gbif_exact
+Osteospermum incanum,,Osteospermum incanum,,gbif_exact
+Osteospermum rigidum,,Osteospermum rigidum,,gbif_exact
+Osteospermum triquetrum,,Osteospermum triquetrum,,gbif_exact
+Othonna digitata,,Othonna digitata,,gbif_exact
+Othonna hederifolia,,Othonna hederifolia,,gbif_exact
+Oldenburgia paradoxa,,Oldenburgia paradoxa,,gbif_exact
+Olea exasperata,,Olea exasperata,,gbif_exact
+Olinia ventosa,,Olinia ventosa,,gbif_exact
+Othonna retrofracta,,Othonna retrofracta,,gbif_exact
+Helichrysum scabrum,,Helichrysum scabrum,,gbif_exact
+Helichrysum stellatum,,Helichrysum stellatum,,gbif_exact
+Ischyrolepis unispicata,,Restio unispicatus,Ischyrolepis unispicata H.P.Linder -> Restio unispicatus,gbif_synonym
+Ischyrolepis virgea,,Restio virgeus,Ischyrolepis virgea (Mast.) H.P.Linder -> Restio virgeus,gbif_synonym
+Isolepis marginata,,Isolepis marginata,,gbif_exact
+Ixia rapunculoides,,Ixia rapunculoides,,gbif_exact
+Ischyrolepis eleocharis,,Restio eleocharis,Ischyrolepis eleocharis (Nees ex Mast.) H.P.Linder -> Restio eleocharis,gbif_synonym
+Ceratocaryum decipiens,,Ceratocaryum decipiens,,gbif_exact
+Carpacoce spermacocea,,Carpacoce spermacocea,,gbif_exact
+Carpacoce vaginellata,,Carpacoce vaginellata,,gbif_exact
+Cassytha ciliolata,,Cassytha ciliolata,,gbif_exact
+Cedrus atlantica_glauca,,Cedrus atlantica,cultivar group 'Glauca' dropped,manual_typo
+Centella glabrata,,Centella glabrata,,gbif_exact
+Centella lanata,,Centella lanata,,gbif_exact
+Othonna pteronioides,,Othonna pteronioides,,gbif_exact
+Chaenostoma caeruleum,,Chaenostoma caeruleum,,gbif_exact
+Cheilanthes contracta,,Cheilanthes contracta,,gbif_exact
+Centella macrocarpa,,Centella macrocarpa,,gbif_exact
+Centella restioides,,Centella restioides,,gbif_exact
+Centella tridentata,,Centella tridentata,,gbif_exact
+Centella triloba,,Centella triloba,,gbif_exact
+Cephalophyllum curtophyllum,,Cephalophyllum curtophyllum,,gbif_exact
+Cephalophyllum framesii,,Cephalophyllum framesii,,gbif_exact
+Lampranthus scaber,,Lampranthus scaber,,gbif_exact
+Lampranthus watermeyeri,,Lampranthus watermeyeri,,gbif_exact
+Lapeirousia falcata,,Codonorhiza falcata,Lapeirousia falcata (L.f.) Ker Gawl. -> Codonorhiza falcata,gbif_synonym
+Lachenalia obscura,,Lachenalia obscura,,gbif_exact
+Muraltia thunbergii,,Muraltia thunbergii,,gbif_exact
+Nebelia fragarioides,,Brunia fragarioides,Nebelia fragarioides (Willd.) Kuntze -> Brunia fragarioides,gbif_synonym
+Neesenbeckia punctoria,,Neesenbeckia punctoria,,gbif_exact
+Cercidium pennisulare,,Parkinsonia florida,typo of Cercidium peninsulare = Parkinsonia florida subsp. peninsularis,manual_typo
+Cadaba aphylla,,Cadaba aphylla,,gbif_exact
+Caesalpina cacalaco,,Tara cacalaco,typo of Caesalpinia cacalaco = Tara cacalaco,manual_typo
+Calopsis filiformis,,Restio tenuispicatus,Calopsis filiformis (Mast.) H.P.Linder -> Restio tenuispicatus,gbif_synonym
+Calopsis hyalina,,Restio hyalinus,Calopsis hyalina (Mast.) H.P.Linder -> Restio hyalinus,gbif_synonym
+Calopsis marlothii,,Restio rudolfii,Calopsis marlothii (Pillans) H.P.Linder -> Restio rudolfii,gbif_synonym
+Brachylaena neriifolia,,Brachylaena neriifolia,,gbif_exact
+Brunia laevis,,Brunia laevis,,gbif_exact
+Bulbine alooides,,Bulbine alooides,,gbif_exact
+Pelargonium candicans,,Pelargonium candicans,,gbif_exact
+Pelargonium crithifolium,,Pelargonium crithmifolium,spelling via GBIF fuzzy match (Pelargonium crithmifolium Sm.),manual_typo
+Pelargonium englerianum,,Pelargonium englerianum,,gbif_exact
+Pelargonium gibbosum,,Pelargonium gibbosum,,gbif_exact
+Paranomus bracteolaris,,Paranomus bracteolaris,,gbif_exact
+Paranomus tomentosus,,Paranomus tomentosus,,gbif_exact
+Pelargonium abrotanifolium,,Pelargonium abrotanifolium,,gbif_exact
+Pelargonium alternans,,Pelargonium alternans,,gbif_exact
+Hypodiscus neesii,,Hypodiscus neesii,,gbif_exact
+Oxalis luteola,,Oxalis luteola,,gbif_exact
+Oxalis pocockiae,,Oxalis pocockiae,,gbif_exact
+Carpacoce heteromorpha,,Carpacoce heteromorpha,,gbif_exact
+Pelargonium tricolor,,Pelargonium tricolor,,gbif_exact
+Pentameris rupestris,,Pentameris rupestris,,gbif_exact
+Pelargonium reflexum,,Pelargonium reflexum,,gbif_exact
+Pelargonium betulinum,,Pelargonium betulinum,,gbif_exact
+Ischyrolepis gossypina,,Restio gossypinus,Ischyrolepis gossypina (Mast.) H.P.Linder -> Restio gossypinus,gbif_synonym
+Ischyrolepis hystrix,,Restio hystrix,Ischyrolepis hystrix (Mast.) H.P.Linder -> Restio hystrix,gbif_synonym
+Ischyrolepis ocreata,,Restio ocreatus,Ischyrolepis ocreata (Kunth) H.P.Linder -> Restio ocreatus,gbif_synonym
+Ischyrolepis sieberi,,Restio sieberi,Ischyrolepis sieberi (Kunth) H.P.Linder -> Restio sieberi,gbif_synonym
+Indigofera glomerata,,Indigofera glomerata,,gbif_exact
+Indigofera langebergensis,,Indigofera langebergensis,,gbif_exact
+Indigofera sarmentosa,,Indigofera sarmentosa,,gbif_exact
+Hypodiscus laevigatus,,Hypodiscus laevigatus,,gbif_exact
+Heliophila crithmifolia,,Heliophila crithmifolia,,gbif_exact
+Heliophila glauca,,Heliophila glauca,,gbif_exact
+Hermannia althaeifolia,,Hermannia althaeifolia,,gbif_exact
+Hermannia angularis,,Hermannia angularis,,gbif_exact
+Hermannia coccocarpa,,Hermannia coccocarpa,,gbif_exact
+Helichrysum hamulosum,,Helichrysum hamulosum,,gbif_exact
+Helichrysum moeserianum,,Helichrysum moeserianum,,gbif_exact
+Pentaschistis pallida,,Pentameris pallida,Pentaschistis pallida (Thunb.) H.P.Linder -> Pentameris pallida,gbif_synonym
+Hypodiscus alternans,,Hypodiscus alternans,,gbif_exact
+Hermannia multiflora,,Hermannia multiflora,,gbif_exact
+Hermannia spinosa,,Hermannia spinosa,,gbif_exact
+Hermannia ternifolia,,Hermannia ternifolia,,gbif_exact
+Hesperantha luticola,,Hesperantha luticola,,gbif_exact
+Hesperantha pauciflora,,Hesperantha pauciflora,,gbif_exact
+Helichrysum teretifolium,,Helichrysum teretifolium,,gbif_exact
+Heliophila amplexicaulis,,Heliophila amplexicaulis,,gbif_exact
+Crassula orbicularis,,Crassula orbicularis,,gbif_exact
+Gasteria acinacifolia,,Gasteria acinacifolia,,gbif_exact
+Gazania lichtensteinianum,,Gazania lichtensteinii,,manual_typo
+Heterolepis aliena,,Heterolepis aliena,,gbif_exact
+Hetrosideros excelsa,,Metrosideros excelsa,,manual_typo
+Hippia integrifolia,,Hippia integrifolia,,gbif_exact
+Hippia pilosa,,Hippia pilosa,,gbif_exact
+Holothrix secunda,,Holothrix secunda,,gbif_exact
+Pharnaceum aurantium,,Pharnaceum aurantium,,gbif_exact
+Pharnaceum ciliare,,Pharnaceum ciliare,,gbif_exact
+Phiambolia hallii,,Phiambolia hallii,,gbif_exact
+Phiambolia mentiens,,Phiambolia mentiens,,gbif_exact
+Phylica agathosmoides,,Phylica agathosmoides,,gbif_exact
+Phylica ambigua,,Phylica ambigua,,gbif_exact
+Pentaschistis aristidoides,,Pentameris aristidoides,Pentaschistis aristidoides (Thunb.) Stapf -> Pentameris aristidoides,gbif_synonym
+Pentaschistis colorata,,Pentameris colorata,Pentaschistis colorata (Steud.) Stapf -> Pentameris colorata,gbif_synonym
+Heeria argentea,,Heeria argentea,,gbif_exact
+Helichrysum anomalum,,Helichrysum anomalum,,gbif_exact
+Helichrysum asperum,,Helichrysum asperum,,gbif_exact
+Gnidia meyeri,,Gnidia meyeri,,gbif_exact
+Gnidia pinifolia,,Gnidia pinifolia,,gbif_exact
+Gnidia scabra,,Gnidia scabra,,gbif_exact
+Gomphocarpus cancellatus,,Gomphocarpus cancellatus,,gbif_exact
+Gorteria diffusa,,Gorteria diffusa,,gbif_exact
+Phylica villosa,,Phylica villosa,,gbif_exact
+Phyllosma capensis,,Phyllosma capensis,,gbif_exact
+Calopsis paniculata,,Restio paniculatus,Calopsis paniculata (Rottb.) Desv. -> Restio paniculatus,gbif_synonym
+Calopsis viminea,,Restio vimineus,Calopsis viminea (Rottb.) H.P.Linder -> Restio vimineus,gbif_synonym
+Ficinia zeyheri,,Ficinia zeyheri,,gbif_exact
+Ficus socotrana,,Ficus vasta,,gbif_synonym
+Foveolina dichotoma,,Foveolina dichotoma,,gbif_exact
+Haplocarpha parvifolia,,Haplocarpha parvifolia,,gbif_exact
+Phytolacca dioica,,Phytolacca dioica,,gbif_exact
+Platycaulos anceps,,Platycaulos anceps,,gbif_exact
+Platylophus trifoliatus,,Platylophus trifoliatus,,gbif_exact
+Podalyria burchellii,,Podalyria burchellii,,gbif_exact
+Podocarpus elongatus,,Podocarpus elongatus,,gbif_exact
+Phylica lasiocarpa,,Phylica lasiocarpa,,gbif_exact
+Phylica oleaefolia,,Phylica oleaefolia,,gbif_exact
+Phylica purpurea,,Phylica purpurea,,gbif_exact
+Pentaschistis papillosa,,Pentameris scabra,Pentaschistis papillosa H.P.Linder -> Pentameris scabra,gbif_synonym
+Pentaschistis velutina,,Pentameris velutina,Pentaschistis velutina H.P.Linder -> Pentameris velutina,gbif_synonym
+Pentzia spinescens,,Pentzia spinescens,,gbif_exact
+Polycarena aurea,,Polycarena aurea,,gbif_exact
+Polygala ephedroides,,Polygala ephedroides,,gbif_exact
+Polygala scabra,,Polygala scabra,,gbif_exact
+Printzia polifolia,,Printzia polifolia,,gbif_exact
+Prionium serratum,,Prionium serratum,,gbif_exact
+Euphorbia genistoides,,Euphorbia genistoides,,gbif_exact
+Euphorbia loricata,,Euphorbia loricata,,gbif_exact
+Euphorbia silenifolia,,Euphorbia silenifolia,,gbif_exact
+Cotula microglossa,,Cotula microglossa,,gbif_exact
+Cotula sororia,,Cotula sororia,,gbif_exact
+Crassula barbata,,Crassula barbata,,gbif_exact
+Clutia laxa,,Clutia laxa,,gbif_exact
+Clutia pulchella,,Clutia pulchella,,gbif_exact
+Protea scabra,,Protea scabra,,gbif_exact
+Psammotropha quadrangularis,,Psammotropha quadrangularis,,gbif_exact
+Pseudopentameris brachyphylla,,Pseudopentameris brachyphylla,,gbif_exact
+Pseudoschoenus inanis,,Pseudoschoenus inanis,,gbif_exact
+Pseudoselago serrata,,Pseudoselago serrata,,gbif_exact
+Psoralea monophylla,,Psoralea monophylla,,gbif_exact
+Prismatocarpus fruticosus,,Prismatocarpus fruticosus,,gbif_exact
+Protea acuminata,,Protea acuminata,,gbif_exact
+Athanasia trifurcata,,Athanasia trifurcata,,gbif_exact
+Babiana pauciflora,,Babiana pauciflora,,gbif_exact
+Berkheya barbata,,Berkheya barbata,,gbif_exact
+Psoralea oligophylla,,Psoralea oligophylla,,gbif_exact
+Pteronia camphorata,,Pteronia camphorata,,gbif_exact
+Astragalus brautonii,,Astragalus brauntonii,,manual_typo
+Athanasia flexuosa,,Athanasia flexuosa,,gbif_exact
+Athanasia microphylla,,Athanasia microphylla,,gbif_exact
+Gerbera serrata,,Gerbera serrata,,gbif_exact
+Ginko biloba,,Ginkgo biloba,,manual_typo
+Gnidia galpinii,,Gnidia galpinii,,gbif_exact
+Crassula coccinea,,Crassula coccinea,,gbif_exact
+Crassula dejecta,,Crassula undulata,Crassula dejecta Jacq. -> Crassula undulata,gbif_synonym
+Cannomois taylorii,,Cannomois taylorii,,gbif_exact
+Phylica debilis,,Phylica debilis,,gbif_exact
+Phylica humilis,,Phylica humilis,,gbif_exact
+Pteronia paniculata,,Pteronia paniculata,,gbif_exact
+Berkheya eriobasis,,Berkheya eriobasis,,gbif_exact
+Berzelia galpinii,,Berzelia galpinii,,gbif_exact
+Erica sessiliflora,,Erica sessiliflora,,gbif_exact
+Erica similis,,Erica similis,,gbif_exact
+Erica sitiens,,Erica sitiens,,gbif_exact
+Ficinia acuminata,,Ficinia acuminata,,gbif_exact
+Ficinia cedarbergensis,,Ficinia cedarbergensis,,gbif_exact
+Restio bifidus,,Restio bifidus,,gbif_exact
+Pterygodium acutifolium,,Pterygodium acutifolium,,gbif_exact
+Rafnia crassifolia,,Rafnia crassifolia,,gbif_exact
+Rafnia diffusa,,Rafnia diffusa,,gbif_exact
+Pteronia divaricata,,Pteronia divaricata,,gbif_exact
+Pteronia empetrifolia,,Pteronia empetrifolia,,gbif_exact
+Pteronia flexicaulis,,Pteronia flexicaulis,,gbif_exact
+Pteronia oblanceolata,,Pteronia oblanceolata,,gbif_exact
+Ficinia ramosissima,,Ficinia ramosissima,,gbif_exact
+Protea glabra,,Protea glabra,,gbif_exact
+Protea piscina,,Protea piscina,,gbif_exact
+Relhania corymbosa,,Oedera corymbosa,Relhania corymbosa (Bolus) Bremer -> Oedera corymbosa,gbif_synonym
+Relhania decussata,,Oedera decussata,Relhania decussata L'Hér. -> Oedera decussata,gbif_synonym
+Relhania pungens,,Oedera pungens,Relhania pungens L'Hér. -> Oedera pungens,gbif_synonym
+Restio ambiguus,,Soroveta ambigua,Restio ambiguus Mast. -> Soroveta ambigua,gbif_synonym
+Restio bifarius,,Restio bifarius,,gbif_exact
+Colchicum crispum,,Colchicum crispum,,gbif_exact
+Coleonema album,,Coleonema album,,gbif_exact
+Coleonema aspalathoides,,Coleonema aspalathoides,,gbif_exact
+Combretum psidioides,,Combretum psidioides,,gbif_exact
+Conophytum minusculum,,Conophytum minusculum,,gbif_exact
+Freylinia lanceolata,,Freylinia lanceolata,,gbif_exact
+Galenia filiformis,,Aizoon filiforme,Galenia filiformis (Thunb.) N.E.Br. -> Aizoon filiforme,gbif_synonym
+Galenia namaensis,,Aizoon namaense,Galenia namaensis Schinz -> Aizoon namaense,gbif_synonym
+Restio debilis,,Restio debilis,,gbif_exact
+Restio egregius,,Restio egregius,,gbif_exact
+Restio inconspicuus,,Restio inconspicuus,,gbif_exact
+Scirpoides dioecus,,Afroscirpoides dioeca,"spelling via GBIF fuzzy match (Scirpoides dioeca (Kunth) Browning, synonym)",gbif_synonym
+Scirpoides nodosus,,Ficinia nodosa,"spelling via GBIF fuzzy match (Scirpoides nodosa (Rottb.) L.C.Br. ex R.T.F.Clifton, synonym)",gbif_synonym
+Searsia dissecta,,Searsia dissecta,,gbif_exact
+Secamone alpini,,Secamone alpini,,gbif_exact
+Selago albida,,Selago albida,,gbif_exact
+Roella amplexicaulis,,Roella amplexicaulis,,gbif_exact
+Rhigozum brevispinosum,,Rhigozum brevispinosum,,gbif_exact
+Restio longiaristatus,,Restio longiaristatus,,gbif_exact
+Restio occultus,,Restio occultus,,gbif_exact
+Restio sarocladus,,Restio saroclados,Restio sarocladus Mast. -> Restio saroclados,gbif_synonym
+Restio similis,,Restio similis,,gbif_exact
+Restio stokoei,,Restio stokoei,,gbif_exact
+Restio capillaris,,Restio capillaris,,gbif_exact
+Euryops pinnatipartitus,,Euryops pinnatipartitus,,gbif_exact
+Euclea racemosa,,Euclea racemosa,,gbif_exact
+Euclea tomentosa,,Euclea tomentosa,,gbif_exact
+Bobartia macrospatha,,Bobartia macrospatha,,gbif_exact
+Bobartia rufa,,Bobartia rufa,,gbif_exact
+Bolusafra bituminosa,,Bolusafra bituminosa,,gbif_exact
+Rhus lucida,,Searsia lucida,Rhus lucida L.,gbif_synonym
+Rhus rimosa,,Searsia rimosa,Rhus rimosa Eckl. & Zeyh. -> Searsia rimosa,gbif_synonym
+Ficinia pinguior,,Ficinia pinguior,,gbif_exact
+Euryops tenuissimus,,Euryops tenuissimus,,gbif_exact
+Felicia brevifolia,,Felicia brevifolia,,gbif_exact
+Felicia hirsuta,,Felicia hirsuta,,gbif_exact
+Felicia rogersii,,Felicia rogersii,,gbif_exact
+Festuca perennis,,Lolium perenne,Jepson name Festuca perennis = Lolium perenne s.l. (incl. L. multiflorum),gbif_synonym
+Euryops lateriflorus,,Euryops lateriflorus,,gbif_exact
+Euryops marlothii,,Euryops marlothii,,gbif_exact
+Eriocephalus ericoides,,Eriocephalus ericoides,,gbif_exact
+Eriocephalus pauperrimus,,Eriocephalus pauperrimus,,gbif_exact
+Erica sparrmannii,,Erica sparmannii,spelling via GBIF fuzzy match (Erica sparmannii L.fil.),manual_typo
+Erica speciosa,,Erica speciosa,"GBIF ambiguous (homonyms, both synonyms); kept as recorded",manual_keep
+Erica spumosa,,Erica spumosa,,gbif_exact
+Erica subdivaricata,,Erica subdivaricata,,gbif_exact
+Erica tenax,,Erica thomae,Erica tenax L.Bolus -> Erica thomae,gbif_synonym
+Erica triceps,,Erica triceps,,gbif_exact
+Erica exleeana,,Erica exleeana,,gbif_exact
+Eriocephalus racemosus,,Eriocephalus racemosus,,gbif_exact
+Eriogonum elonongatum,,Eriogonum elongatum,,manual_typo
+Eriospermum capense,,Eriospermum capense,,gbif_exact
+Eucalyptus rudius,,Eucalyptus rudis,"GBIF fuzzy candidates (E. rubida, E. rudderi) rejected",manual_typo
+Euclea acutifolia,,Euclea acutifolia,,gbif_exact
+Euclea lancea,,Euclea lancea,,gbif_exact
+Erica vestita,,Erica vestita,,gbif_exact
+Ruschia intricata,,Ruschia intricata,,gbif_exact
+Ruschia laxipetala,,Ruschia laxipetala,,gbif_exact
+Ruschia sarmentosa,,Ruschia sarmentosa,,gbif_exact
+Salix Linnaeus,,Salix,"author string, no epithet",genus_only
+Salix sepulcralis,,Salix x sepulcralis,hybrid (weeping willow); USDA Salix ×sepulcralis,manual_typo
+Romulea sabulosa,,Romulea sabulosa,,gbif_exact
+Erica daphniflora,,Erica daphniflora,,gbif_exact
+Erica discolor,,Erica discolor,,gbif_exact
+Selago articulata,,Selago articulata,,gbif_exact
+Selago canescens,,Selago canescens,,gbif_exact
+Salsola zeyheri,,Caroxylon zeyheri,,gbif_synonym
+Salvia albicaulis,,Salvia albicaulis,,gbif_exact
+Salvia disermas,,Salvia disermas,,gbif_exact
+Sarcostemma viminale,,Cynanchum viminale,Sarcostemma viminale (L.) R.Br.,gbif_synonym
+Scabiosa africana,,Scabiosa africana,,gbif_exact
+Ruschia dichroa,,Ruschia dichroa,,gbif_exact
+Senecio burchellii,,Senecio burchellii,,gbif_exact
+Aspalathus chenopoda,,Aspalathus chenopoda,,gbif_exact
+Aspalathus decora,,Aspalathus decora,,gbif_exact
+Aspalathus ericifolia,,Aspalathus ericifolia,,gbif_exact
+Aspalathus hirta,,Aspalathus hirta,,gbif_exact
+Aspalathus hispida,,Aspalathus hispida,,gbif_exact
+Aspalathus lanata,,Aspalathus lanata,,gbif_exact
+Aristida vestita,,Aristida vestita,,gbif_exact
+Serruria elongata,,Serruria elongata,,gbif_exact
+Senecio crenatus,,Senecio crenatus,,gbif_exact
+Senecio lanifer,,Senecio lanifer,,gbif_exact
+Senecio paniculatus,,Senecio paniculatus,,gbif_exact
+Selago glomerata,,Selago glomerata,,gbif_exact
+Selago pustulosa,,Selago pustulosa,,gbif_exact
+Selago subspinosa,,Selago subspinosa,,gbif_exact
+Senecio abbreviatus,,Senecio abbreviatus,,gbif_exact
+Sideroxylon inerme,,Sideroxylon inerme,,gbif_exact
+Silene clandestina,,Silene clandestina,,gbif_exact
+Sonderothamnus petraeus,,Sonderothamnus petraeus,,gbif_exact
+Spatalla parilis,,Spatalla parilis,,gbif_exact
+Senecio pubigerus,,Senecio pubigerus,,gbif_exact
+Senecio radicans,,Curio radicans,Senecio radicans (L.fil.) Sch.Bip. -> Curio radicans,gbif_synonym
+Senecio triqueter,,Senecio triqueter,,gbif_exact
+Serruria effusa,,Serruria effusa,,gbif_exact
+Erica verecunda,,Erica verecunda,,gbif_exact
+Erica perspicua,,Erica perspicua,,gbif_exact
+Romulea tortuosa,,Romulea tortuosa,,gbif_exact
+Rosenia glandulosa,,Oedera glandulosa,Rosenia glandulosa Thunb. -> Oedera glandulosa,gbif_synonym
+Rosenia humilis,,Oedera humilis,Rosenia humilis (Less.) K.Bremer -> Oedera humilis,gbif_synonym
+Ruschia aspera,,Ruschia aspera,,gbif_exact
+Ruschia decurvans,,Ruschia decurvans,,gbif_exact
+Serruria fasciflora,,Serruria fasciflora,,gbif_exact
+Erica madida,,Erica madida,,gbif_exact
+Erica fascicularis,,Erica fascicularis,,gbif_exact
+Erica gracilis,,Erica gracilis,,gbif_exact
+Erica grata,,Erica grata,,gbif_exact
+Erica inaequalis,,Erica glabra,Erica inaequalis (Klotzsch) E.G.H.Oliv. -> Erica glabra,gbif_synonym
+Erica infundibuliformis,,Erica infundibuliformis,,gbif_exact
+Erica cristata,,Erica cristata,,gbif_exact
+Erica cubica,,Erica cubica,,gbif_exact
+Erica massonii,,Erica massonii,,gbif_exact
+Erica melanthera,,Erica melanthera,,gbif_exact
+Erica palliiflora,,Erica palliiflora,,gbif_exact
+Erica patersonia,,Erica patersonia,,gbif_exact
+Erica pectinifolia,,Erica pectinifolia,,gbif_exact
+Erica intervallaris,,Erica intervallaris,,gbif_exact
+Erica intonsa,,Erica intonsa,,gbif_exact
+Erica kougabergensis,,Erica kougabergensis,,gbif_exact
+Aristea major,,Aristea capitata,Aristea major Andrews -> Aristea capitata,gbif_synonym
+Staberoha aemula,,Staberoha aemula,,gbif_exact
+Staberoha banksii,,Staberoha banksii,,gbif_exact
+Staberoha distachyos,,Staberoha distachyos,,gbif_exact
+Dimorphotheca nudicaulis,,Dimorphotheca nudicaulis,,gbif_exact
+Dimorphotheca pinnata,,Dimorphotheca pinnata,,gbif_exact
+Diosma acmaeophylla,,Diosma acmaeophylla,,gbif_exact
+Elegia racemosa,,Elegia racemosa,,gbif_exact
+Askidiosperma capitatum,,Askidiosperma capitatum,,gbif_exact
+Askidiosperma nitidum,,Askidiosperma nitidum,,gbif_exact
+Aspalathus acanthes,,Aspalathus acanthes,,gbif_exact
+Aspalathus aciphylla,,Aspalathus aciphylla,,gbif_exact
+Aspalathus capensis,,Aspalathus capensis,,gbif_exact
+Aspalathus carnosa,,Aspalathus carnosa,,gbif_exact
+Stoebe aethiopica,,Stoebe aethiopica,,gbif_exact
+Stoebe cyathuloides,,Stoebe cyathuloides,,gbif_exact
+Erepsia aspera,,Erepsia aspera,,gbif_exact
+Erepsia saturata,,Erepsia saturata,,gbif_exact
+Erica areolata,,Erica areolata,,gbif_exact
+Elegia spathacea,,Elegia spathacea,,gbif_exact
+Elegia thyrsifera,,Elegia thyrsifera,,gbif_exact
+Elegia vaginulata,,Elegia vaginulata,,gbif_exact
+Elytropappus adpressus,,Dicerothamnus adpressus,Elytropappus adpressus Harv. -> Dicerothamnus adpressus,gbif_synonym
+Elytropappus glandulosus,,Myrovernix glandulosus,Elytropappus glandulosus Less. -> Myrovernix glandulosus,gbif_synonym
+Aspalathus securifolia,,Aspalathus securifolia,,gbif_exact
+Erica brachialis,,Erica brachialis,,gbif_exact
+Erica bruniades,,Erica bruniades,,gbif_exact
+Erica caffra,,Erica caffra,,gbif_exact
+Erica capillaris,,Erica capillaris,,gbif_exact
+Erica cordata,,Erica cordata,,gbif_exact
+Enneapogon scoparius,,Enneapogon scoparius,,gbif_exact
+Erepsia anceps,,Erepsia anceps,,gbif_exact
+Teedia pubescens,,Teedia pubescens,,gbif_exact
+Stoebe incana,,Seriphium incanum,Stoebe incana (Lam.) Thunb. -> Seriphium incanum,gbif_synonym
+Stoebe microphylla,,Stoebe microphylla,,gbif_exact
+Struthiola argentea,,Struthiola argentea,,gbif_exact
+Struthiola eckloniana,,Struthiola eckloniana,,gbif_exact
+Struthiola garciana,,Struthiola garciana,,gbif_exact
+Struthiola macowanii,,Struthiola macowanii,,gbif_exact
+Aspalathus polycephala,,Aspalathus polycephala,,gbif_exact
+Stachys aethiopica,,Stachys aethiopica,,gbif_exact
+Stipagrostis namaquensis,,Stipagrostis namaquensis,,gbif_exact
+Terocaous whra,,,"garbled name (Species_ID TER-WHR, IITF arboretum, Puerto Rico); no match",unresolved
+Tetragonia sarcophylla,,Tetragonia sarcophylla,,gbif_exact
+Tetraria burmannii,,Tetraria burmanni,spelling via GBIF fuzzy match (Tetraria burmanni (Vahl) C.B.Clarke),manual_typo
+Tetraria crinifolia,,Tetraria crinifolia,,gbif_exact
+Stylapterus fruticulosus,,Stylapterus fruticulosus,,gbif_exact
+Syncarpha paniculata,,Achyranthemum paniculatum,Syncarpha paniculata (L.) B.Nord. -> Achyranthemum paniculatum,gbif_synonym
+Wahlenbergia tenella,,Wahlenbergia tenella,,gbif_exact
+Antimima dasyphylla,,Antimima dasyphylla,,gbif_exact
+Antimima triquetra,,Antimima triquetra,,gbif_exact
+Adenogramma glomerata,,Adenogramma glomerata,,gbif_exact
+Adenandra uniflora,,Adenandra uniflora,,gbif_exact
+Alepidea capensis,,Alepidea capensis,,gbif_exact
+Adenandra fragrans,,Adenandra fragrans,,gbif_exact
+Diospyros whyteana,,Diospyros whyteana,,gbif_exact
+Agathosma pubigera,,Agathosma pubigera,,gbif_exact
+Wiborgia sericea,,Wiborgia sericea,,gbif_exact
+Wiborgia tetraptera,,Wiborgia tetraptera,,gbif_exact
+Wiborgiella leipoldtiana,,Wiborgiella leipoldtiana,,gbif_exact
+Widdringtonia cedarbergensis,,Widdringtonia cedarbergensis,,gbif_exact
+Viscum capense,,Viscum capense,,gbif_exact
+Wachendorfia paniculata,,Wachendorfia paniculata,,gbif_exact
+Wahlenbergia macrostachys,,Wahlenbergia macrostachys,,gbif_exact
+Tetraria nigrovaginata,,Tetraria nigrovaginata,,gbif_exact
+Tetraria pillansii,,Tetraria pillansii,,gbif_exact
+Tetraria pubescens,,Tetraria pubescens,,gbif_exact
+Tetraria sylvatica,,Schoenus auritus,Tetraria sylvatica (Nees) C.B.Clarke -> Schoenus auritus,gbif_synonym
+Willdenowia sulcata,,Willdenowia sulcata,,gbif_exact
+Zaluzianskya cohabitans,,Zaluzianskya cohabitans,,gbif_exact
+Zaluzianskya pusilla,,Zaluzianskya pusilla,,gbif_exact
+Zaluzianskya violacea,,Zaluzianskya violacea,,gbif_exact
+Curtisia dentata,,Curtisia dentata,,gbif_exact
+Ehrharta setacea,,Ehrharta setacea,,gbif_exact
+Elegia asperiflora,,Elegia asperiflora,,gbif_exact
+Elegia equisetacea,,Elegia equisetacea,,gbif_exact
+Elegia hookeriana,,Elegia hookeriana,,gbif_exact
+Elegia neesii,,Elegia neesii,,gbif_exact
+Drosanthemum framesii,,Drosanthemum framesii,,gbif_exact
+Drosera trinervia,,Drosera trinervia,,gbif_exact
+Lachnaea striata,,Lachnaea striata,,gbif_exact
+Cliffortia filifolia,,Cliffortia filifolia,,gbif_exact
+Cliffortia gracilis,,Cliffortia dentata,Cliffortia gracilis Harv. -> Cliffortia dentata,gbif_synonym
+Cliffortia heterophylla,,Cliffortia heterophylla,,gbif_exact
+Cliffortia linearifolia,,Cliffortia linearifolia,,gbif_exact
+Cliffortia obcordata,,Cliffortia obcordata,,gbif_exact
+Cleretum bellidiforme,,Cleretum bellidiforme,,gbif_exact
+Cliffortia arborea,,Cliffortia arborea,,gbif_exact
+Lobostemon montanus,,Lobostemon montanus,,gbif_exact
+Lobostemon muirii,,Lobostemon muirii,,gbif_exact
+Lobostemon trichotomus,,Lobostemon trichotomus,,gbif_exact
+Lidbeckia lobata,,Lidbeckia quinqueloba,Lidbeckia lobata Thunb. -> Lidbeckia quinqueloba,gbif_synonym
+Lachnaea densiflora,,Lachnaea densiflora,,gbif_exact
+Lachnaea globulifera,,Lachnaea globulifera,,gbif_exact
+Lachnaea penicillata,,Lachnaea penicillata,,gbif_exact
+Lachnaea sociorum,,Lachnaea sociorum,,gbif_exact
+Merxmuellera decora,,Geochloa decora,Merxmuellera decora (Nees) Conert -> Geochloa decora,gbif_synonym
+Mesembryanthemum emarcidum,,Mesembryanthemum emarcidum,,gbif_exact
+Lycium amoenum,,Lycium amoenum,,gbif_exact
+Macrostylis squarrosa,,Macrostylis squarrosa,,gbif_exact
+Macrostylis tenuis,,Macrostylis tenuis,,gbif_exact
+Lobelia neglecta,,Lobelia neglecta,,gbif_exact
+Lobelia tomentosa,,Lobelia tomentosa,,gbif_exact
+Lobostemon glaucophyllus,,Lobostemon glaucophyllus,,gbif_exact
+,ACSN,Acer saccharinum,NEON base code ACSN: Townsend-lab code (nasa_fft ACSN = Acer saccharinum),usda_code_context
+,GRASS,,nasa_fft 'GRASS': unidentified grass,non_taxon
+,OLSP,,NEON base code OLSP: unknown (SJER),unresolved
+Agathosma serpyllacea,,Agathosma serpyllacea,,gbif_exact
+Chondropetalum microcarpum,,Elegia microcarpa,Chondropetalum microcarpum (Kunth) Pillans -> Elegia microcarpa,gbif_synonym
+Melianthus comosus,,Melianthus comosus,,gbif_exact
+Melolobium candicans,,Melolobium candicans,,gbif_exact
+Merciera azurea,,Merciera azurea,,gbif_exact
+,ACSAN,Acer saccharinum,"NEON base code ACSAN: Townsend-lab code (cf. nasa_fft ACSN); USDA ACSAN = A. saccharum ssp. nigrum, unlikely in D06/D08 floodplains (USDA code match is wrong)",usda_code_context
+,ACSM,Acer saccharum,NEON base code ACSM: Townsend-lab code (nasa_fft: 'changed from ACSA to ACSM'); USDA ACSM = Acacia smallii (USDA code match is wrong),usda_code_context
+,ALRH,Alnus rhombifolia,NEON base code ALRH: ALRH2 (SOAP); USDA ALRH = Allium rhizomatum (USDA code match is wrong),usda_code_context
+,BRHO,Bromus hordeaceus,NEON base code BRHO: BRHO2 (SJER); USDA BRHO = Brodiaea howellii (USDA code match is wrong),usda_code_context
+,CADE,Calocedrus decurrens,"NEON base code CADE: CADE27 (neon_across, SOAP); neon_east_lma D07 CADE = Castanea dentata is recoded to CADE12 in its config (USDA code match is wrong)",usda_code_context
+,LECA,Lespedeza capitata,NEON base code LECA: LECA8 (Konza forb); USDA LECA = Lemmonia californica (USDA code match is wrong),usda_code_context
+,LEVI,,NEON base code LEVI: ambiguous D06 forb (Lespedeza violacea/virginica or Lepidium virginicum); USDA LEVI = Lechea villosa (USDA code match is wrong),unresolved
+,NYSA,Nyssa,"NEON base code NYSA: probably N. sylvatica, but NYSY also used in D08; USDA NYSA = Nymphaea sagittifolia (USDA code match is wrong)",usda_code_context
+,PETE,,NEON base code PETE: unknown D06 forb; USDA PETE = Pectis tenella implausible (USDA code match is wrong),unresolved
+,POAL,Populus alba,NEON base code POAL: POAL7 (D09 broadleaf); USDA POAL = Poa alpigena (USDA code match is wrong),usda_code_context
+,POGR,Populus grandidentata,NEON base code POGR: POGR4; USDA POGR = Poa gracillima (USDA code match is wrong),usda_code_context
+,RHCA,Rhamnus cathartica,NEON base code RHCA: RHCA3 (NOGP); USDA RHCA = Rhamnus californica (USDA code match is wrong),usda_code_context
+,SORI,Solidago rigida,NEON base code SORI: SORI2 (Konza forb); USDA SORI = Solidago riddellii (USDA code match is wrong),usda_code_context
+,TACA,Taxus canadensis,NEON base code TACA: TACA7 (Madison); USDA TACA = Talinum calycinum (USDA code match is wrong),usda_code_context
+,THSE,,NEON base code THSE: unknown (ABBY); USDA THSE = Thymus serpyllum implausible (USDA code match is wrong),unresolved
+Abies,ABsp,Abies,NEON base code ABsp: 'Abies sp.'; USDA ABSP = Absconditella sphagnorum (lichen) (USDA code match is wrong),usda_code_context
+Abies,Absp,Abies,NEON base code Absp: 'Abies sp.'; USDA ABSP = Absconditella sphagnorum (lichen) (USDA code match is wrong),usda_code_context
+Abutilon berlandieri,ABBE,,NEON base code ABBE: unknown (Madison conifer collection); EcoSIS fill Abutilon berlandieri implausible (EcoSIS-filled name 'Abutilon berlandieri' is wrong),unresolved
+Acacia baileyana,ACBA,Acer floridanum,"NEON base code ACBA: Acer barbatum (ACBA3), D08; EcoSIS fill Acacia baileyana (EcoSIS-filled name 'Acacia baileyana' is wrong)",usda_code_context
+Acacia saligna,ACSA,Acer saccharum,NEON base code ACSA: ACSA3; EcoSIS fill Acacia saligna (EcoSIS-filled name 'Acacia saligna' is wrong),usda_code_context
+Acacia schottii,ACSC,,NEON base code ACSC: unknown (D08_DELA); EcoSIS fill Acacia schottii implausible (EcoSIS-filled name 'Acacia schottii' is wrong),unresolved
+Acalypha neomexicana,ACNE,Acer negundo,NEON base code ACNE: EcoSIS fill Acalypha neomexicana (EcoSIS-filled name 'Acalypha neomexicana' is wrong),usda_code_context
+Allionia incarnata,ALIN,Alnus incana,NEON base code ALIN: EcoSIS fill Allionia incarnata (EcoSIS-filled name 'Allionia incarnata' is wrong),usda_code_context
+Allium vineale,ALVI,Alnus viridis,NEON base code ALVI: ALVI5 (DEJU); EcoSIS fill Allium vineale (EcoSIS-filled name 'Allium vineale' is wrong),usda_code_context
+Amaranthus arenicola,AMAR,Ambrosia artemisiifolia,NEON base code AMAR: AMAR2 (D06/D07 forb); EcoSIS fill Amaranthus arenicola (EcoSIS-filled name 'Amaranthus arenicola' is wrong),usda_code_context
+Amaranthus californicus,AMCA,Amorpha canescens,NEON base code AMCA: AMCA6 (Konza forb); EcoSIS fill Amaranthus californicus (EcoSIS-filled name 'Amaranthus californicus' is wrong),usda_code_context
+Arabis furcata,ARFU,Arctophila fulva,NEON base code ARFU: ARFU2 (BARR); EcoSIS fill Arabis furcata (EcoSIS-filled name 'Arabis furcata' is wrong),usda_code_context
+Arabis sparsiflora,ARSP,Aralia spinosa,NEON base code ARSP: ARSP2 (D08 broadleaf); EcoSIS fill Arabis sparsiflora (EcoSIS-filled name 'Arabis sparsiflora' is wrong),usda_code_context
+Arisaema triphyllum,ARTR,Artemisia tridentata,NEON base code ARTR: ARTR2 (YELL); EcoSIS fill Arisaema triphyllum (EcoSIS-filled name 'Arisaema triphyllum' is wrong),usda_code_context
+Besseya alpina,BEAL,Betula alleghaniensis,NEON base code BEAL: BEAL2; EcoSIS fill Besseya alpina (EcoSIS-filled name 'Besseya alpina' is wrong),usda_code_context
+Cabomba caroliniana,CACA,Carpinus caroliniana,NEON base code CACA: CACA18; EcoSIS fill Cabomba caroliniana (EcoSIS-filled name 'Cabomba caroliniana' is wrong),usda_code_context
+Calla palustris,CAPA,Carya pallida,NEON base code CAPA: CAPA24 (D08 broadleaf); EcoSIS fill Calla palustris (EcoSIS-filled name 'Calla palustris' is wrong),usda_code_context
+Calliandra conferta,CACO,Carya cordiformis,NEON base code CACO: CACO15; EcoSIS/USDA CACO = Calliandra conferta (EcoSIS-filled name 'Calliandra conferta' is wrong),usda_code_context
+Calochortus greenei,CAGR,,NEON base code CAGR: unknown (Konza); EcoSIS fill Calochortus greenei (CA/OR endemic) implausible (EcoSIS-filled name 'Calochortus greenei' is wrong),unresolved
+Calochortus tolmiei,CATO,Carya tomentosa,NEON base code CATO: CATO6; EcoSIS fill Calochortus tolmiei (EcoSIS-filled name 'Calochortus tolmiei' is wrong),usda_code_context
+Carex illota,CAIL,Carya illinoinensis,NEON base code CAIL: CAIL2; EcoSIS fill Carex illota (EcoSIS-filled name 'Carex illota' is wrong),usda_code_context
+Cedronella canariensis,CECA,Cercis canadensis,NEON base code CECA: CECA4; EcoSIS fill Cedronella canariensis (EcoSIS-filled name 'Cedronella canariensis' is wrong),usda_code_context
+Cocos nucifera,CONU,Cornus nuttallii,NEON base code CONU: CONU4 (SOAP); EcoSIS fill Cocos nucifera (EcoSIS-filled name 'Cocos nucifera' is wrong),usda_code_context
+Conyza floribunda,COFL,Cornus florida,NEON base code COFL: COFL2; EcoSIS fill Conyza floribunda (EcoSIS-filled name 'Conyza floribunda' is wrong),usda_code_context
+Delphinium purpusii,DEPU,,NEON base code DEPU: unknown (D07 broadleaf); EcoSIS fill Delphinium purpusii (Kern Co. endemic) implausible (EcoSIS-filled name 'Delphinium purpusii' is wrong),unresolved
+Dicentra pauciflora,DIPA,Dirca palustris,NEON base code DIPA: DIPA9 (D05 broadleaf); EcoSIS fill Dicentra pauciflora (EcoSIS-filled name 'Dicentra pauciflora' is wrong),usda_code_context
+Digitaria villosa,DIVI,Diospyros virginiana,NEON base code DIVI: DIVI5; EcoSIS fill Digitaria villosa (EcoSIS-filled name 'Digitaria villosa' is wrong),usda_code_context
+Distichlis spicata,DISP,,"NEON base code DISP: unknown (D07 broadleaf, possibly Diospyros sp.); EcoSIS fill Distichlis spicata (grass) implausible (EcoSIS-filled name 'Distichlis spicata' is wrong)",unresolved
+Juncus nevadensis,JUNE,,NEON base code JUNE: unknown (Madison); EcoSIS fill Juncus nevadensis implausible (EcoSIS-filled name 'Juncus nevadensis' is wrong),unresolved
+Labordia kaalae,LAKA,Larix kaempferi,NEON base code LAKA: LAKA2 (Madison); EcoSIS fill Labordia kaalae (Hawaii) (EcoSIS-filled name 'Labordia kaalae' is wrong),usda_code_context
+Lagenaria siceraria,LASI,Larix sibirica,NEON base code LASI: LASI3 (Madison); EcoSIS fill Lagenaria siceraria (EcoSIS-filled name 'Lagenaria siceraria' is wrong),usda_code_context
+Linanthus bellus,LIBE,Lindera benzoin,NEON base code LIBE: EcoSIS fill Linanthus bellus (EcoSIS-filled name 'Linanthus bellus' is wrong),usda_code_context
+Linum striatum,LIST,Liquidambar styraciflua,NEON base code LIST: LIST2; EcoSIS fill Linum striatum (EcoSIS-filled name 'Linum striatum' is wrong),usda_code_context
+Macromeria viridiflora,MAVI,Magnolia virginiana,NEON base code MAVI: MAVI2; EcoSIS fill Macromeria viridiflora (EcoSIS-filled name 'Macromeria viridiflora' is wrong),usda_code_context
+Madia madioides,MAMA,Magnolia macrophylla,NEON base code MAMA: MAMA2 (D08 broadleaf); EcoSIS fill Madia madioides (EcoSIS-filled name 'Madia madioides' is wrong),usda_code_context
+Malva sylvestris,MASY,,NEON base code MASY: unknown D07 broadleaf (possibly Malus sylvestris); EcoSIS fill Malva sylvestris (EcoSIS-filled name 'Malva sylvestris' is wrong),unresolved
+Monarda russeliana,MORU,Morus rubra,NEON base code MORU: EcoSIS fill Monarda russeliana (EcoSIS-filled name 'Monarda russeliana' is wrong),usda_code_context
+Nymphoides aquatica,NYAQ,Nyssa aquatica,NEON base code NYAQ: NYAQ2; EcoSIS fill Nymphoides aquatica (EcoSIS-filled name 'Nymphoides aquatica' is wrong),usda_code_context
+Palafoxia rosea,PARO,,NEON base code PARO: unknown D07 broadleaf; EcoSIS fill Palafoxia rosea implausible (EcoSIS-filled name 'Palafoxia rosea' is wrong),unresolved
+Panax quinquefolius,PAQU,Parthenocissus quinquefolia,NEON base code PAQU: PAQU2 (D08 broadleaf); EcoSIS fill Panax quinquefolius (EcoSIS-filled name 'Panax quinquefolius' is wrong),usda_code_context
+Panicum torridum,PATO,Paulownia tomentosa,NEON base code PATO: PATO2 (D02 broadleaf); EcoSIS fill Panicum torridum (EcoSIS-filled name 'Panicum torridum' is wrong),usda_code_context
+Penstemon fremontii,PEFR,Petasites frigidus,NEON base code PEFR: PEFR5 (BARR); EcoSIS fill Penstemon fremontii (EcoSIS-filled name 'Penstemon fremontii' is wrong),usda_code_context
+Phacelia argentea,PHAR,Phalaris arundinacea,NEON base code PHAR: PHAR3; EcoSIS fill Phacelia argentea (EcoSIS-filled name 'Phacelia argentea' is wrong),usda_code_context
+Phacelia austromontana,PHAU,Phragmites australis,NEON base code PHAU: PHAU7; EcoSIS fill Phacelia austromontana (EcoSIS-filled name 'Phacelia austromontana' is wrong),usda_code_context
+Picramnia pentandra,PIPE,,NEON base code PIPE: unknown (Madison; possibly Pinus peuce); EcoSIS fill Picramnia pentandra implausible (EcoSIS-filled name 'Picramnia pentandra' is wrong),unresolved
+Picris echioides,PIEC,Pinus echinata,NEON base code PIEC: PIEC2 (JERC/TALL); EcoSIS fill Picris echioides (EcoSIS-filled name 'Picris echioides' is wrong),usda_code_context
+Pimpinella saxifraga,PISA,Pinus sabiniana,NEON base code PISA: PISA2 (SJER); EcoSIS fill Pimpinella saxifraga (EcoSIS-filled name 'Pimpinella saxifraga' is wrong),usda_code_context
+Pinaropappus parvus,PIPA,Pinus palustris,NEON base code PIPA: PIPA2 (JERC/TALL); EcoSIS fill Pinaropappus parvus (EcoSIS-filled name 'Pinaropappus parvus' is wrong),usda_code_context
+Pinus balfouriana,PIBA,Pinus banksiana,NEON base code PIBA: PIBA2 (D05); EcoSIS fill Pinus balfouriana (EcoSIS-filled name 'Pinus balfouriana' is wrong),usda_code_context
+Poa tracyi,POTR,Populus tremuloides,NEON base code POTR: POTR5; EcoSIS fill Poa tracyi (EcoSIS-filled name 'Poa tracyi' is wrong),usda_code_context
+Polycarpon depressum,PODE,Populus deltoides,NEON base code PODE: PODE3; EcoSIS fill Polycarpon depressum (EcoSIS-filled name 'Polycarpon depressum' is wrong),usda_code_context
+Polygala barbeyana,POBA,Populus balsamifera,NEON base code POBA: POBA2; EcoSIS fill Polygala barbeyana (EcoSIS-filled name 'Polygala barbeyana' is wrong),usda_code_context
+Prenanthes serpentaria,PRSE,Prunus serotina,NEON base code PRSE: PRSE2; EcoSIS fill Prenanthes serpentaria (EcoSIS-filled name 'Prenanthes serpentaria' is wrong),usda_code_context
+Proserpinaca pectinata,PRPE,Prunus pensylvanica,NEON base code PRPE: PRPE2; EcoSIS fill Proserpinaca pectinata (EcoSIS-filled name 'Proserpinaca pectinata' is wrong),usda_code_context
+Quercus chapmanii,QUCH,Quercus chrysolepis,NEON base code QUCH: QUCH2 (SOAP); EcoSIS fill Quercus chapmanii (EcoSIS-filled name 'Quercus chapmanii' is wrong),usda_code_context
+Quercus laceyi,QULA,Quercus laevis,NEON base code QULA: QULA2 (D03/D08); EcoSIS fill Quercus laceyi (Texas) (EcoSIS-filled name 'Quercus laceyi' is wrong),usda_code_context
+Quercus mohriana,QUMO,Quercus montana,NEON base code QUMO: QUMO4; EcoSIS fill Quercus mohriana (Texas) (EcoSIS-filled name 'Quercus mohriana' is wrong),usda_code_context
+Quercus ×heterophylla,QUHE,Quercus hemisphaerica,NEON base code QUHE: QUHE2 (D03); EcoSIS fill Quercus x heterophylla (EcoSIS-filled name 'Quercus ×heterophylla' is wrong),usda_code_context
+Quercus ×macnabiana,QUMA,Quercus,NEON base code QUMA: D08/TALL: Q. marilandica (QUMA3) or Q. macrocarpa (QUMA2) ambiguous; D06/D09 rows of neon_east_lma are recoded to QUMA2 in its config (EcoSIS-filled name 'Quercus ×macnabiana' is wrong),usda_code_context
+Quercus ×palaeolithicola,QUPA,Quercus pagoda,NEON base code QUPA: QUPA5 (LENO); EcoSIS fill Quercus x palaeolithicola (EcoSIS-filled name 'Quercus ×palaeolithicola' is wrong),usda_code_context
+Quercus ×willdenowiana,QUWI,Quercus wislizeni,NEON base code QUWI: QUWI2 (SJER); EcoSIS fill Quercus x willdenowiana (EcoSIS-filled name 'Quercus ×willdenowiana' is wrong),usda_code_context
+Rhexia aristosa,RHAR,,NEON base code RHAR: unknown D06 grass; EcoSIS fill Rhexia aristosa implausible (EcoSIS-filled name 'Rhexia aristosa' is wrong),unresolved
+Rhexia mariana,RHMA,Rhododendron maximum,NEON base code RHMA: RHMA4; EcoSIS fill Rhexia mariana (EcoSIS-filled name 'Rhexia mariana' is wrong),usda_code_context
+Sagittaria lancifolia,SALA,Salix,NEON base code SALA: SJER willow (S. laevigata or S. lasiolepis); EcoSIS fill Sagittaria lancifolia (EcoSIS-filled name 'Sagittaria lancifolia' is wrong),usda_code_context
+Sicyos laciniatus,SILA,Silphium laciniatum,NEON base code SILA: SILA3 (Konza forb); EcoSIS fill Sicyos laciniatus (EcoSIS-filled name 'Sicyos laciniatus' is wrong),usda_code_context
+Solanum campechiense,SOCA,Solidago canadensis,NEON base code SOCA: SOCA6; EcoSIS fill Solanum campechiense (EcoSIS-filled name 'Solanum campechiense' is wrong),usda_code_context
+Sophora nuttalliana,SONU,Sorghastrum nutans,NEON base code SONU: SONU2 (grass); EcoSIS fill Sophora nuttalliana (EcoSIS-filled name 'Sophora nuttalliana' is wrong),usda_code_context
+Thalictrum occidentale,THOC,Thuja occidentalis,NEON base code THOC: THOC2; EcoSIS fill Thalictrum occidentale (EcoSIS-filled name 'Thalictrum occidentale' is wrong),usda_code_context
+Trichomanes davallioides,TRDA,Tripsacum dactyloides,NEON base code TRDA: TRDA3 (grass); EcoSIS fill Trichomanes davallioides (EcoSIS-filled name 'Trichomanes davallioides' is wrong),usda_code_context
+Acer negundo,ACNE,Acer negundo,nasa_fft code_map name; USDA ACNE is another species,dataset_name_over_code
+Acer saccharum,ACSM,Acer saccharum,nasa_fft code_map name; USDA ACSM is another species,dataset_name_over_code
+Acer spicatum,ACSP,Acer spicatum,nasa_fft code_map name; USDA ACSP is another species,dataset_name_over_code
+Alnus incana,ALIN,Alnus incana,nasa_fft code_map name; USDA ALIN is another species,dataset_name_over_code
+Betula alleghaniensis,BEAL,Betula alleghaniensis,nasa_fft code_map name; USDA BEAL is another species,dataset_name_over_code
+Carya alba,CAAL,Carya alba,nasa_fft code_map name; USDA CAAL is another species,dataset_name_over_code
+Chamaedaphne calyculata,CHCA,Chamaedaphne calyculata,nasa_fft code_map name; USDA CHCA is another species,dataset_name_over_code
+Cornus florida,COFL,Cornus florida,nasa_fft code_map name; USDA COFL is another species,dataset_name_over_code
+Corylus americana,COAM,Corylus americana,nasa_fft code_map name; USDA COAM is another species,dataset_name_over_code
+Phalaris arundinacea,PHAR,Phalaris arundinacea,nasa_fft code_map name; USDA PHAR is another species,dataset_name_over_code
+Pinus banksiana,PIBA,Pinus banksiana,nasa_fft code_map name; USDA PIBA is another species,dataset_name_over_code
+Pinus virginiana,PIVI,Pinus virginiana,nasa_fft code_map name; USDA PIVI is another species,dataset_name_over_code
+Populus deltoides,PODE,Populus deltoides,nasa_fft code_map name; USDA PODE is another species,dataset_name_over_code
+Populus grandidentata,POGR,Populus grandidentata,nasa_fft code_map name; USDA POGR is another species,dataset_name_over_code
+Populus tremuloides,POTR,Populus tremuloides,nasa_fft code_map name; USDA POTR is another species,dataset_name_over_code
+Prunus pensylvanica,PRPE,Prunus pensylvanica,nasa_fft code_map name; USDA PRPE is another species,dataset_name_over_code
+Prunus serotina,PRSE,Prunus serotina,nasa_fft code_map name; USDA PRSE is another species,dataset_name_over_code
+Quercus macrocarpa,QUMA,Quercus macrocarpa,nasa_fft code_map name; USDA QUMA is another species,dataset_name_over_code
+Quercus montana,QUPR,Quercus montana,nasa_fft code_map name; USDA QUPR is another species,dataset_name_over_code
+Rhamnus cathartica,RHCA,Rhamnus cathartica,nasa_fft code_map name; USDA RHCA is another species,dataset_name_over_code
+Rhododendron maximum,RHMA,Rhododendron maximum,nasa_fft code_map name; USDA RHMA is another species,dataset_name_over_code
+Sassafras albidum,SAAL,Sassafras albidum,nasa_fft code_map name; USDA SAAL is another species,dataset_name_over_code
+Thuja occidentalis,THOC,Thuja occidentalis,nasa_fft code_map name; USDA THOC is another species,dataset_name_over_code
+,CACO,Carya cordiformis,"nasa_fft (Wisconsin) Townsend-lab code, as in NEON; USDA CACO = Calliandra conferta",usda_code_context
+,SORU,,nasa_fft (Wisconsin); USDA SORU = Solanum rugosum (tropical) implausible,unresolved
+Amorpha canescens,amoca,Amorpha canescens,cedar_creek_esr lab code; USDA AMOCA is Amorpha occidentalis,dataset_name_over_code
+,ACMA,Acer macrophyllum,accp Jasper Ridge; same dataset uses ACMA3; USDA ACMA = Acacia macracantha,usda_code_context
+,ACSA,Acer saccharum,accp Howland; USDA ACSA = Acacia saligna,usda_code_context
+,BEAL,Betula alleghaniensis,accp Harvard Forest; USDA BEAL = Besseya alpina,usda_code_context
+,ABME,,accp Jasper Ridge; USDA ABME = Abronia mellifera implausible,unresolved
+Vitus sp.,,Vitis,SHIFT; typo of Vitis,genus_only
+Melilotis indicus,,Melilotus indicus,SHIFT,manual_typo
+Helminthotheca echinoides,,Helminthotheca echioides,SHIFT; bristly ox-tongue (USDA: Picris echioides),manual_typo

@@ -33,6 +33,10 @@ spectra:
 ids:
   entity: [Site, date_key, sp_key, occ]
   time: [state]
+# Species codes are USDA symbols without their numeric suffix; the Latin Genus/Species
+# columns were filled by EcoSIS from those truncated codes and are often wrong (PIBA ->
+# Pinus balfouriana, ACSA -> Acacia saligna, ...). Corrections per (name, code) pair are in
+# vocab/species_resolution.csv (source usda_code_context).
 species:
   name: ["Latin Genus", "Latin Species"]
   code: "USDA Symbol"

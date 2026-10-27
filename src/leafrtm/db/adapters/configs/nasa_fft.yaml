@@ -70,7 +70,9 @@ ids:
 # symbols without their numeric suffix and are often wrong (PIBA -> Pinus balfouriana,
 # THOC -> Thalictrum occidentale, POTR -> Poa tracyi, BEAL -> Besseya alpina, ...).
 # Names below come from the project's own codes (northern US forest species); codes not
-# listed (CACO, SORU, GRASS, UNKN1) stay unresolved.
+# listed (CACO, SORU, GRASS, UNKN1) stay unresolved here. species.resolve() looks codes up in
+# USDA before names, so the (name, code) pairs whose code is another USDA species, and CACO
+# (= Carya cordiformis, as in the NEON packages), are fixed in vocab/species_resolution.csv.
 species:
   code: species_code
   code_map:

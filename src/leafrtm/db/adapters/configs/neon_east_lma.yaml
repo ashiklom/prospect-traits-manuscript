@@ -15,6 +15,17 @@ columns:
   series: "Sample_ID.str[0]"
   sp_key: "`USDA Symbol`.fillna('NA')"
   lma_key: "LMA.round(2)"
+  # Species codes are USDA symbols without their numeric suffix (and the 'Latin Genus/Species'
+  # columns were filled by EcoSIS from those truncated codes, often wrongly; corrected per
+  # (name, code) pair in vocab/species_resolution.csv). Codes whose meaning differs from the
+  # same pair in another dataset are recoded here to the full USDA symbol:
+  #   CADE (D07 broadleaf) = Castanea dentata (CADE12); in neon_across CADE = Calocedrus decurrens
+  #   QUMA in D06/D09 = Quercus macrocarpa (QUMA2); in D08 ambiguous (Q. marilandica?)
+  #   SAAL (D08) = Sassafras albidum (SAAL5); in ngee_arctic_teller_2017 SAAL = Salix alaxensis
+  sp_code: >-
+    `USDA Symbol`.mask(`USDA Symbol`.eq('CADE'), 'CADE12')
+    .mask(`USDA Symbol`.eq('SAAL'), 'SAAL5')
+    .mask(`USDA Symbol`.eq('QUMA') & Domain.isin(['D06', 'D09']), 'QUMA2')
 spectra:
   quantity: R
   scale: auto
@@ -28,7 +39,8 @@ ids:
   time: [series]
 species:
   name: ["Latin Genus", "Latin Species"]
-  code: "USDA Symbol"
+  code: sp_code
+  prefer_code: true   # 'Latin Genus/Species' were filled from the truncated codes by EcoSIS
   code_map:
     "Cornus sp.": Cornus
     "Corus sp.": Cornus
