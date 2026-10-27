@@ -1,0 +1,48 @@
+dataset_id: lopex
+source: ecosis
+source_id: leaf-optical-properties-experiment-database--lopex93-
+citation: "Hosgood, B., Jacquemoud, S., Andreoli, G., Verdebout, J., Pedrini, G., Schmuck, G. (1994). Leaf Optical Properties EXperiment 93 (LOPEX93). European Commission, Joint Research Centre, EUR 16095 EN."
+# Five leaves (consecutive Sample_#) per sample: optics, LMA, EWT, area and
+# thickness per leaf; pigments and chemistry on the pooled five (plant level).
+# Samples 176-180 (corn) and 196-200 (chestnut) are dried leaves.
+columns:
+  plant: "(`Sample_#` - 1) // 5 + 1"
+  dried: "`Sample_#`.between(176, 180) | `Sample_#`.between(196, 200)"
+  protein_mean: "(`Protein_1 (% DW)` + `Protein_2 (% DW)`) / 2"
+  cellulose_mean: "(`Cellulose_1 (% DW)` + `Cellulose_2 (% DW)`) / 2"
+  lignin_mean: "(`Lignin_1 (% DW)` + `Lignin_2 (% DW)`) / 2"
+  starch_mean: "(`Starch_1 (% DW)` + `Starch_2 (% DW)`) / 2"
+spectra:
+  quantity: {column: Measurement_type, map: {reflectance: R, transmittance: T}}
+  scale: fraction
+  foreoptic: integrating_sphere
+  instrument: pe-lambda19
+  sample_state: {column: dried, map: {true: dried_intact, false: fresh}}
+  target_config: single_leaf
+ids:
+  entity: ["Sample_#"]
+  plant: [plant]
+species: {name: "Latin Name"}
+date: 1993
+site: {name: "JRC Ispra"}
+lat: 45.806
+lon: 8.631
+ecosystem: mixed
+traits:
+  - {column: "Equivalent Water Thickness (g/cm²)", trait: ewt, unit: "g/cm**2"}
+  - {column: "Leaf mass per area (g/cm²)", trait: lma, unit: "g/cm**2"}
+  - {column: "Leaf Area (cm²)", trait: leaf_area, unit: "cm**2"}
+  - {column: "Leaf Thickness (µm)", trait: leaf_thickness, unit: "um"}
+  - {column: "Structure parameter", trait: prospect_n}
+  - {column: "Chlorophyll_a+b (µg/cm²)", trait: chl_area, unit: "ug/cm**2", level: plant}
+  - {column: "Chlorophyll_a (µg/cm²)", trait: chla_area, unit: "ug/cm**2", level: plant}
+  - {column: "Chlorophyll_b (µg/cm²)", trait: chlb_area, unit: "ug/cm**2", level: plant}
+  - {column: "Carotenoid (µg/cm²)", trait: car_area, unit: "ug/cm**2", level: plant}
+  - {column: "Leaf carbon content per leaf dry mass (% DW)", trait: c_mass, unit: percent, level: plant}
+  - {column: "Leaf nitrogen content per leaf dry mass (% DW)", trait: n_mass, unit: percent, level: plant}
+  - {column: "Hydrogen (% DW)", trait: h_mass, unit: percent, level: plant}
+  - {column: "Oxygen (% DW)", trait: o_mass, unit: percent, level: plant}
+  - {column: protein_mean, trait: protein_mass, unit: percent, level: plant}
+  - {column: cellulose_mean, trait: cellulose_mass, unit: percent, level: plant}
+  - {column: lignin_mean, trait: lignin_mass, unit: percent, level: plant}
+  - {column: starch_mean, trait: starch_mass, unit: percent, level: plant}
