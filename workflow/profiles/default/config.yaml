@@ -1,0 +1,6 @@
+# Re-run jobs only when inputs or their timestamps change, not when code or
+# parameters change; refits are triggered explicitly via fit_version / paths.
+rerun-triggers: [mtime, input]
+keep-going: true
+rerun-incomplete: true
+printshellcmds: true
