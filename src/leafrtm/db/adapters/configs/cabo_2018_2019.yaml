@@ -1,0 +1,106 @@
+dataset_id: cabo_2018_2019
+source: ecosis
+# Canadian Airborne Biodiversity Observatory (CABO) leaf spectra + traits, plus the
+# herbarium-project packages that measured (partly) the same samples fresh, pressed and ground.
+#  0: CABO 2018-2019 v2: fresh R, T, A, SVC HR-1024i + integrating sphere (supersedes v1)
+#  1: herbarium fresh v2: fresh R, same instrument; 544/609 IDs are CABO sample_ids and their
+#     R spectra are identical to package 0 (max abs diff 5e-8), so those rows are dropped.
+#     The other 65 (Dessain project, 2017; ASD FS4 sphere) are kept here; cabo_dessain_2017
+#     excludes them from "dessain-project-reflectance-spectra".
+#  2: herbarium pressed v2: pressed leaves, Spectral Evolution PSR+ 3500 leaf clip
+#  3: herbarium ground v2: ground leaves, PSR+ 3500 benchtop reflectance probe
+# ID / sample_id identify the same leaf sample across packages. Traits agree except N and C
+# for 10 samples (e.g. 12085718-12088857, 18582718-18585219: values shifted by one sample
+# between the CABO and herbarium tables; unclear which is right), so pressed/ground
+# observations of those 10 carry different N/C than the fresh one.
+source_id:
+  - cabo-2018-2019-leaf-level-spectra-v2
+  - fresh-leaf-cabo-spectra-from-herbarium-project-v2
+  - pressed-leaf-cabo-spectra-from-herbarium-project-v2
+  - ground-leaf-cabo-spectra-from-herbarium-project-v2
+citation: "Kothari, S., Beauchamp-Rioux, R., Blanchard, F., et al. (2023). Predicting leaf traits across functional groups using reflectance spectroscopy. New Phytologist 238, 549-566; Kothari, S., Beauchamp-Rioux, R., Laliberte, E., Cavender-Bares, J. (2023). Reflectance spectroscopy allows rapid, accurate and non-destructive estimates of functional traits from pressed leaves. Methods Ecol. Evol. 14, 385-401."
+doi: 10.1111/nph.18713
+columns:
+  uid: "`sample_id`.astype('Int64').astype('str').where(`sample_id`.notna(), `ID`)"
+  # The CABO export has no measurement-type column: the abs/trans/ref resource files were
+  # merged so that each sample's rows come in the order A, T, R (+ an exact duplicate of R
+  # for 1908 of 1971 samples). Verified: A + T + R == 1 to 1e-14 for every sample, A has the
+  # highest VIS values, R > T at 450 nm. pos = row index within (package, sample).
+  pkg_uid: "`uid`.str.cat(`_package`, sep='|')"
+  pos: "`_package_index`.groupby(`pkg_uid`).cumcount()"
+  qkey: "`pos`.where(`_package_index` == 0, 2)"
+  state: "`_package`.where(`_package_index` != 2, 'pressed').where(`_package_index` != 3, 'ground').where(`_package_index` >= 2, 'fresh')"
+  # Propagate CABO site / plant ID to the herbarium rows of the same sample.
+  site_name: "`site`.groupby(`uid`).transform('first').fillna(`Project`)"
+  plant: "`plantid`.groupby(`uid`).transform('first').astype('Int64').astype('str').where(`plantid`.groupby(`uid`).transform('first').notna(), `uid`)"
+  stage_: "`stage`.fillna(`Stage`)"
+  # The 65 Dessain herbarium-fresh spectra are identical (5e-8) to dessain-project-reflectance-spectra,
+  # which used an ASD FS4 + RTS-3ZC sphere (cabo_dessain_2017 drops these 65 to avoid duplicates).
+  inst: "`_package`.where(`_package_index` >= 2, 'svc-hr1024i').where(`_package_index` < 2, 'se-psr3500').where(~((`_package_index` == 1) & (`Project` == 'Dessain')), 'asd-fs4')"
+  latin: "`Latin Genus`.str.cat(`Latin Species`, sep=' ')"
+  conifer: "`functionalgroup`.groupby(`uid`).transform('first') == 'conifer'"
+  # Conifer needles (presentation not documented) and ground powders -> unknown.
+  tc: "`state`.where(`conifer` | (`state` == 'ground'), 'single_leaf').where(~(`conifer` | (`state` == 'ground')), 'unknown')"
+  # Same traits under CABO (first) or herbarium (fallback) column names.
+  n_mass_: "`Nmass`.fillna(`N`)"
+  c_mass_: "`Cmass`.fillna(`C`)"
+  n_area_: "`Narea`.fillna(`N_area`)"
+  c_area_: "`Carea`.fillna(`C_area`)"
+  chla_mass_: "`chlA_mass`.fillna(`chlA`)"
+  chlb_mass_: "`chlB_mass`.fillna(`chlB`)"
+  chl_mass_: "`chla_mass_` + `chlb_mass_`"
+  car_mass_: "`car_mass`.fillna(`car`)"
+  chl_area_: "`chlA_area` + `chlB_area`"
+  cellulose_: "`cellulose_mass`.fillna(`cellulose`)"
+  hemicellulose_: "`hemicellulose_mass`.fillna(`hemicellulose`)"
+  lignin_: "`lignin_mass`.fillna(`lignin`)"
+  ca_: "`Ca_mass`.fillna(`Ca`)"
+  k_: "`K_mass`.fillna(`K`)"
+  mg_: "`Mg_mass`.fillna(`Mg`)"
+  p_: "`P_mass`.fillna(`P`)"
+filter:
+  - "~((`_package_index` == 1) & `uid`.isin(`uid`.where(`_package_index` == 0)))"
+  - "`qkey` <= 2"     # drop the duplicated R row
+spectra:
+  quantity: {column: qkey, map: {0: A, 1: T, 2: R}}
+  scale: fraction     # metadata says "%" but values are fractions (median 0.29)
+  foreoptic: {column: _package_index, map: {0: integrating_sphere, 1: integrating_sphere, 2: leaf_clip, 3: contact_probe}}
+  instrument: {column: inst}
+  sample_state: {column: state}
+  target_config: {column: tc}
+ids:
+  entity: [uid]
+  time: [state]
+  plant: [plant]
+species: {name: latin, map: {"Salix Linnaeus": Salix}}   # genus-only record
+date: {column: Measurement Date, format: "%Y-%m-%d"}   # missing for pressed/ground rows
+site: {column: site_name}
+lat: Latitude
+lon: Longitude
+ecosystem: mixed
+treatments:
+  # SWA-Warren (Agonis flexuosa, SW Australia): sampling stage, incl. burnt vs unburnt.
+  - {factor: other, column: stage_}
+traits:
+  - {column: LMA, trait: lma, unit: "kg/m**2"}
+  - {column: EWT, trait: ewt, unit: "kg/m**2"}           # v2: based on field fresh mass
+  - {column: LDMC, trait: ldmc, unit: "mg/g"}
+  - {column: n_mass_, trait: n_mass, unit: percent}
+  - {column: c_mass_, trait: c_mass, unit: percent}
+  - {column: n_area_, trait: n_area, unit: "g/cm**2"}     # = Nmass/100 * LMA[g/cm2]
+  - {column: c_area_, trait: c_area, unit: "g/cm**2"}
+  - {column: chl_area_, trait: chl_area, unit: "g/cm**2"}
+  - {column: chlA_area, trait: chla_area, unit: "g/cm**2"}
+  - {column: chlB_area, trait: chlb_area, unit: "g/cm**2"}
+  - {column: car_area, trait: car_area, unit: "g/cm**2"}
+  - {column: chl_mass_, trait: chl_mass, unit: "mg/g"}
+  - {column: car_mass_, trait: car_mass, unit: "mg/g"}
+  - {column: NDF, trait: ndf_mass, unit: percent}
+  - {column: ADF, trait: adf_mass, unit: percent}
+  - {column: cellulose_, trait: cellulose_mass, unit: percent}
+  - {column: hemicellulose_, trait: hemicellulose_mass, unit: percent}
+  - {column: lignin_, trait: lignin_mass, unit: percent}
+  - {column: ca_, trait: ca_mass, unit: "mg/g"}
+  - {column: k_, trait: k_mass, unit: "mg/g"}
+  - {column: mg_, trait: mg_mass, unit: "mg/g"}
+  - {column: p_, trait: p_mass, unit: "mg/g"}
