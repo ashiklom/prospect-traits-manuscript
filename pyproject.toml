@@ -21,6 +21,7 @@ dependencies = [
     "pyarrow==26.0.0",
     "pymc==6.3.2",
     "pytensor==3.3.4",
+    "pyproj>=3.6",
     "pyyaml>=6",
     "quarto-cli>=1.6",
     "requests>=2.32",
