@@ -1,0 +1,17 @@
+dataset_id: vargas_zesati_alaska_svc_2017
+source: ecosis
+source_id:
+  - 2017-eagle-creek--alaska-plant-species-leaf-reflectance-spectra--svc-
+  - 2017-no-name-creek--alaska-plant-species-reflectance-spectra--svc-
+  - 2017-sagwon--alaska-plant-species-leaf-reflectance-spectra--svc-
+  - 2017-toolik--alaska-plant-species-leaf-reflectance-spectra--svc-
+  - 2017-utqia-vik--alaska-oil-spill-runway-plant-species-leaf-reflectance-spectra--svc-
+  - 2017-utqia-vik--alaska-plant-species-leaf-reflectance-spectra--svc-
+include: false
+exclude_reason: >-
+  Six 2017 ABoVE SVC HR-1024i leaf-clip packages (Vargas-Zesati et al.) sharing one structure. Most
+  spectra are radiometrically broken: VNIR reflectance of 100-2200 % (e.g. Petasites 750 nm ~1600 %,
+  'white lichen'), while SWIR of the same spectra is ~10-45 %. Most other spectra are flat ~5-12 %
+  across 750-2500 nm (target not filling the clip, or plot codes such as 'EC CF5', 'SAG_11_CTL'
+  rather than species). Only a handful (e.g. some Toolik shrubs) look like leaves, and they can't
+  be selected by metadata. No traits. Not usable for RTM inversion.

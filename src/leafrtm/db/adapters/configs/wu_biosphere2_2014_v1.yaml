@@ -1,0 +1,8 @@
+dataset_id: wu_biosphere2_2014_v1
+source: ecosis
+source_id: 2014-leaf-reflectance-spectra-of-tropical-plants-growing-in-biosphere2
+include: false
+exclude_reason: >-
+  Earlier upload of the same 76 spectra as
+  leaf-spectral-reflectance-of-tropical-plants-growing-in-biosphere-2 (dataset wu_biosphere2_2014);
+  spectra identical, and this version has no metadata columns.

@@ -1,0 +1,24 @@
+dataset_id: frye_cape_floristic_region
+source: ecosis
+source_id: greater-cape-floristic-region-leaf-spectral-library
+doi: 10.1111/geb.13306
+# Frye et al. (2021) Global Ecol. Biogeogr. 3205 leaf-clip spectra (450-949 nm only, Ocean Optics
+# USB4000) of 1187 species. NewUID (date_sample_region) is not unique per plant (it can hold two
+# species), so each row is its own entity (the row number column "Unnamed: 0"). Multiple leaves
+# per individual are possible, but no plant ID can be reconstructed.
+# Collection dates are month-day only (e.g. 723) with no reliable year, so no date is mapped.
+# Many fynbos leaves (ericoid, restioid) are far smaller than the clip port: target unknown.
+spectra:
+  quantity: R
+  scale: percent
+  foreoptic: leaf_clip
+  instrument: unknown              # Ocean Optics USB4000: not in instruments.yaml
+  sample_state: fresh
+  target_config: unknown
+ids:
+  entity: ["Unnamed: 0"]
+species: {name: finalname}
+site: {column: Subregion}
+lat: Latitude
+lon: Longitude
+ecosystem: shrubland

@@ -1,0 +1,43 @@
+dataset_id: ngee_arctic_barrow_2014_2016
+source: ecosis
+source_id: ngee-arctic-leaf-spectral-reflectance-and-transmittance-data-2014-to-2016-utqiagvik--barrow--alaska
+# Reflectance: SVC leaf clip (LC-RP / LC-RP-Pro), 397 leaves. Transmittance (2015 only, 31 leaves):
+# SVC integrating sphere, "Relative" T, Sample_ID with suffix T; it shares BNL_Barcode and date
+# with the matching R row, so R and T of one leaf form one observation.
+# "Measurement Units" (Radiance / Raw_DN) is the collection unit; all spectra are percent R or T.
+# The R spectra (397) are also in spectra_db `ngee_arctic` (2014-2016 Barrow); keep only one.
+columns:
+  latin_name: "`Latin Genus`.str.strip().str.cat(`Latin Species`.str.strip(), sep=' ')"
+sentinels: [-999, -9999, -99999, -999.9]   # C_mass_g_g has -999.9
+spectra:
+  quantity: {column: Measurement, map: {Reflectance: R, Transmittance: T}}
+  scale: percent
+  foreoptic:
+    column: "Foreoptic Specifications"
+    map: {Fiber_1_LC_RP: leaf_clip, Fiber_1_LC_RP_Pro: leaf_clip, SVC_Integrating_Sphere: integrating_sphere}
+  instrument: svc-hr1024i
+  sample_state: fresh
+  target_config: single_leaf
+  # Sphere T spectra are very noisy below 400 nm (spikes of -33 to +190 %); crop.
+  wavelength_range: [400, 2500]
+ids:
+  entity: [BNL_Barcode]
+  time: ["Measurement Date"]
+species:
+  name: latin_name
+  code: "USDA Symbol"
+  code_map: {SAPU6: "Saxifraga punctata"}   # see ngee_arctic_barrow_2013.yaml
+date: {column: "Measurement Date", format: "%Y%m%d"}
+site: {name: "Barrow Environmental Observatory, Utqiagvik"}
+lat: 71.28
+lon: -156.6
+ecosystem: tundra
+traits:
+  - {column: LMA_g_m2, trait: lma, unit: "g/m**2"}
+  # mg/g columns used (the *_g_g columns are the same values in %, rounded)
+  - {column: N_mass_mg_g, trait: n_mass, unit: "mg/g"}
+  - {column: C_mass_mg_g, trait: c_mass, unit: "mg/g"}
+  - {column: N_area_g_m2, trait: n_area, unit: "g/m**2"}
+  - {column: C_area_g_m2, trait: c_area, unit: "g/m**2"}
+  - {column: CN_ratio, trait: cn_ratio}
+  - {column: Leaf_Temperature_PreSpec_degC, trait: leaf_temperature, unit: degC}

@@ -1,0 +1,29 @@
+dataset_id: talladega_2018
+source: ecosis
+source_id: 2018-talladega-national-forest--leaf-level-reflectance-spectra-and-foliar-traits
+# Kamoske et al., NEON TALL site. Each spectrum is the mean of 3 leaf-clip scans of one sample.
+# Coordinates are UTM zone 16N (EPSG:32616) and the columns are swapped: "Latitude" holds the
+# easting (~463000) and "Longitude" the northing (~3645000); they are mapped accordingly.
+# N was predicted from the spectra (PLSR), not measured, so it is not mapped.
+columns:
+  latin_name: "`Latin Genus`.str.strip().str.cat(`Latin Species`.str.strip(), sep=' ')"
+spectra:
+  quantity: R
+  scale: percent
+  foreoptic: leaf_clip             # SVC LC-RP-Pro
+  instrument: svc-hr1024i
+  sample_state: fresh
+  # Pinus palustris / P. taeda needles must have been laid side by side to fill the clip.
+  target_config: {column: "Latin Genus", map: {Pinus: needle_array}, default: single_leaf}
+ids:
+  entity: [Sample_ID]
+species: {name: latin_name, map: {"Quercus falcate": "Quercus falcata"}}
+date: {column: "Sample Collection Date", format: "%Y%m%d"}
+site: {name: "Talladega National Forest (NEON TALL)"}
+lat: Longitude                     # northing
+lon: Latitude                      # easting
+crs: "EPSG:32616"
+ecosystem: forest
+canopy_position: {column: "Canopy Position", map: {T: top, M: middle, B: bottom}}
+traits:
+  - {column: "Leaf mass per area", trait: lma, unit: "g/m**2"}

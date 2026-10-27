@@ -1,0 +1,37 @@
+dataset_id: missoula_lodgepole_sagebrush_2012
+source: ecosis
+source_id: missoula-montana-lodgepole-pine---big-sagebrush-time-series
+# Qi et al. (2014) RSE. Weekly May-Oct 2012 collections; needle mats (lodgepole pine, new and old
+# needles) and leaf mats (big sagebrush) in a black sample holder, ASD RTS-3ZCR sphere.
+# Each row is a new sample of one species/needle age/site on one date (Spectra = nn|on|sb +
+# site + yymmdd). Also in spectra_db as `ecosis_missoulats`; keep only one.
+# Data problem: sb1_120710 and sb2_120710 have identical spectra.
+columns:
+  needle_age: "Spectra.str[:2]"
+  # live fuel moisture (% of dry mass) -> water as % of fresh mass
+  lwc_from_lfm: "`Live fuel moisture` / (100 + `Live fuel moisture`) * 100"
+spectra:
+  quantity: R
+  scale: fraction
+  foreoptic: integrating_sphere
+  instrument: asd-fs4
+  sample_state: fresh
+  target_config: {column: needle_age, map: {nn: needle_array, on: needle_array, sb: unknown}}
+  wavelength_range: [400, 2400]    # several spectra blow up (-41 to +19) at the detector ends
+ids:
+  entity: [Spectra]
+species: {name: ["Latin Genus", "Latin Species"]}
+date: {column: "Sample Collection Date", format: "%m/%d/%Y"}
+site: {column: "Location Name"}
+lat: Latitude
+lon: Longitude
+ecosystem: mixed                   # lodgepole forest (Lolo Pass, Spring Gulch) + sagebrush steppe
+leaf_age: {column: needle_age, map: {nn: young, on: old}}   # first-year vs >= second-year needles
+traits:
+  - {column: "Relative water content", trait: rwc, unit: dimensionless}   # fraction 0.6-0.9
+  - {column: lwc_from_lfm, trait: lwc, unit: percent}
+  - {column: "% Protein", trait: protein_mass, unit: percent}
+  - {column: "% Neutral detergent fiber", trait: ndf_mass, unit: percent}
+  - {column: "% Non-structural carbohydrate", trait: nsc_mass, unit: percent}
+  - {column: "% Fat", trait: fat_mass, unit: percent}
+  - {column: "% Ash", trait: ash_mass, unit: percent}

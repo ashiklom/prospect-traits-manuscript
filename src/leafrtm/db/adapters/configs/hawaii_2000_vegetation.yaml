@@ -1,0 +1,8 @@
+dataset_id: hawaii_2000_vegetation
+source: ecosis
+source_id: hawaii-2000-vegetation-species-spectra
+include: false
+exclude_reason: >-
+  Field spectra in sunlight at branch level (trees) or canopy level (shrubs, grasses), plus soil and
+  rock; no single-leaf contact or sphere measurements (rows described as 'leaves' are branch views
+  that include flowers, pods and stems). Also present in spectra_db as `ecosis_hawaii2000`.

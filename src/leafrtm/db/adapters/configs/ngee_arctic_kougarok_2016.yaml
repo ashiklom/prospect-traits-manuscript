@@ -1,0 +1,30 @@
+dataset_id: ngee_arctic_kougarok_2016
+source: ecosis
+source_id: ngee-arctic-2016-leaf-spectral-reflectance-kougarok-road-watershed-seward-peninsula-alaska
+# The same 149 spectra are also in spectra_db `ngee_arctic` (Seward_Kougarok 2016); keep only one.
+# "Measurement Quantity: Radiance" is the collection unit; spectra are percent reflectance.
+columns:
+  latin_name: "`Latin Genus`.str.strip().str.cat(`Latin Species`.str.strip(), sep=' ')"
+spectra:
+  quantity: R
+  scale: percent
+  foreoptic: leaf_clip             # SVC LC-RP-Pro leaf clip
+  instrument: svc-hr1024i
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [Sample_ID]
+species: {name: latin_name, code: "USDA Symbol"}
+date: {column: "Sample Collection Date", format: "%Y%m%d"}
+site: {name: "Kougarok Road watershed, Seward Peninsula"}
+lat: Latitude
+lon: Longitude
+ecosystem: tundra
+traits:
+  - {column: LMA_g_m2, trait: lma, unit: "g/m**2"}
+  # *_g_g columns are percent (values ~2 and ~48), not g/g
+  - {column: Nmass_g_g, trait: n_mass, unit: percent}
+  - {column: Cmass_g_g, trait: c_mass, unit: percent}
+  - {column: N_area_g_m2, trait: n_area, unit: "g/m**2"}
+  - {column: C_area_g_m2, trait: c_area, unit: "g/m**2"}
+  - {column: CN_Ratio, trait: cn_ratio}
