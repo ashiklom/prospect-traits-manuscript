@@ -1,0 +1,57 @@
+dataset_id: bnl_cucurbita_2019
+source: ecosis
+source_id: leaf-and-canopy-spectroscopy-and-biochemical-data-of-field-grown-cucurbita-pepo-under-two-stresses
+title: "Leaf and canopy spectroscopy and biochemical data of field-grown Cucurbita pepo under two stresses"
+# Field-grown C. pepo, BNL 2019; plot-level treatments control / drought
+# (irrigation withheld from 2019-07-05) / sink (all fruits removed from
+# 2019-07-15, irrigated). Leaves were harvested right after measurement and
+# paired with either leaf-clip spectra or canopy spectra: canopy rows dropped.
+# The control+drought leaf rows are also in the package
+# hyperspectral-leaf-reflectance-...-droughted-and-watered-crops (identical);
+# they are kept here only (bnl_drought_crops_glasshouse drops its field rows).
+# 24 leaf rows (Rep 0; plot/date only in uniquefield "YYYY-MM-DD_PP_0_leaf")
+# have no other metadata (description: samples paired with UAS data); date
+# and plot are parsed from uniquefield and the treatment taken from the plot.
+# Units (not given) inferred: LMA g/m2, RWC %, Protein g/m2 (Rogers-lab
+# convention, 10-25 % of LMA); Temperature = leaf temperature (Apogee IR
+# radiometer, degC). Not mapped: Chlorophyll (MultispeQ relative index),
+# PhiPSII, starch / sugars / TNC (magnitudes imply mmol m-2, unit
+# undocumented), amino acids.
+columns:
+  date_u: "uniquefield.str.slice(0, 10)"
+  plot_u: "uniquefield.str.slice(11, 13).astype('int64')"
+  trt_u: "Treatment.groupby(plot_u).transform('first')"
+  # Effective treatment: measurements before the drought (07-05) or fruit
+  # removal (07-15) started are untreated.
+  trt_eff: "trt_u.where((trt_u == 'control') | ((trt_u == 'drought') & (date_u >= '2019-07-05')) | ((trt_u == 'sink') & (date_u >= '2019-07-15')), 'pretreatment')"
+filter: ["Paired_Spectra != 'canopy'"]
+spectra:
+  quantity: R
+  scale: auto
+  foreoptic: leaf_clip           # SVC LC-RP-Pro leaf clip
+  instrument: se-psr3500         # Spectral Evolution PSR+
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [uniquefield]
+species: {constant: "Cucurbita pepo"}
+date: {column: date_u, format: "%Y-%m-%d"}
+site: {name: "Brookhaven National Laboratory field"}
+plot: {column: plot_u}
+lat: 40.870
+lon: -72.880
+ecosystem: cropland
+treatments:
+  - factor: water
+    column: trt_eff
+    map: {control: watered, sink: watered, drought: droughted, pretreatment: watered}
+    control: [watered]
+  - factor: other            # sink manipulation: removal of developing fruits
+    column: trt_eff
+    map: {control: fruits_intact, drought: fruits_intact, sink: fruits_removed, pretreatment: fruits_intact}
+    control: [fruits_intact]
+traits:
+  - {column: Leaf mass per area, trait: lma, unit: "g/m**2"}
+  - {column: RWC, trait: rwc, unit: percent}
+  - {column: Protein, trait: protein_area, unit: "g/m**2"}
+  - {column: Temperature, trait: leaf_temperature, unit: degC}

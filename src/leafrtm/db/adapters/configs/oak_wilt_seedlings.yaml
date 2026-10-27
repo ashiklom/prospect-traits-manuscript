@@ -1,0 +1,42 @@
+dataset_id: oak_wilt_seedlings
+source: ecosis
+source_id: leaf-spectra-from-experimental-detection-of-oak-wilt-in-oak-seedlings
+citation: "Fallon, B., Yang, A., Lapadat, C., Armour, I., Juzwik, J., Montgomery, R. A., Cavender-Bares, J. (2020). Spectral differentiation of oak wilt from foliar fungal disease and drought is correlated with physiological changes. Tree Physiology 40, 377-390."
+# Greenhouse seedling experiments (2017, 2018), Q. ellipsoidalis and
+# Q. macrocarpa: control, chronic drought, oak wilt or bur oak blight
+# inoculation. Spectra are averages per plant (id) and date:
+#  - 2017: 4 marked leaves per plant, re-measured over time;
+#  - 2018: per leaf/tissue type (green leaf, green tissue / transition zone /
+#    symptomatic tissue of symptomatic leaves), up to 3 leaves per type.
+# The 2018 rows "all tissue types on symptomatic leaf" are averages of the
+# three tissue-type rows of the same plant/date -> dropped as redundant.
+# Entity = plant x tissue type (pooled leaves); time = measurement date.
+columns:
+  tissue: "symptom_status.fillna('marked leaves')"
+filter: ["tissue != 'all tissue types on symptomatic leaf'"]
+spectra:
+  quantity: R
+  scale: auto
+  foreoptic: leaf_clip
+  instrument: svc-hr1024i
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [id, tissue]
+  time: [date]
+  plant: [id]
+species: {name: species}
+date: {column: date, format: "%Y%m%d"}
+site: {name: "University of Minnesota greenhouse"}
+lat: 44.985
+lon: -93.180
+ecosystem: greenhouse
+treatments:
+  - factor: pathogen
+    column: trt
+    map: {oak wilt: oak_wilt, bur oak blight: bur_oak_blight, control: none, drought: none}
+    control: [none]
+  - factor: water
+    column: trt
+    map: {drought: drought, control: watered, oak wilt: watered, bur oak blight: watered}
+    control: [watered]

@@ -1,0 +1,24 @@
+dataset_id: corn_varieties_wmars_2014
+source: ecosis
+source_id: spectral-characterization-of-multiple-corn-varieties--west-madison-agricultural-station-2014
+# 288 maize plants of different varieties (24 variety codes in the data;
+# description says 18), one leaf per plant (5 scans averaged per row).
+# All measured on one day in summer 2014 (exact date not given).
+spectra:
+  quantity: R
+  scale: auto
+  foreoptic: leaf_clip          # ASD plant probe + leaf clip
+  instrument: asd-fs3
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [ID]
+  plant: [ID]
+species: {constant: "Zea mays"}
+date: 2014
+site: {name: "West Madison Agricultural Research Station"}
+lat: 43.060
+lon: -89.532
+ecosystem: cropland
+treatments:
+  - {factor: genotype, column: Variety}

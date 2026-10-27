@@ -1,0 +1,56 @@
+dataset_id: bnl_drought_crops_glasshouse
+source: ecosis
+source_id: hyperspectral-leaf-reflectance--biochemistry--and-physiology-of-droughted-and-watered-crops
+citation: "Burnett, A. C., Serbin, S. P., Davidson, K. J., Ely, K. S., Rogers, A. (2021). Detection of the metabolic response to drought stress using hyperspectral reflectance. Journal of Experimental Botany 72, 6474-6489."
+# BNL glasshouse 2018 drought experiments on 7 crops (PSR+ with SVC leaf clip).
+# The 2019 field Cucurbita pepo rows (leaf + canopy) are identical (spectra
+# and traits, same uniquefield IDs) to the package
+# leaf-and-canopy-spectroscopy-...-cucurbita-pepo-under-two-stresses, which
+# is config bnl_cucurbita_2019 -> dropped here (only glasshouse kept; this
+# also removes all canopy spectra).
+# One leaf sampled per plant and date (uniquefield = date_plant); plants were
+# sampled repeatedly through the drought.
+# Units (not given in the package) inferred from magnitudes: LMA g/m2,
+# RWC %, Elemental_C/N g/m2 (C/LMA ~ 40-45 %, N/LMA 1.5-7 %), Protein g/m2
+# (Rogers-lab convention; 10-25 % of LMA). 24 Elemental_C values of 0.5-1.1
+# g/m2 (~2 % of LMA, implausible) are dropped via c_area_ok.
+# Not mapped: starch and soluble sugars (magnitudes imply mmol glucose
+# equivalents m-2; unit undocumented), amino acids, proline, fructans, ABA.
+columns:
+  c_area_ok: "Elemental_C.where(Elemental_C > 5)"
+filter: ["`Location Name` == 'glasshouse'", "Paired_Spectra == 'leaf'"]
+spectra:
+  quantity: R
+  scale: auto
+  foreoptic: leaf_clip           # SVC LC-RP-Pro leaf clip
+  instrument: se-psr3500         # Spectral Evolution PSR+ 3500
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [uniquefield]
+  plant: [Common Name, Plant]
+species:
+  name: [Latin Genus, Latin Species]
+  map: {"Populus ×canadensis": "Populus × canadensis"}
+date: {column: Measurement Date, format: "%m/%d/%y"}
+site: {name: "Brookhaven National Laboratory glasshouse"}
+lat: 40.870
+lon: -72.880
+ecosystem: greenhouse
+treatments:
+  # Pre-treatment measurements were taken before water was withheld, so
+  # plants of both groups count as watered (control) then.
+  - factor: water
+    columns: [Treatment, Pre_or_Post_Treatment]
+    map: {"droughted post": droughted, "watered post": watered,
+          "droughted pre": watered, "watered pre": watered}
+    control: [watered]
+traits:
+  - {column: Leaf mass per area, trait: lma, unit: "g/m**2"}
+  - {column: RWC, trait: rwc, unit: percent}
+  - {column: c_area_ok, trait: c_area, unit: "g/m**2"}
+  - {column: Elemental_N, trait: n_area, unit: "g/m**2"}
+  - {column: Protein, trait: protein_area, unit: "g/m**2"}
+  - {column: Asat, trait: asat_area, unit: "umol/m**2/s"}
+  - {column: gs, trait: gs_area, unit: "mol/m**2/s"}
+  - {column: Tleaf, trait: leaf_temperature, unit: degC}

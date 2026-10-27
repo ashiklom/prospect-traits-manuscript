@@ -1,0 +1,32 @@
+dataset_id: pvy_potato_hawaii_2014
+source: ecosis
+source_id: varietal-discrimination-and-detection-of-pvy-in-solanum-tuberosum--hawaii-2014
+# Field potatoes in Hawaii (2014): 761 individuals (ID unique, one leaf-clip
+# spectrum each) of 77+ varieties bred in CO/MI/MN/WI ("state"), healthy (h)
+# or PVY-infected (i; natural infection confirmed with test strips).
+# Variety names are lower-cased to merge case variants (FL1879 / Fl1879);
+# "?" = unknown variety.
+columns:
+  var_lc: "VAR.str.lower().str.strip()"
+  variety: "var_lc.where(var_lc != '?')"
+spectra:
+  quantity: R
+  scale: auto
+  foreoptic: leaf_clip
+  instrument: svc-hr1024i
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [ID]
+  plant: [ID]
+species: {constant: "Solanum tuberosum"}
+date: 2014
+site: {name: "Hawaii"}
+plot: {column: row_id}
+ecosystem: cropland
+treatments:
+  - factor: pathogen
+    column: infect
+    map: {h: healthy, i: PVY_infected}
+    control: [healthy]
+  - {factor: genotype, column: variety}

@@ -1,0 +1,93 @@
+dataset_id: hancock_vegetable_n_lma
+source: ecosis
+source_id: fresh-leaf-spectra-to-estimate-leaf-n-concentration-and-leaf-mass-per-area-in-two-vegetable-crops
+# Sweet corn and snap bean, Hancock Agricultural Research Station (WI), 2014-2015.
+# The export is badly joined:
+#  * 1500-2400 nm were exported as metadata columns "B1500".."B2400", so the
+#    loader only sees 350-1499 (+2401-2500 for some rows). Spectra are cropped
+#    to 350-1499 nm (a converter feature to re-read "B<nm>" columns as bands
+#    would recover the SWIR).
+#  * Each trait came from a separate file (LMA file, N file, 2014 bean file
+#    without traits), so the same spectrum appears up to 4 times with
+#    different metadata. No leaf IDs exist. A spectral fingerprint `fp`
+#    (values at 1600 and 2000 nm, from the B columns) identifies a leaf; traits
+#    and site are propagated across duplicates and only the first row kept.
+#  * 62 fingerprints carry conflicting dates or trait values (often offset by
+#    exactly 0.1, 1 or 2 units, or dated 6/15/08); they are dropped.
+#  * 164 rows without the B columns are truncated duplicates of 2014 bean
+#    spectra (no traits) and are dropped.
+columns:
+  fp: "(B1600 * 100000).round() * 1000000 + (B2000 * 100000).round()"
+  d2: "date.str.replace(r'^(\\d)(\\d\\d)\\d\\d(\\d\\d)$', r'\\1/\\2/\\3', regex=True)"
+  n_date: "d2.groupby(fp).transform('nunique')"
+  n_lma: "refLMA.groupby(fp).transform('nunique')"
+  n_n: "refN.groupby(fp).transform('nunique')"
+  n_site: "site.groupby(fp).transform('nunique')"
+  lma_all: "refLMA.groupby(fp).transform('first')"
+  n_all: "refN.groupby(fp).transform('first')"
+  site_all: "site.groupby(fp).transform('first')"
+  crop_all: "`type`.groupby(fp).transform('first')"
+  field_all: "Field.groupby(fp).transform('first')"
+  crop: "crop_all.fillna(site_all)"     # 2014 rows: type; 2015 rows: plot code
+  plotcode: "site_all.fillna(field_all)"
+filter:
+  - "B1600.notna()"
+  - "(n_date <= 1) & (n_lma <= 1) & (n_n <= 1) & (n_site <= 1)"
+  - "~fp.duplicated()"
+spectra:
+  quantity: R
+  scale: auto
+  foreoptic: leaf_clip            # ASD plant probe + leaf clip on an SVC 1024i
+  instrument: svc-hr1024i
+  sample_state: fresh
+  target_config: single_leaf
+  # B<nm> columns (1500-2400 nm) are read as bands by the loader
+ids:
+  entity: [fp]
+# Plot codes: T0..T5 = N rate, suffix S = sweet corn, SB = snap bean.
+# L1-L12 and T3 occur only in the sweet-corn file (with the S plots) -> corn.
+species:
+  name: crop
+  map:
+    corn: Zea mays
+    bean: Phaseolus vulgaris
+    T0S: Zea mays
+    T1S: Zea mays
+    T2S: Zea mays
+    T3S: Zea mays
+    T3: Zea mays
+    L1: Zea mays
+    L2: Zea mays
+    L3: Zea mays
+    L4: Zea mays
+    L5: Zea mays
+    L6: Zea mays
+    L7: Zea mays
+    L8: Zea mays
+    L9: Zea mays
+    L10: Zea mays
+    L11: Zea mays
+    L12: Zea mays
+    T0SB: Phaseolus vulgaris
+    T1SB: Phaseolus vulgaris
+    T2SB: Phaseolus vulgaris
+    T3SB: Phaseolus vulgaris
+    T4SB: Phaseolus vulgaris
+    T5SB: Phaseolus vulgaris
+date: {column: d2, format: "%m/%d/%y"}
+site: {name: "Hancock Agricultural Research Station"}
+plot: {column: plotcode}
+lat: 44.12
+lon: -89.53
+ecosystem: cropland
+treatments:
+  # N-rate plots; T0 assumed to be the zero-N control. L1-L12 (unknown design)
+  # and the 2014 fields get no treatment.
+  - factor: nitrogen
+    column: plotcode
+    map: {T0S: T0, T0SB: T0, T1S: T1, T1SB: T1, T2S: T2, T2SB: T2, T3S: T3, T3SB: T3, T3: T3,
+          T4SB: T4, T5SB: T5}
+    control: [T0]
+traits:
+  - {column: lma_all, trait: lma, unit: "g/m**2"}
+  - {column: n_all, trait: n_mass, unit: percent}
