@@ -1,0 +1,72 @@
+# Workflow configuration. Select a fit set with `snakemake --config fitset=full`.
+fitset: pilot
+fit_version: v1
+
+# Quantities used in the likelihood. Absorbance (A) and pseudo-absorbance (PA)
+# are added once their feasibility check passes (see the Diagnostics page).
+fit_quantities: [R, T]
+# Optional wavelength masks [lo, hi] in nm, e.g. noisy water bands.
+mask_ranges: []
+
+sampler: {chains: 4, tune: 1000, draws: 1000, target_accept: 0.8}
+
+# Learned discrepancy: k factors; dataset-level cross-fitting folds.
+discrepancy: {k: 6, n_folds: 5}
+
+# A run = RTM x error model x R/T error correlation x data use.
+#   stage 1 runs need nothing learned; stage 2 runs (ss, ld) use structure
+#   learned from the stage-1 `ou` fits of the same RTM.
+#   data_use: all (every fitted quantity) | R (reflectance only; only for
+#   observations that also have T or A, so T can be predicted out of sample)
+#   only_rt: fit only observations with both R and T.
+fitsets:
+  pilot:
+    n_observations: 120
+    n_batches: 8
+    quantities: [R, T]
+    sampler: {chains: 4, tune: 600, draws: 600}
+    runs:
+      - {id: prospectd_ou,      model: prospectd, errmodel: ou, rt: false, data_use: all, stage: 1}
+      - {id: liberty_ou,        model: liberty,   errmodel: ou, rt: false, data_use: all, stage: 1}
+      - {id: leafsip_ou,        model: leafsip,   errmodel: ou, rt: false, data_use: all, stage: 1}
+      - {id: prospectd_ou_rt,   model: prospectd, errmodel: ou, rt: true,  data_use: all, stage: 1, only_rt: true}
+      - {id: prospectd_ou_R,    model: prospectd, errmodel: ou, rt: false, data_use: R,   stage: 1, only_rt: true}
+      - {id: prospectd_ss,      model: prospectd, errmodel: ss, rt: false, data_use: all, stage: 2}
+      - {id: prospectd_ss_rt,   model: prospectd, errmodel: ss, rt: true,  data_use: all, stage: 2, only_rt: true}
+      - {id: prospectd_ss_R,    model: prospectd, errmodel: ss, rt: false, data_use: R,   stage: 2, only_rt: true}
+      - {id: prospectd_ld,      model: prospectd, errmodel: ld, rt: false, data_use: all, stage: 2}
+      - {id: prospectd_ld_rt,   model: prospectd, errmodel: ld, rt: true,  data_use: all, stage: 2, only_rt: true}
+      - {id: prospectd_ld_R,    model: prospectd, errmodel: ld, rt: false, data_use: R,   stage: 2, only_rt: true}
+      - {id: liberty_ss,        model: liberty,   errmodel: ss, rt: false, data_use: all, stage: 2}
+      - {id: liberty_ld_rt,     model: liberty,   errmodel: ld, rt: true,  data_use: all, stage: 2}
+      - {id: leafsip_ss,        model: leafsip,   errmodel: ss, rt: false, data_use: all, stage: 2}
+      - {id: leafsip_ld_rt,     model: leafsip,   errmodel: ld, rt: true,  data_use: all, stage: 2}
+  smoke:  # tiny end-to-end test of the workflow (CI-sized)
+    n_observations: 16
+    n_batches: 2
+    quantities: [R, T]
+    sampler: {chains: 2, tune: 150, draws: 150}
+    runs:
+      - {id: prospectd_ou,   model: prospectd, errmodel: ou, rt: false, data_use: all, stage: 1}
+      - {id: leafsip_ou,     model: leafsip,   errmodel: ou, rt: false, data_use: all, stage: 1}
+      - {id: prospectd_ou_R, model: prospectd, errmodel: ou, rt: false, data_use: R,   stage: 1, only_rt: true}
+      - {id: prospectd_ss,   model: prospectd, errmodel: ss, rt: false, data_use: all, stage: 2}
+  feasibility:  # can absorbance (A) and pseudo-absorbance (PA) be fitted? (Diagnostics page)
+    datasets: [herrmann_pepper_nk, accp]
+    n_observations: 30
+    n_batches: 2
+    quantities: [R, T, A, PA]
+    fit_quantities: [R, T, A, PA]
+    strata: [dataset_id, sample_state]
+    sampler: {chains: 4, tune: 600, draws: 600}
+    runs:
+      - {id: prospectd_ou_RT, model: prospectd, errmodel: ou, rt: false, data_use: R+T, stage: 1}
+      - {id: prospectd_ou_A,  model: prospectd, errmodel: ou, rt: false, data_use: A,   stage: 1}
+      - {id: prospectd_ou_PA, model: prospectd, errmodel: ou, rt: false, data_use: PA,  stage: 1}
+  full:
+    n_observations: null
+    n_batches: 400
+    quantities: [R, T]
+    sampler: {chains: 2, tune: 500, draws: 500}
+    # Filled in from the pilot's error-model comparison (see docs/hpc.md).
+    runs: []
