@@ -41,8 +41,8 @@ def screen_traits(traits: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
 def red_edge(v: np.ndarray, w: np.ndarray) -> float | None:
     """Wavelength of the steepest rise between 650 and 850 nm (5-nm smoothed).
 
-    None when there is no clear red edge (rise < 0.1, e.g. senescent or
-    non-green material). Green leaves have it at about 690-740 nm."""
+    None when there is no clear red edge: a rise below 0.1 or no inflection
+    (senescent, ground or other chlorophyll-free material). Green leaves have it at about 690-740 nm."""
     sel = (w >= 650) & (w <= 850)
     if sel.sum() < 20:
         return None
@@ -52,8 +52,13 @@ def red_edge(v: np.ndarray, w: np.ndarray) -> float | None:
     y = np.convolve(y, np.ones(5) / 5, mode="same")
     if np.nanmax(y[150:195]) - np.nanmin(y[5:40]) < 0.1:  # NIR (800-845) minus red (655-690)
         return None
-    d = np.gradient(y)
-    return float(grid[3:-3][np.argmax(d[3:-3])])
+    d = np.gradient(y)[3:-3]
+    i = int(np.argmax(d))
+    # an edge is an inflection: a derivative peak inside the window that clearly exceeds
+    # the slope at its ends (ground or chlorophyll-free material rises steadily instead)
+    if not 10 <= i < len(d) - 10 or d[i] < 3 * max(d[:10].mean(), d[-10:].mean(), 1e-6):
+        return None
+    return float(grid[3:-3][i])
 
 
 def spectral_flags(values: np.ndarray, wavelength: np.ndarray, quantity: str) -> list[str]:
