@@ -10,6 +10,7 @@ from leafrtm.rtm.e1 import e1_fast_np
 from leafrtm.rtm.liberty import ABSORBERS
 from liberty_rrtm import liberty_rrtm
 from scipy.special import exp1
+from sip_matlab import sip_model
 
 # Representative parameter sets per model (typical, thick, thin/pale).
 CASES = {
@@ -29,6 +30,8 @@ CASES = {
                      l_factor=40, p_factor=1),
                 dict(xu=0.02, thick=3.4, baseline=0.0004, element=1, c_factor=400, w_factor=250,
                      l_factor=60, p_factor=1.5)],
+    "leafsip": [dict(Cab=30, Car=10, Canth=1, Cbrown=0, Cw=0.015, Cm=0.009),
+                dict(Cab=60, Car=15, Canth=3, Cbrown=0.3, Cw=0.03, Cm=0.02)],
 }
 
 
@@ -118,6 +121,15 @@ def test_prospect5_is_5b_without_brown():
     c5 = CASES["prospect5"][0]
     np.testing.assert_allclose(get_model("prospect5").simulate(c5)[0],
                                get_model("prospect5b").simulate({**c5, "Cbrown": 0.0})[0], atol=1e-14)
+
+
+@pytest.mark.parametrize("case", CASES["leafsip"])
+def test_leafsip_matches_matlab_transliteration(case):
+    m = get_model("leafsip")
+    R, T = m.simulate(case)
+    Rm, Tm = sip_model(m.K, *(case[c] for c in ("Cab", "Car", "Canth", "Cbrown", "Cw", "Cm")))
+    np.testing.assert_allclose(R, Rm, atol=1e-12)
+    np.testing.assert_allclose(T, Tm, atol=1e-12)
 
 
 @pytest.mark.parametrize("case", CASES["liberty"])
