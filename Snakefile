@@ -8,8 +8,14 @@
 
 configfile: "config/config.yaml"
 
+import sys
+from pathlib import Path
+
 FITSET = config["fitset"]
-PY = "python -W ignore"
+# Rules run in the interpreter snakemake itself runs in (e.g. `uv run snakemake`), activated or not.
+PYEXE = sys.executable
+PYBIN = str(Path(PYEXE).parent)
+PY = f"{PYEXE} -W ignore"
 
 
 def fs(wc):

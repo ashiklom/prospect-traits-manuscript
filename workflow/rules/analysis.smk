@@ -63,4 +63,4 @@ rule site:
         "results/{fitset}/site/index.html",
     shell:
         "cd site && LEAFRTM_FITSET={wildcards.fitset} LEAFRTM_SITE_DATA=../results/{wildcards.fitset}/site_data "
-        "QUARTO_PYTHON=$(which python) quarto render --output-dir ../results/{wildcards.fitset}/site"
+        "QUARTO_PYTHON={PYEXE} PATH={PYBIN}:$PATH quarto render --output-dir ../results/{wildcards.fitset}/site"

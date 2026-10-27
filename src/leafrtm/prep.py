@@ -58,11 +58,20 @@ def select(obs: pd.DataFrame, fitset: dict, seed=20261027) -> pd.DataFrame:
     if n:
         rng = np.random.default_rng(seed)
         strata = fitset.get("strata", ["dataset_id", "sample_state", "has_RT"])
-        w = obs.groupby(strata)["observation_id"].transform("size")
-        # equal weight per stratum, favouring observations with measured traits
-        p = (1.0 / w) * (1 + np.minimum(obs["n_traits"], 5))
-        idx = rng.choice(len(obs), size=min(n, len(obs)), replace=False, p=p / p.sum())
-        obs = obs.iloc[np.sort(idx)]
+
+        def draw(pool, k):
+            if k <= 0 or pool.empty:
+                return pool.iloc[:0]
+            w = pool.groupby(strata)["observation_id"].transform("size")
+            # equal weight per stratum, favouring observations with measured traits
+            p = (1.0 / w) * (1 + np.minimum(pool["n_traits"], 5))
+            idx = rng.choice(len(pool), size=min(k, len(pool)), replace=False, p=p / p.sum())
+            return pool.iloc[idx]
+
+        # R+T leaves carry the R-only vs R+T and held-out-T comparisons: guarantee a quota
+        rt = draw(obs[obs["has_RT"]], fitset.get("min_rt", 0))
+        rest = draw(obs[~obs["observation_id"].isin(rt["observation_id"])], n - len(rt))
+        obs = obs[obs["observation_id"].isin(pd.concat([rt, rest])["observation_id"])]
     obs = obs.copy()
     obs["batch"] = [batch_of(o, fitset["n_batches"]) for o in obs["observation_id"]]
     return obs

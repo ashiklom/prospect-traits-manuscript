@@ -21,7 +21,8 @@ discrepancy: {k: 6, n_folds: 5}
 #   only_rt: fit only observations with both R and T.
 fitsets:
   pilot:
-    n_observations: 120
+    n_observations: 140
+    min_rt: 48          # R+T leaves for the R-only vs R+T and held-out T comparisons
     n_batches: 8
     quantities: [R, T]
     sampler: {chains: 4, tune: 600, draws: 600}
