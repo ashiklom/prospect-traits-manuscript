@@ -9,3 +9,14 @@
 /logs/
 
 .osfcli.config
+
+# Python pipeline
+/.venv/
+__pycache__/
+*.egg-info/
+/results/
+/.snakemake/
+/_site/
+/site/_freeze/
+/site/.quarto/
+/hpc/
