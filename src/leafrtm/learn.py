@@ -8,11 +8,16 @@ posterior heteroskedastic scale) and ``<fitset>/discrepancy/<model>/<tag>/
 <class>/fold<k>.npz`` (learned discrepancies; tag ``rt`` = joint R/T factors,
 ``sep`` = separate R and T factors; class = sample state x foreoptic; fold =
 dataset-level cross-fitting fold: leaves of fold k are learned from).
+
+Reference implementation: after commit 0cc1e51 (tag v0.3-pilot-all-errmodels) the
+workflow fits hetero + OU errors only and does not run this module. It is kept,
+with its tests, to document and reproduce the pilot's error-model comparison.
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 
@@ -21,9 +26,22 @@ import pandas as pd
 
 from leafrtm import discrepancy as disc
 from leafrtm.prep import read_batch
-from leafrtm.run import discrepancy_class, fold_of, load_config
+from leafrtm.run import load_config
 
 MIN_LEAVES = 15
+
+
+def discrepancy_class(sample_state: str, foreoptic: str) -> str:
+    """Leaves share a learned discrepancy within (fresh or not) x foreoptic group."""
+    optic = {"integrating_sphere": "sphere", "leaf_clip": "clip", "contact_probe": "clip"}.get(
+        foreoptic, "other")
+    return f"{'fresh' if sample_state == 'fresh' else 'dry'}_{optic}"
+
+
+def fold_of(observation_id: str, n_folds: int) -> int:
+    """Cross-fitting fold by dataset (all leaves of a dataset share a fold)."""
+    ds = observation_id.split(":")[0]
+    return int(hashlib.md5(ds.encode()).hexdigest(), 16) % n_folds
 
 
 def residuals(fitset_dir: Path, run_id: str) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -150,8 +168,8 @@ def main(argv=None):
     ap.add_argument("--stage1-runs", nargs="+", required=True)
     a = ap.parse_args(argv)
     cfg = load_config()
-    learn_all(Path(a.fitset_dir), a.stage1_runs, cfg["discrepancy"]["k"],
-              cfg["discrepancy"]["n_folds"])
+    dcfg = cfg.get("discrepancy", {"k": 6, "n_folds": 5})  # settings used in the pilot
+    learn_all(Path(a.fitset_dir), a.stage1_runs, dcfg["k"], dcfg["n_folds"])
 
 
 if __name__ == "__main__":

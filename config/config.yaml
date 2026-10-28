@@ -10,15 +10,11 @@ mask_ranges: []
 
 sampler: {chains: 4, tune: 1000, draws: 1000, target_accept: 0.8}
 
-# Learned discrepancy: k factors; dataset-level cross-fitting folds.
-discrepancy: {k: 6, n_folds: 5}
-
-# A run = RTM x error model x R/T error correlation x data use.
-#   stage 1 runs need nothing learned; stage 2 runs (ss, ld) use structure
-#   learned from the stage-1 `ou` fits of the same RTM.
+# A run = RTM x data use; errors are always hetero + OU (leafrtm.fit).
 #   data_use: all (every fitted quantity) | R (reflectance only; only for
 #   observations that also have T or A, so T can be predicted out of sample)
 #   only_rt: fit only observations with both R and T.
+
 # Trait analyses. `flag`: thresholds for flagging (dataset, year, trait) groups whose RTM
 # estimates miss the measurements much more than the same trait does elsewhere
 # (analysis table suspect_groups; site page "Suspect groups"). `exclude`: groups to leave out,
@@ -38,32 +34,22 @@ fitsets:
     n_batches: 8
     quantities: [R, T]
     sampler: {chains: 4, tune: 600, draws: 600}
+    # After commit 0cc1e51 runs are hetero + OU only; the pilot's results/pilot keeps the
+    # four-model comparison (Matern-3/2, learned discrepancy, R/T-correlated) for reference.
     runs:
-      - {id: prospectd_ou,      model: prospectd, errmodel: ou, rt: false, data_use: all, stage: 1}
-      - {id: liberty_ou,        model: liberty,   errmodel: ou, rt: false, data_use: all, stage: 1}
-      - {id: leafsip_ou,        model: leafsip,   errmodel: ou, rt: false, data_use: all, stage: 1}
-      - {id: prospectd_ou_rt,   model: prospectd, errmodel: ou, rt: true,  data_use: all, stage: 1, only_rt: true}
-      - {id: prospectd_ou_R,    model: prospectd, errmodel: ou, rt: false, data_use: R,   stage: 1, only_rt: true}
-      - {id: prospectd_ss,      model: prospectd, errmodel: ss, rt: false, data_use: all, stage: 2}
-      - {id: prospectd_ss_rt,   model: prospectd, errmodel: ss, rt: true,  data_use: all, stage: 2, only_rt: true}
-      - {id: prospectd_ss_R,    model: prospectd, errmodel: ss, rt: false, data_use: R,   stage: 2, only_rt: true}
-      - {id: prospectd_ld,      model: prospectd, errmodel: ld, rt: false, data_use: all, stage: 2}
-      - {id: prospectd_ld_rt,   model: prospectd, errmodel: ld, rt: true,  data_use: all, stage: 2, only_rt: true}
-      - {id: prospectd_ld_R,    model: prospectd, errmodel: ld, rt: false, data_use: R,   stage: 2, only_rt: true}
-      - {id: liberty_ss,        model: liberty,   errmodel: ss, rt: false, data_use: all, stage: 2}
-      - {id: liberty_ld_rt,     model: liberty,   errmodel: ld, rt: true,  data_use: all, stage: 2}
-      - {id: leafsip_ss,        model: leafsip,   errmodel: ss, rt: false, data_use: all, stage: 2}
-      - {id: leafsip_ld_rt,     model: leafsip,   errmodel: ld, rt: true,  data_use: all, stage: 2}
+      - {id: prospectd_ou,      model: prospectd, data_use: all}
+      - {id: liberty_ou,        model: liberty,   data_use: all}
+      - {id: leafsip_ou,        model: leafsip,   data_use: all}
+      - {id: prospectd_ou_R,    model: prospectd, data_use: R,   only_rt: true}
   smoke:  # tiny end-to-end test of the workflow (CI-sized)
     n_observations: 16
     n_batches: 2
     quantities: [R, T]
     sampler: {chains: 2, tune: 150, draws: 150}
     runs:
-      - {id: prospectd_ou,   model: prospectd, errmodel: ou, rt: false, data_use: all, stage: 1}
-      - {id: leafsip_ou,     model: leafsip,   errmodel: ou, rt: false, data_use: all, stage: 1}
-      - {id: prospectd_ou_R, model: prospectd, errmodel: ou, rt: false, data_use: R,   stage: 1, only_rt: true}
-      - {id: prospectd_ss,   model: prospectd, errmodel: ss, rt: false, data_use: all, stage: 2}
+      - {id: prospectd_ou,   model: prospectd, data_use: all}
+      - {id: leafsip_ou,     model: leafsip,   data_use: all}
+      - {id: prospectd_ou_R, model: prospectd, data_use: R,   only_rt: true}
   feasibility:  # can absorbance (A) and pseudo-absorbance (PA) be fitted? (Diagnostics page)
     datasets: [herrmann_pepper_nk, accp]
     n_observations: 30
@@ -73,38 +59,31 @@ fitsets:
     strata: [dataset_id, sample_state]
     sampler: {chains: 4, tune: 600, draws: 600}
     runs:
-      - {id: prospectd_ou_RT, model: prospectd, errmodel: ou, rt: false, data_use: R+T, stage: 1}
-      - {id: prospectd_ou_A,  model: prospectd, errmodel: ou, rt: false, data_use: A,   stage: 1}
-      - {id: prospectd_ou_PA, model: prospectd, errmodel: ou, rt: false, data_use: PA,  stage: 1}
+      - {id: prospectd_ou_RT, model: prospectd, data_use: R+T}
+      - {id: prospectd_ou_A,  model: prospectd, data_use: A}
+      - {id: prospectd_ou_PA, model: prospectd, data_use: PA}
   full:
-    # Configured from the pilot (see the site's Error models and Diagnostics pages):
-    # * Error model: hetero + Matern-3/2 ("ss") with R/T correlation where a leaf has both.
-    #   Trait CRPS on par with OU (0.56 vs 0.54 for PROSPECT-D), best convergence of the R+T
-    #   runs (94 % converged, 98 % usable), no per-leaf length scale to sample. The learned
-    #   discrepancy ("ld") scored worse (0.71) at higher cost and is not run.
-    # * Its Matern length scale and nugget come from the pilot's stage-1 OU fits
-    #   (discrepancy_from), so no stage-1 fits are needed here; PROSPECT versions not in
-    #   the pilot borrow PROSPECT-D's (same structure, different absorption coefficients).
-    # * Every RTM is fitted to every observation (objective 1). PROSPECT-D is also fitted to
+    # Configured from the pilot (site: Error models, Diagnostics):
+    # * Errors: hetero + OU, independently for each quantity, the only error model fitted
+    #   after commit 0cc1e51 (tag v0.3-pilot-all-errmodels). In the pilot it matched or beat
+    #   Matern-3/2 and the learned discrepancy on trait log-CRPS (PROSPECT-D 0.42 vs 0.44 and
+    #   0.45; LeafSIP 0.59 vs 0.74 and 0.59); correlated R/T errors added nothing on the same
+    #   leaves (0.40 vs 0.40).
+    # * Every RTM is fitted to every observation (objective 1); PROSPECT-D is also fitted to
     #   reflectance alone on R+T leaves (R only vs R+T; held-out T).
-    # * Absorptance (A) and pseudo-absorbance (PA) are fitted: in the pilot, A fits agreed
-    #   with R+T fits of the same leaves (pigments and LMA within 11 %) and PA fits converged.
+    # * Absorptance (A) and pseudo-absorbance (PA) are fitted: in the pilot, A fits agreed with
+    #   R+T fits of the same leaves (pigments and LMA within 11 %) and PA fits converged.
     n_observations: null
     n_batches: 400
     quantities: [R, T, A, PA]
     fit_quantities: [R, T, A, PA]
     sampler: {chains: 2, tune: 500, draws: 500}
-    discrepancy_from: pilot
-    discrepancy:
-      k: 6
-      n_folds: 5
-      borrow: {prospect4: prospectd, prospect5: prospectd, prospect5b: prospectd, prospectpro: prospectd}
     runs:
-      - {id: prospect4_ss_rt,   model: prospect4,   errmodel: ss, rt: true,  data_use: all, stage: 2}
-      - {id: prospect5_ss_rt,   model: prospect5,   errmodel: ss, rt: true,  data_use: all, stage: 2}
-      - {id: prospect5b_ss_rt,  model: prospect5b,  errmodel: ss, rt: true,  data_use: all, stage: 2}
-      - {id: prospectd_ss_rt,   model: prospectd,   errmodel: ss, rt: true,  data_use: all, stage: 2}
-      - {id: prospectpro_ss_rt, model: prospectpro, errmodel: ss, rt: true,  data_use: all, stage: 2}
-      - {id: liberty_ss_rt,     model: liberty,     errmodel: ss, rt: true,  data_use: all, stage: 2}
-      - {id: leafsip_ss_rt,     model: leafsip,     errmodel: ss, rt: true,  data_use: all, stage: 2}
-      - {id: prospectd_ss_R,    model: prospectd,   errmodel: ss, rt: false, data_use: R,   stage: 2, only_rt: true}
+      - {id: prospect4_ou,   model: prospect4,   data_use: all}
+      - {id: prospect5_ou,   model: prospect5,   data_use: all}
+      - {id: prospect5b_ou,  model: prospect5b,  data_use: all}
+      - {id: prospectd_ou,   model: prospectd,   data_use: all}
+      - {id: prospectpro_ou, model: prospectpro, data_use: all}
+      - {id: liberty_ou,     model: liberty,     data_use: all}
+      - {id: leafsip_ou,     model: leafsip,     data_use: all}
+      - {id: prospectd_ou_R, model: prospectd,   data_use: R,   only_rt: true}

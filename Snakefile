@@ -22,11 +22,9 @@ def fs(wc):
     return config["fitsets"][wc.fitset]
 
 
-def runs(fitset, stage=None, **match):
+def runs(fitset, **match):
     out = []
     for r in config["fitsets"][fitset]["runs"]:
-        if stage is not None and r["stage"] != stage:
-            continue
         if all(r.get(k) == v for k, v in match.items()):
             out.append(r["id"])
     return out

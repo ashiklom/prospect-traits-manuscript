@@ -33,6 +33,11 @@ Correlated R/T errors (``rt``):
     independent of z_R and with R's correlation structure;
   * for ``ld``, factors learned on the stacked [R; T] residual vector carry
     the cross-correlation.
+
+After commit 0cc1e51 (tag v0.3-pilot-all-errmodels) the workflow fits only
+``loglik_ou`` with independent quantities (no ``rho``). ``loglik_ss``,
+``loglik_ld`` and the R/T coupling (``rt_adjust``) are kept, with their tests,
+as reference implementations of the alternatives compared in the pilot.
 """
 
 from __future__ import annotations

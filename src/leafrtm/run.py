@@ -2,8 +2,9 @@
 
     python -m leafrtm.run --fitset-dir results/pilot --run <run_id> --batch 3
 
-A *run* (``config/config.yaml``) fixes the RTM, error model, R/T correlation,
-data use ("all" quantities or "R" only) and stage. Per-observation results
+A *run* (``config/config.yaml``) fixes the RTM and the data use ("all"
+quantities or "R" only); the error model is always hetero + OU (see
+``leafrtm.fit``). Per-observation results
 are cached under ``<fitset>/cache/<run_id>/`` (resumable); the batch output
 is three parquet files: posterior summaries, thinned draws, fitted spectra.
 """
@@ -12,7 +13,6 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import json
 import pickle
 import time
 import traceback
@@ -23,8 +23,6 @@ import numpy as np
 import pandas as pd
 import yaml
 
-from leafrtm import discrepancy as disc
-from leafrtm import likelihood as L
 from leafrtm.fit import FitSpec, Inverter, data_arrays, load_priors
 from leafrtm.obsop import QCODE, make_obsdata
 from leafrtm.prep import data_use_variants, read_batch
@@ -37,50 +35,6 @@ N_KEEP_DRAWS = 100
 def load_config(path=ROOT / "config" / "config.yaml") -> dict:
     with open(path) as f:
         return yaml.safe_load(f)
-
-
-def discrepancy_class(sample_state: str, foreoptic: str) -> str:
-    """Leaves share a learned discrepancy within (fresh or not) x foreoptic group."""
-    optic = {"integrating_sphere": "sphere", "leaf_clip": "clip", "contact_probe": "clip"}.get(
-        foreoptic, "other")
-    return f"{'fresh' if sample_state == 'fresh' else 'dry'}_{optic}"
-
-
-def fold_of(observation_id: str, n_folds: int) -> int:
-    """Cross-fitting fold by dataset (all leaves of a dataset share a fold)."""
-    ds = observation_id.split(":")[0]
-    return int(hashlib.md5(ds.encode()).hexdigest(), 16) % n_folds
-
-
-# ---------------------------------------------------------------------------
-# Error-model inputs
-# ---------------------------------------------------------------------------
-
-
-def ss_arrays(od, corr: dict, model: str):
-    """Vecchia factors per block with the learned Matern (ell, nugget) for
-    (model, quantity); falls back to the model's pooled values."""
-    m = 30
-    nb = np.zeros((len(od), m), dtype=np.int64)
-    b = np.zeros((len(od), m))
-    S = np.ones(len(od))
-    for bi in np.unique(od.block):
-        idx = np.flatnonzero(od.block == bi)
-        q = [k for k, v in QCODE.items() if v == od.qcode[idx[0]]][0]
-        p = corr.get(f"{model}/{q}") or corr[f"{model}/all"]
-        n_, b_, S_ = L.vecchia(od.wavelength[idx], od.start[idx],
-                               lambda d, p=p: L.matern32(d, p["ell"], p["nugget"]), m=m)
-        nb[idx], b[idx], S[idx] = idx[n_], b_, S_
-    return {"nb": nb, "b": b, "S": S}
-
-
-def ld_arrays(od, klass, discrepancies: dict, model: str, oid: str, n_folds: int, rt: bool):
-    fold = fold_of(oid, n_folds)
-    tag = "rt" if rt else "sep"
-    for key in (f"{model}/{tag}/{klass}/fold{fold}", f"{model}/{tag}/all/fold{fold}"):
-        if key in discrepancies:
-            return disc.map_to_obs(discrepancies[key], od), key
-    raise KeyError(f"No discrepancy for {model}/{tag}/{klass}/fold{fold}")
 
 
 # ---------------------------------------------------------------------------
@@ -197,16 +151,6 @@ def run_batch(fitset_dir: Path, run: dict, batch: int, cfg: dict) -> dict:
     model = get_model(run["model"])
     cache = fitset_dir / "cache" / run_id
     cache.mkdir(parents=True, exist_ok=True)
-    corr, discs = {}, {}
-    # learned error structure: this fit set's own, or another's (``discrepancy_from``);
-    # an RTM may borrow another's (``discrepancy.borrow``), e.g. PROSPECT versions
-    ddir = fitset_dir.parent / cfg.get("discrepancy_from", fitset_dir.name) / "discrepancy"
-    learned_model = cfg.get("discrepancy", {}).get("borrow", {}).get(run["model"], run["model"])
-    if run["errmodel"] == "ss":
-        corr = json.loads((ddir / "ss_correlation.json").read_text())
-    if run["errmodel"] == "ld":
-        for p in ddir.glob(f"{learned_model}/*/*/fold*.npz"):
-            discs[str(p.relative_to(ddir).with_suffix(""))] = disc.Discrepancy.load(p)
     priors = load_priors()
     inverters: dict[str, Inverter] = {}
     status = []
@@ -229,15 +173,8 @@ def run_batch(fitset_dir: Path, run: dict, batch: int, cfg: dict) -> dict:
         try:
             od = make_obsdata(blocks, model.wavelength)
             od_all = make_obsdata(all_blocks, model.wavelength)
-            spec = FitSpec(run["model"], run["errmodel"], run.get("rt", False), od.quantities)
-            extra, dkey = None, None
-            if spec.errmodel == "ss":
-                extra = ss_arrays(od, corr, learned_model)
-            elif spec.errmodel == "ld":
-                klass = discrepancy_class(meta.at[oid, "sample_state"], blocks[0].instrument_class)
-                extra, dkey = ld_arrays(od, klass, discs, learned_model, oid,
-                                        cfg["discrepancy"]["n_folds"], spec.rt)
-            arrays = data_arrays(od, spec, extra)
+            spec = FitSpec(run["model"], od.quantities)
+            arrays = data_arrays(od, spec)
             if spec.key not in inverters:
                 inverters[spec.key] = Inverter(spec, arrays)
             seed = zlib_seed(oid, run_id)
@@ -256,7 +193,7 @@ def run_batch(fitset_dir: Path, run: dict, batch: int, cfg: dict) -> dict:
                     "seconds": time.perf_counter() - t0, "sampling_seconds": t_sample,
                     "n_grad": n_grad, "divergences": div, "n_bands": len(od),
                     "n_draws": int(sampler["draws"] * sampler["chains"]),
-                    "quantities": "".join(od.quantities), "discrepancy": dkey,
+                    "quantities": "".join(od.quantities),
                     "max_rhat": float(summ.loc[summ.is_rtm, "rhat"].max()),
                     "min_ess_bulk": float(summ.loc[summ.is_rtm, "ess_bulk"].min()),
                     "min_ess_tail": float(summ.loc[summ.is_rtm, "ess_tail"].min()),

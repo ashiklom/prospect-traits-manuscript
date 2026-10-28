@@ -3,7 +3,6 @@
 import numpy as np
 import pytest
 
-from leafrtm import likelihood as L
 from leafrtm.fit import FitSpec, Inverter, data_arrays
 from leafrtm.obsop import Block, make_obsdata
 from leafrtm.rtm import get_model
@@ -24,7 +23,7 @@ def _leaf(step, seed, quantities=("R", "T")):
 
 @pytest.fixture(scope="module")
 def ou_inverter():
-    spec = FitSpec("prospectd", "ou", True, ("R", "T"))
+    spec = FitSpec("prospectd", ("R", "T"))
     return spec, Inverter(spec, data_arrays(_leaf(1.0, 0), spec))
 
 
@@ -45,11 +44,9 @@ def test_recovers_truth(ou_inverter):
         assert lo * 0.97 <= TRUTH[p] <= hi * 1.03, (p, lo, hi)
 
 
-def test_ss_model_runs():
-    spec = FitSpec("leafsip", "ss", False, ("R",))
-    od = _leaf(5.0, 3, quantities=("R",))
-    nb, b, S = L.vecchia(od.wavelength, od.start, lambda d: L.matern32(d, 40.0, 0.02))
-    arrays = data_arrays(od, spec, {"nb": nb, "b": b, "S": S})
+def test_reflectance_only_leafsip_runs():
+    spec = FitSpec("leafsip", ("R",))
+    arrays = data_arrays(_leaf(5.0, 3, quantities=("R",)), spec)
     tr, _ = Inverter(spec, arrays).sample(arrays, draws=50, tune=100, chains=1, seed=1)
     assert np.isfinite(tr.posterior["Cab"].values).all()
 

@@ -19,6 +19,10 @@ heteroskedastic scale, gives the fixed correlation used by the ``ss`` model.
 bands and precomputes the Vecchia/Woodbury factors ``loglik_ld`` needs.
 Cross-fitting: callers learn one discrepancy per held-out dataset fold, and
 each leaf uses the one learned without its own fold.
+
+Reference implementation: after commit 0cc1e51 (tag v0.3-pilot-all-errmodels) the
+workflow fits hetero + OU errors only and does not run this module. It is kept,
+with its tests, to document and reproduce the pilot's error-model comparison.
 """
 
 from __future__ import annotations

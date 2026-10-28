@@ -1,8 +1,15 @@
 """Bayesian inversion of one leaf observation with PyMC + nutpie.
 
-A fit is specified by an RTM, an error model (``ou``, ``ss``, ``ld``), whether
-R/T errors are correlated (``rt``), and the set of observed quantities. The
-PyMC model is built with ``pm.Data`` containers, compiled once per such
+A fit is specified by an RTM and the set of observed quantities. The error
+model is heteroskedastic with Ornstein-Uhlenbeck correlation across wavelengths
+(``likelihood.loglik_ou``), independently per quantity. The pilot compared it with
+three alternatives (Matern-3/2 state space, learned shared discrepancy, correlated
+R/T errors); it was as accurate or better, so it is the only one fitted. The
+last version of this module that dispatches on error model is commit 0cc1e51
+(tag v0.3-pilot-all-errmodels); the alternatives' likelihoods remain in
+``likelihood.py`` (and ``discrepancy.py``/``learn.py``) as a reference.
+
+The PyMC model is built with ``pm.Data`` containers, compiled once per
 specification (``Inverter``), and re-used across leaves with
 ``CompiledModel.with_data``; compilation is ~10 s, while a fit is seconds to
 minutes.
@@ -25,7 +32,6 @@ from leafrtm.obsop import QUANTITIES, ObsData
 from leafrtm.rtm import get_model
 
 CONFIG = Path(__file__).resolve().parents[2] / "config"
-ERRMODELS = ("ou", "ss", "ld")
 
 
 @cache
@@ -67,35 +73,21 @@ def prior_median(spec) -> float:
 @dataclass(frozen=True)
 class FitSpec:
     model: str
-    errmodel: str
-    rt: bool
     quantities: tuple[str, ...]
-
-    def __post_init__(self):
-        if self.errmodel not in ERRMODELS:
-            raise ValueError(self.errmodel)
-        if self.rt and not {"R", "T"} <= set(self.quantities):
-            object.__setattr__(self, "rt", False)
 
     @property
     def key(self) -> str:
-        return f"{self.model}-{self.errmodel}{'-rt' if self.rt else ''}-{''.join(self.quantities)}"
+        return f"{self.model}-{''.join(self.quantities)}"
 
 
-def data_arrays(od: ObsData, spec: FitSpec, extra: dict | None = None) -> dict:
+def data_arrays(od: ObsData, spec: FitSpec) -> dict:
     """Flat arrays fed to ``pm.Data`` (shapes vary by leaf)."""
     local = {QUANTITIES.index(q): i for i, q in enumerate(spec.quantities)}
     if set(od.quantities) != set(spec.quantities):
         raise ValueError(f"Observation has {od.quantities}, spec expects {spec.quantities}")
     lq = np.array([local[q] for q in od.qcode], dtype=np.int64)
-    out = {"y": od.y, "flat_idx": od.flat_idx, "w": od.w, "lq": lq,
-           "dlam": od.dlam, "start": od.start.astype(np.int8), "pair": od.pair}
-    if spec.errmodel in ("ss", "ld"):
-        missing = {"nb", "b", "S"} - set(extra or {})
-        if missing:
-            raise ValueError(f"{spec.errmodel} needs precomputed {sorted(missing)}")
-    out.update(extra or {})
-    return out
+    return {"y": od.y, "flat_idx": od.flat_idx, "w": od.w, "lq": lq,
+            "dlam": od.dlam, "start": od.start.astype(np.int8)}
 
 
 def build_model(spec: FitSpec, arrays: dict, priors: dict | None = None) -> pm.Model:
@@ -110,26 +102,12 @@ def build_model(spec: FitSpec, arrays: dict, priors: dict | None = None) -> pm.M
             Q = pt.stack([R, T, 1 - R - T, -pt.log10(R)]).ravel()
         yhat = pt.sum(D["w"] * Q[D["flat_idx"]], axis=1)
         pm.Deterministic("max_pred", pt.max(yhat))  # cheap sanity trace
-        e = D["y"] - yhat
-        d = {"qcode": D["lq"], "dlam": D["dlam"], "start": pt.neq(D["start"], 0), "pair": D["pair"]}
-        rho = None
-        if spec.rt and spec.errmodel != "ld":
-            rho = pm.Deterministic("rho", 2 * _prior("rho_raw", priors["error"]["rho"]) - 1)
-        if spec.errmodel == "ou":
-            s0 = _prior("sigma0", priors["error"]["sigma0"], shape=nq)
-            s1 = _prior("sigma1", priors["error"]["sigma1"], shape=nq)
-            ell = _prior("ell", priors["error"]["ell"], shape=nq)
-            ll = L.loglik_ou(e, yhat, d, s0, s1, ell, rho=rho)
-        elif spec.errmodel == "ss":
-            s0 = _prior("sigma0", priors["error"]["sigma0"], shape=nq)
-            s1 = _prior("sigma1", priors["error"]["sigma1"], shape=nq)
-            d.update(nb=D["nb"], b=D["b"], S=D["S"])
-            ll = L.loglik_ss(e, yhat, d, s0, s1, rho=rho)
-        else:
-            kappa = _prior("kappa", priors["error"]["kappa"], shape=nq)
-            d.update({k: D[k] for k in ("mu", "sqrtD", "nb", "b", "S", "W", "Minv", "logdetM")})
-            ll = L.loglik_ld(e, d, kappa)
-        pm.Potential("loglik", ll)
+        d = {"qcode": D["lq"], "dlam": D["dlam"], "start": pt.neq(D["start"], 0)}
+        # heteroskedastic scale and OU correlation, one (sigma0, sigma1, ell) per quantity
+        s0 = _prior("sigma0", priors["error"]["sigma0"], shape=nq)
+        s1 = _prior("sigma1", priors["error"]["sigma1"], shape=nq)
+        ell = _prior("ell", priors["error"]["ell"], shape=nq)
+        pm.Potential("loglik", L.loglik_ou(D["y"] - yhat, yhat, d, s0, s1, ell))
     return model
 
 

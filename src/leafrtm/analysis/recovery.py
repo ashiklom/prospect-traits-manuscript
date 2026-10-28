@@ -64,30 +64,23 @@ def main(argv=None):
     rows = []
     for name in a.models:
         model = get_model(name)
-        for err in ("ou", "ss"):
-            inv = None
-            for i in range(a.n):
-                theta = draw_theta(model, priors, rng)
-                blocks = simulate(model, theta, rng)
-                od = make_obsdata(blocks, model.wavelength)
-                spec = FitSpec(name, err, False, od.quantities)
-                extra = None
-                if err == "ss":
-                    nb, b, S = [], [], []
-                    from leafrtm.discrepancy import vecchia_blocks
-                    nb, b, S = vecchia_blocks(od, TRUE_ELL, TRUE_NUGGET)
-                    extra = {"nb": nb, "b": b, "S": S}
-                arr = data_arrays(od, spec, extra)
-                inv = inv or Inverter(spec, arr)
-                tr, secs = inv.sample(arr, draws=500, tune=500, chains=4, seed=i)
-                for p in model.params:
-                    x = np.asarray(tr.posterior[p]).ravel()
-                    q05, q50, q95 = np.quantile(x, [0.05, 0.5, 0.95])
-                    rows.append({"model": name, "errmodel": err, "replicate": i, "param": p,
-                                 "true": theta[p], "q05": q05, "q50": q50, "q95": q95,
-                                 "covered90": q05 <= theta[p] <= q95,
-                                 "log_error": float(np.log(q50 / theta[p])) if theta[p] > 0 else np.nan,
-                                 "seconds": secs})
+        inv = None
+        for i in range(a.n):
+            theta = draw_theta(model, priors, rng)
+            blocks = simulate(model, theta, rng)
+            od = make_obsdata(blocks, model.wavelength)
+            spec = FitSpec(name, od.quantities)
+            arr = data_arrays(od, spec)
+            inv = inv or Inverter(spec, arr)
+            tr, secs = inv.sample(arr, draws=500, tune=500, chains=4, seed=i)
+            for p in model.params:
+                x = np.asarray(tr.posterior[p]).ravel()
+                q05, q50, q95 = np.quantile(x, [0.05, 0.5, 0.95])
+                rows.append({"model": name, "errmodel": "ou", "replicate": i, "param": p,
+                             "true": theta[p], "q05": q05, "q50": q50, "q95": q95,
+                             "covered90": q05 <= theta[p] <= q95,
+                             "log_error": float(np.log(q50 / theta[p])) if theta[p] > 0 else np.nan,
+                             "seconds": secs})
     df = pd.DataFrame(rows)
     summ = df.groupby(["model", "errmodel", "param"]).agg(
         coverage90=("covered90", "mean"), median_log_error=("log_error", "median"),
