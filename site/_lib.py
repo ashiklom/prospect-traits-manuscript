@@ -22,12 +22,17 @@ DATA = Path(os.environ.get("LEAFRTM_SITE_DATA", ROOT / "results" / FITSET / "sit
 # marker symbols are the secondary encoding.
 MODELS = ["prospect4", "prospect5", "prospect5b", "prospectd", "prospectpro", "liberty", "leafsip"]
 MODEL_LABEL = {"prospect4": "PROSPECT-4", "prospect5": "PROSPECT-5", "prospect5b": "PROSPECT-5B",
-               "prospectd": "PROSPECT-D", "prospectpro": "PROSPECT-PRO", "liberty": "LIBERTY",
+               "prospectd": "PROSPECT-D", "prospectpro": "PROSPECT-PRO", "liberty": "LIBERTY (Eq. 16 fixed)",
                "leafsip": "LeafSIP"}
 MODEL_COLOR = dict(zip(MODELS, ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4",
                                 "#008300", "#6250d6"]))
 SYMBOLS = ["circle", "square", "diamond", "triangle-up", "x", "cross", "star"]
 MODEL_SYMBOL = dict(zip(MODELS, SYMBOLS))
+# LIBERTY as published (Dawson et al. 1998, Eq. 16 bug included): a reference, not fitted;
+# muted gray so it never competes with the fitted models' hues.
+MODEL_LABEL["liberty_dawson"] = "LIBERTY (as published)"
+MODEL_COLOR["liberty_dawson"] = "#898781"
+MODEL_SYMBOL["liberty_dawson"] = "cross-open"
 ERR_LABEL = {"ou": "Hetero + OU", "ss": "Hetero + Matérn-3/2 (fixed ℓ)",
              "ld": "Learned discrepancy"}
 ERR_COLOR = {"ou": "#2a78d6", "ss": "#eb6834", "ld": "#1baf7a"}

@@ -35,4 +35,4 @@ liberty:     &lib
   - {param: w_factor, trait: ewt, factor: 1}             # g m-2
   - {param: p_factor, trait: n_area, factor: 1}          # g m-2
   - {param: l_factor, trait: lignin_cellulose_area, factor: 1, relative: true}
-liberty_fixed: *lib
+liberty_dawson: *lib

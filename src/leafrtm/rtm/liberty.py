@@ -1,7 +1,13 @@
 """LIBERTY (Leaf Incorporating Biochemistry Exhibiting Reflectance and
 Transmittance Yields; Dawson, Curran & Plummer 1998, RSE 65:50-60,
-doi:10.1016/S0034-4257(98)00007-8), as published (``liberty``) and with its
-infinite-reflectance equation corrected (``liberty_fixed``).
+doi:10.1016/S0034-4257(98)00007-8), in two variants:
+
+* ``liberty`` (class ``Liberty``): fixes a bug in the original paper. Its
+  infinite-reflectance equation (Eq. 16) is not the sum of Eq. 15 it is derived
+  from; ``liberty`` uses the correct sum. Use this one.
+* ``liberty_dawson`` (class ``LibertyDawson``): the model as published by Dawson
+  et al. (1998) and implemented in rrtm, kept for provenance and comparison. It
+  has no real solution for weakly absorbing, strongly scattering leaves.
 
 Port of ``liberty()`` in ashiklom/rrtm (``R/liberty.R``, MIT), with that
 package's coefficients (``data-raw/liberty_raw.dat``, Dawson et al. 1998
@@ -21,7 +27,7 @@ literal transliteration of the R loop (``tests/reference/liberty_rrtm.py``):
 * The 0/0 limit of the slab transmission ``M(coeff)`` as coeff -> 0 is handled
   with a series expansion.
 
-One correction relative to rrtm, in both models: the internal reflectance
+One correction relative to rrtm, in both variants: the internal reflectance
 ``mi`` (Dawson et al. Eq. 2) integrates the Fresnel reflectance of light inside
 the cell at internal angles up to the critical angle. rrtm evaluates the
 reflectance of light arriving from *outside* at those angles (it pairs each
@@ -33,13 +39,13 @@ and ``mi = 1 - tav / n^2``, which we use (rrtm's 1-degree sum for ``me`` was
 within 6e-5 of it). Eq. 1 as printed lacks the factor 2 that normalizes the
 cosine-weighted average; Eq. 2 and rrtm both have it.
 
-``liberty_fixed``. Eq. 15 sums the radiation leaving a surface layer of cells
+The bug fixed in ``liberty``. Eq. 15 sums the radiation leaving a surface layer of cells
 lying on leaf material of reflectance R (Fig. 1). Its sum is
 
     R = 2 x me + x (1 - 2 x me) tau (1 - me R) / [(1 - me R) - (1 - x)(1 - me) tau R],
 
 but Eq. 16 places ``2 x me`` over the common denominator without multiplying it
-by that denominator. rrtm (and ``liberty``) implement Eq. 16. Eq. 15 is the
+by that denominator. rrtm (and ``liberty_dawson``) implement Eq. 16. Eq. 15 is the
 adding equation ``R = r_d + t_d t_u R / (1 - r_u R)`` for the surface layer of
 Fig. 1, with
 
@@ -51,7 +57,7 @@ either side (it absorbs (1 - 2 x me)(1 - tau) and (1 - me)(1 - tau)), so
 sqrt(r_d r_u) + sqrt(t_d t_u) <= 1 and R_inf is real for any absorption, tending
 to 1 as absorption vanishes. Eq. 16 instead corresponds to a layer that returns
 more light than it receives when absorption is weak (me (1 + me) / 2 more at
-zero absorption), which is why it has no real root there. ``liberty_fixed``
+zero absorption), which is why it has no real root there. ``liberty``
 replaces Eq. 16 with the sum of Eq. 15 and changes nothing else (Eqs. 1-9, 17,
 19 and Benford's thickness interpolation). It evaluates Eq. 19 as
 ``T^2 = t_d t_u (1 - R r_d) / (1 - R r_u)``, equal to ``(R - r)(1 - R r) / R`` by
@@ -61,10 +67,10 @@ absorption.
 Notes for inference: ``D`` (cell diameter) multiplies every absorption term,
 so it is exactly non-identifiable from the concentrations; it is held fixed
 (``fixed``) at Dawson's typical value. ``thick`` must be >= 1 (the model jumps
-from 2 to 1 layers at thick = 1). In ``liberty``, large ``xu`` with weak
-absorption leaves the quadratic without a real root (rrtm diverges); the
-PyTensor version returns NaN there, which the sampler rejects. ``liberty_fixed``
-is defined for all parameter values.
+from 2 to 1 layers at thick = 1). In ``liberty_dawson``, large ``xu`` with
+weak absorption leaves the quadratic without a real root (rrtm diverges); the
+PyTensor version returns NaN there, which the sampler rejects. ``liberty`` is
+defined for all parameter values.
 """
 
 from __future__ import annotations
@@ -146,15 +152,17 @@ def _leaf(rb, tb, thick, xp):
 
 
 @dataclass
-class Liberty(RTM):
+class LibertyDawson(RTM):
+    """LIBERTY as published by Dawson et al. (1998), Eq. 16 included (as in rrtm)."""
+
     K: np.ndarray = field(default=None, repr=False)  # (NWL, 5), columns ordered as ABSORBERS
     me: np.ndarray = field(default=None, repr=False)
     mi: np.ndarray = field(default=None, repr=False)
 
-    _label = ("liberty", "LIBERTY (Dawson et al. 1998)")
+    _label = ("liberty_dawson", "LIBERTY as published (Dawson et al. 1998)")
 
     @classmethod
-    def create(cls, D: float = 40.0) -> "Liberty":
+    def create(cls, D: float = 40.0) -> "LibertyDawson":
         with (files("leafrtm.rtm") / "data" / "liberty.csv").open() as f:
             coef = pd.read_csv(f).iloc[:NWL]
         me, mi = interface_reflectances(1.4891 - 0.0005 * np.arange(NWL))
@@ -218,10 +226,17 @@ class Liberty(RTM):
 
 
 @dataclass
-class LibertyFixed(Liberty):
-    """LIBERTY with Eq. 16 replaced by the sum of Eq. 15 (see module docstring)."""
+class Liberty(LibertyDawson):
+    """LIBERTY with a bug in the original paper fixed.
 
-    _label = ("liberty_fixed", "LIBERTY, Eq. 16 re-derived from Eq. 15")
+    Dawson et al. (1998) Eq. 16, the infinite-reflectance equation, is not the
+    sum of Eq. 15 it is derived from: ``2 x me`` is put over the common
+    denominator without being multiplied by it. This class uses the correct sum
+    (the adding equation of an energy-conserving surface layer), so R_inf is
+    real for all parameter values; everything else is as in ``LibertyDawson``.
+    See the module docstring for the derivation."""
+
+    _label = ("liberty", "LIBERTY with Eq. 16 corrected (Dawson et al. 1998 bug fixed)")
 
     def _coefficients(self, me, x, Tt):
         """a, b, c of a R^2 + b R + c = 0 for R_inf (Eq. 15 summed)."""

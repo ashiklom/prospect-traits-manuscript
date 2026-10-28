@@ -27,12 +27,12 @@ CASES = {
                   dict(N=1.5, Cab=400, Car=100, Canth=30, Cbrown=3, Cw=0.08, Cm=0.05)],
     "prospectpro": [dict(N=1.5, Cab=40, Car=10, Canth=2, Cbrown=0.1, Cw=0.01, Cprot=0.001, Ccbc=0.008),
                     dict(N=2.0, Cab=60, Car=12, Canth=1, Cbrown=0.0, Cw=0.02, Cprot=0.002, Ccbc=0.015)],
-    "liberty": [dict(xu=0.045, thick=1.6, baseline=0.0006, element=2, c_factor=200, w_factor=100,
+    "liberty_dawson": [dict(xu=0.045, thick=1.6, baseline=0.0006, element=2, c_factor=200, w_factor=100,
                      l_factor=40, p_factor=1),
                 dict(xu=0.02, thick=3.4, baseline=0.0004, element=1, c_factor=400, w_factor=250,
                      l_factor=60, p_factor=1.5)],
     # the second case has no real R_inf in LIBERTY as published
-    "liberty_fixed": [dict(xu=0.045, thick=1.6, baseline=0.0006, element=2, c_factor=200, w_factor=100,
+    "liberty": [dict(xu=0.045, thick=1.6, baseline=0.0006, element=2, c_factor=200, w_factor=100,
                            l_factor=40, p_factor=1),
                       dict(xu=0.1, thick=2.5, baseline=0.0003, element=1, c_factor=200, w_factor=100,
                            l_factor=40, p_factor=1)],
@@ -170,13 +170,13 @@ def test_liberty_interface_reflectances_are_dawson_eqs_1_2(i):
     mi = (1 - np.sin(crit) ** 2) + integral(lambda t: 2 * _fresnel(t, n, 1) * np.sin(t) * np.cos(t),
                                             0, crit)
     np.testing.assert_allclose([me, mi], [1 - tav(90, n), 1 - tav(90, n) / n**2], atol=1e-10)
-    m = get_model("liberty")
+    m = get_model("liberty_dawson")
     np.testing.assert_allclose([m.me[i], m.mi[i]], [me, mi], atol=1e-10)
 
 
-@pytest.mark.parametrize("case", CASES["liberty"])
-def test_liberty_matches_converged_rrtm(case):
-    m = get_model("liberty")
+@pytest.mark.parametrize("case", CASES["liberty_dawson"])
+def test_liberty_dawson_matches_converged_rrtm(case):
+    m = get_model("liberty_dawson")
     R, T, Rinf = m.simulate(case, return_rinf=True)
     Ro, To, Rinfo = liberty_rrtm(m.K, m.fixed["D"], **case, n_iter=20000, **_interface(m))
     np.testing.assert_allclose(R, Ro, atol=1e-11)
@@ -188,9 +188,9 @@ def test_liberty_matches_converged_rrtm(case):
 
 
 @pytest.mark.parametrize("thick", [1.2, 2.0, 2.7, 3.0, 4.0, 6.5])
-def test_liberty_integer_layers_match_loop(thick):
-    m = get_model("liberty")
-    case = {**CASES["liberty"][0], "thick": thick}
+def test_liberty_dawson_integer_layers_match_loop(thick):
+    m = get_model("liberty_dawson")
+    case = {**CASES["liberty_dawson"][0], "thick": thick}
     R, T = m.simulate(case)
     Ro, To, _ = liberty_rrtm(m.K, m.fixed["D"], **case, n_iter=20000, **_interface(m))
     np.testing.assert_allclose(R, Ro, atol=1e-11)
@@ -198,9 +198,9 @@ def test_liberty_integer_layers_match_loop(thick):
 
 
 @pytest.mark.parametrize("k", [2, 3, 4])
-def test_liberty_continuous_across_integer_thickness(k):
-    m = get_model("liberty")
-    base = CASES["liberty"][0]
+def test_liberty_dawson_continuous_across_integer_thickness(k):
+    m = get_model("liberty_dawson")
+    base = CASES["liberty_dawson"][0]
     lo = m.simulate({**base, "thick": k - 1e-9})
     hi = m.simulate({**base, "thick": k + 1e-9})
     # Benford's fractional step goes from 1 to 2 layers as fraction 0 -> 1;
@@ -209,16 +209,16 @@ def test_liberty_continuous_across_integer_thickness(k):
     assert np.abs(lo[1] - hi[1]).max() < 5e-3
 
 
-def test_liberty_no_real_root_region_is_nan():
-    m = get_model("liberty")
-    R, _ = m.simulate({**CASES["liberty"][0], "xu": 0.1, "baseline": 0.0001})
+def test_liberty_dawson_no_real_root_region_is_nan():
+    m = get_model("liberty_dawson")
+    R, _ = m.simulate({**CASES["liberty_dawson"][0], "xu": 0.1, "baseline": 0.0001})
     assert np.isnan(R).any()
 
 
-def test_liberty_fixed_rinf_is_the_sum_of_dawson_eq_15():
+def test_liberty_rinf_is_the_sum_of_dawson_eq_15():
     # R_inf must reproduce itself as the R under the surface layer in Eq. 15,
     # summed term by term; Eq. 16 (LIBERTY as published) does not
-    m = get_model("liberty_fixed")
+    m = get_model("liberty")
     rng = np.random.default_rng(0)
     for _ in range(50):
         i = rng.integers(420)
@@ -230,19 +230,19 @@ def test_liberty_fixed_rinf_is_the_sum_of_dawson_eq_15():
         assert eq15 == pytest.approx(R, rel=1e-12)
         assert tb**2 == pytest.approx((R - rd) * (1 - R * rd) / R, rel=1e-9, abs=1e-15)  # Eq. 19
         with np.errstate(invalid="ignore"):
-            R16 = get_model("liberty")._layer(me, x, tau, np)[2]
+            R16 = get_model("liberty_dawson")._layer(me, x, tau, np)[2]
         if np.isfinite(R16):
             assert not np.isclose(R16, R, rtol=1e-6, atol=0)
 
 
-def test_liberty_fixed_defined_everywhere_and_conserves_energy():
-    m, pub = get_model("liberty_fixed"), get_model("liberty")
+def test_liberty_defined_everywhere_and_conserves_energy():
+    m, pub = get_model("liberty"), get_model("liberty_dawson")
     zero = dict(element=0, c_factor=0, w_factor=0, l_factor=0, p_factor=0)
     n_pub_undefined = 0
     for xu in (0.005, 0.03, 0.06, 0.1, 0.3, 0.5):
         for baseline in (1e-8, 1e-6, 1e-4, 1e-3, 1e-2):
             for thick in (1.0, 1.6, 3.4, 10.0):
-                case = {**CASES["liberty"][0], "xu": xu, "baseline": baseline, "thick": thick}
+                case = {**CASES["liberty_dawson"][0], "xu": xu, "baseline": baseline, "thick": thick}
                 R, T = m.simulate(case)
                 assert np.all(np.isfinite(R) & np.isfinite(T)), case
                 assert np.all((R > 0) & (T > 0) & (R + T <= 1 + 1e-12)), case
@@ -253,7 +253,7 @@ def test_liberty_fixed_defined_everywhere_and_conserves_energy():
         R, T = m.simulate({**zero, "xu": xu, "baseline": 1e-8, "thick": 2.3})
         np.testing.assert_allclose(R + T, 1, atol=1e-5)
     assert n_pub_undefined > 0
-    assert m.validity_margin(CASES["liberty"][0]) is None
+    assert m.validity_margin(CASES["liberty_dawson"][0]) is None
 
 
 def _compile(m):
