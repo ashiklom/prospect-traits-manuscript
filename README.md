@@ -12,7 +12,8 @@ The repository contains three things:
    [Yang et al. (2016) data repository](https://github.com/ashiklom/LeafTraitSpectraSeasonality-Yangetal2016RSE).
 2. **Bayesian inversions** of seven leaf radiative transfer models (RTMs): PROSPECT-4, 5,
    5B, D and PRO, LIBERTY and LeafSIP. They use PyMC with the nutpie sampler, every replicate
-   R and T spectrum of a leaf, and structured error models.
+   R and T spectrum of a leaf, and a heteroskedastic Ornstein–Uhlenbeck error model (chosen
+   by a pilot comparison of four error models; see "Error models" below).
 3. **A static website** with interactive analyses, plus the manuscript (Quarto).
 
 Everything from download to website is orchestrated with [Snakemake](https://snakemake.readthedocs.io).
@@ -65,8 +66,8 @@ config/priors.yaml                  priors for RTM and error-model parameters
 config/rtm_traits.yaml              RTM parameter <-> measured trait mapping (units)
 src/leafrtm/rtm/                    PROSPECT 4/5/5B/D/PRO, LIBERTY, LeafSIP (NumPy + PyTensor); data/PROVENANCE.md
 src/leafrtm/obsop.py                observation operator (model grid -> observed bands; no resampling of data)
-src/leafrtm/likelihood.py           error models: OU, Matern state-space (Vecchia), learned discrepancy (Woodbury)
-src/leafrtm/discrepancy.py          learning shared RTM discrepancy from first-stage residuals
+src/leafrtm/likelihood.py           error models: hetero + OU (fitted); Matern state-space, learned discrepancy, R/T coupling (reference)
+src/leafrtm/discrepancy.py, learn.py   learning a shared RTM discrepancy (reference; used in the pilot comparison)
 src/leafrtm/fit.py, run.py          PyMC model builder, nutpie inverter (compile once, swap data per leaf)
 src/leafrtm/db/                     sources (downloaders), adapters (+ one YAML config per dataset), schema, harmonize, QC, species
 src/leafrtm/analysis/               analyses for the website (objectives A and B)
@@ -95,3 +96,20 @@ The schema is defined in `src/leafrtm/db/schema.py`; the tables are Parquet file
 
 Run `quarto render` in the repository root to build PDF, HTML and DOCX versions of the
 manuscript in `_output/`.
+
+## Error models
+
+The pilot compared four error models for the spectral residuals, on 140 leaves with traits:
+
+- heteroskedastic + Ornstein–Uhlenbeck (OU);
+- heteroskedastic + Matérn-3/2 state space;
+- a learned shared discrepancy;
+- each of the above with correlated R/T errors.
+
+Hetero + OU was as accurate or more accurate for trait retrieval, so it is the only model
+fitted now, with independent errors per quantity. See the site's Error models page.
+
+Commit `0cc1e51` (tag `v0.3-pilot-all-errmodels`) is the last version whose fitting code
+dispatches on error model. The other likelihoods, the discrepancy learning, and their tests
+remain in the package as a reference. `docs/hpc.md` explains how to recreate the tag if it
+is missing on GitHub.

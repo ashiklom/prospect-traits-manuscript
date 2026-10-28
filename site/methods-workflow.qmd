@@ -24,29 +24,26 @@ flowchart TB
     S[ECOSTRESS library] --> H
     N[NASA SHIFT<br>ORNL DAAC] --> H
     D[spectra_db<br>pinned commit] --> H
+    Y[Yang et al. 2016<br>pinned commit] --> H
     H[harmonize<br>adapters + schema + QC<br>+ species] --> DB[(normalized<br>parquet DB)]
   end
   DB --> SEL[select<br>fit set + batches]
-  subgraph fits[Inversions]
-    direction LR
-    SEL --> F1[stage 1 fits<br>ou error model]
-    F1 --> LR[learn<br>Matérn ℓ, discrepancy<br>cross-fitted]
-    LR --> F2[stage 2 fits<br>ss / ld error models]
-  end
+  SEL --> F1[fits<br>run × batch<br>hetero + OU errors]
   F1 --> AG[aggregate]
-  F2 --> AG
   AG --> AN[analyses<br>A: RTM evaluation<br>B: trait variation]
   AN --> SD[site data<br>release asset]
   SD --> W[this website]
 ```
 
-**Fit sets** (`config/config.yaml`) select the observations and the runs, where a run is
-RTM × error model × R/T correlation × data use:
+**Fit sets** (`config/config.yaml`) select the observations and the runs. A run is RTM ×
+data use (all quantities, or reflectance only). Errors are always hetero + OU. Up to commit
+`0cc1e51`, runs also chose the error model and R/T correlation, with a learning stage between
+two rounds of fits; see [Error models](error-models.qmd).
 
 | Fit set | Purpose |
 |---|---|
 | `smoke` | A 16-leaf end-to-end test of the whole chain. |
-| `pilot` | About 120 observations stratified by dataset, sample state and R+T availability; all error models. |
+| `pilot` | 140 observations stratified by dataset, sample state and R+T availability (at least 48 with R+T). Its results compare all four error models. |
 | `feasibility` | Absorptance and pseudo-absorbance fits. |
 | `full` | Every observation, with the configuration chosen in the pilot. |
 

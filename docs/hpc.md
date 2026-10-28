@@ -29,41 +29,32 @@ This runs download → harmonize → selection and writes `results/full/inputs/<
 `config/config.yaml` → `fitsets.full` is already configured from the pilot (the comments
 there give the evidence):
 
-- **Error model:** heteroskedastic + Matérn-3/2 (`ss`) for every RTM, with correlated R/T
-  errors where a leaf has both.
-- **Models:** PROSPECT-4, 5, 5B, D and PRO, LIBERTY (Eq. 16 corrected) and LeafSIP.
-- **Quantities:** reflectance, transmittance, absorptance and pseudo-absorbance.
+- **Errors:** heteroskedastic + Ornstein–Uhlenbeck, independently for R, T, A and PA. This
+  is the only error model fitted after commit `0cc1e51`.
+- **Models:** PROSPECT-4, 5, 5B, D and PRO, LIBERTY (Eq. 16 corrected) and LeafSIP, fitted
+  to every observation.
 - **R only:** a PROSPECT-D fit to reflectance alone on every leaf with R and T.
-- **No stage 1:** all runs are stage 2. The Matérn length scale and nugget come from the
-  pilot (`discrepancy_from: pilot`). PROSPECT versions not in the pilot borrow
-  PROSPECT-D's (`discrepancy.borrow`).
 
-That needs the pilot's learned error structure, `results/pilot/discrepancy/` (7 MB, not in
-git). Copy it from the machine that ran the pilot, or unpack the release asset:
-
-```bash
-mkdir -p results/pilot && tar -xzf pilot-discrepancy.tar.gz -C results/pilot
-```
-
-`n_batches: 400` puts about 230 observations in each job.
+All runs are independent, so there is a single job file. `n_batches: 400` puts
+about 230 observations in each job.
 
 ## 3. Fits (dSQ)
 
 ```bash
-.venv/bin/python -m leafrtm.hpc --fitset full --stage 2 --pilot-dir results/pilot
+.venv/bin/python -m leafrtm.hpc --fitset full --pilot-dir results/pilot
 module load dSQ
-dsq --job-file hpc/fit_jobs_full_stage2.txt --mem-per-cpu 4g -t 4:00:00 --max-jobs 400 \
+dsq --job-file hpc/fit_jobs_full.txt --mem-per-cpu 4g -t 4:00:00 --max-jobs 400 \
     -o hpc/logs/%A_%a.out --batch-file hpc/fits.sh
 sbatch hpc/fits.sh
 ```
 
-`leafrtm.hpc` writes one job line per (run, batch) whose outputs are missing, and prints the
-projected cost from the pilot's timings. Each line runs on one core. In October 2026 the
-projection was 3,200 jobs and about 3,100 core-hours, roughly 1 core-hour per job. Its
-inputs were:
+`leafrtm.hpc` writes one job line per (run, batch) whose outputs are missing. It also
+prints the projected cost from the pilot's OU timings, scaled to the full run's 2 chains ×
+1,000 iterations. The projection needs `results/pilot/summary/info.parquet`; drop
+`--pilot-dir` without it. In October 2026 it was:
 
 - 91,501 observations, 4,434 of them with R and T;
-- the pilot's per-fit times, scaled to the full run's 2 chains × 1,000 iterations.
+- 3,200 jobs and about 3,400 core-hours, roughly 1 core-hour per job.
 
 Per-observation results are cached in `results/full/cache/<run>/`, so a job that hits its
 time limit resumes where it stopped.
@@ -71,14 +62,30 @@ time limit resumes where it stopped.
 After the array finishes:
 
 ```bash
-dsqa -j <jobid> -f hpc/fit_jobs_full_stage2.txt > hpc/rerun.txt   # failed or timed-out jobs
+dsqa -j <jobid> -f hpc/fit_jobs_full.txt > hpc/rerun.txt   # failed or timed-out jobs
 # resubmit hpc/rerun.txt the same way, until it is empty
 ```
 
-To add stage-1 (OU) runs and learn the error structure from the full data instead, give the
-runs `stage: 1`, drop `discrepancy_from`, and run
-`snakemake --config fitset=full -- results/full/discrepancy/report.json` between the two job
-files (`--stage 1`, then `--stage 2`).
+### Earlier error models
+
+Up to commit `0cc1e51` (tag `v0.3-pilot-all-errmodels`), the fitting code could also fit
+three alternatives:
+
+- a Matérn-3/2 state-space error model;
+- a learned shared discrepancy;
+- correlated R/T errors.
+
+That needed two stages: OU fits, then `leafrtm.learn`, then the alternatives. Their
+likelihoods and the learning code remain in `likelihood.py`, `discrepancy.py` and
+`learn.py` as a reference. To run them, check out that commit.
+
+Only the branch was pushed from the session that made the tag. If the tag is missing on
+GitHub, recreate it:
+
+```bash
+git tag -a v0.3-pilot-all-errmodels 0cc1e51 -m "Last version that dispatches on error model"
+git push origin v0.3-pilot-all-errmodels
+```
 
 ## 4. Analyses and site
 

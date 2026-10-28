@@ -30,6 +30,15 @@ def draw(kind, ell, nugget=0.0, seed=0):
     return Lc @ np.random.default_rng(seed).normal(size=len(wl))
 ```
 
+::: {.callout-note}
+**Which error model is fitted.** All four models below were compared in the pilot
+([Error models](error-models.qmd)). Hetero + OU (sections 2–3) was as good as or better than
+the others for trait retrieval, so after commit `0cc1e51` (tag `v0.3-pilot-all-errmodels`)
+it is the only one fitted, with independent errors for each quantity. The Matérn-3/2 model,
+the learned discrepancy and correlated R/T errors (sections 3–5) are documented here, and
+kept in the code, as a reference.
+:::
+
 The inversions treat a measured spectrum as
 
 $$y(\lambda) = \hat y(\lambda;\theta) + e(\lambda),$$

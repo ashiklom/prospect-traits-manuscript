@@ -59,38 +59,52 @@ if len(em) and em["coverage90"].notna().any():
 
 ## Findings and the choice for the full run
 
-**No error model gives calibrated trait intervals.** 90 % credible intervals cover the
-measured trait for 4–30 % of leaves, whatever the model.
+These results are from the pilot refit with noisy detector ends trimmed (see
+[Observation operator](methods-observation.qmd)).
+
+**Calibration.** No error model gives calibrated trait intervals. 90 % credible intervals
+cover the measured trait for only 3–28 % of leaves, whatever the model.
 
 * **The cause is bias.** Most of the miss is systematic bias between the RTM parameter and
   the measured trait (see [Trait retrieval](a-retrieval.qmd)), not intervals that are too
   narrow.
-* **The inference itself is sound.** Synthetic recovery shows calibrated intervals and
-  small errors ([Diagnostics](a-diagnostics.qmd)).
+* **The inference itself is sound.** Synthetic recovery shows calibrated intervals and small
+  errors ([Diagnostics](a-diagnostics.qmd)).
 * **So the remaining error is in the RTMs and the measurements:**
-  * how an RTM parameter maps onto a measured quantity (e.g. $C_m$ vs LMA of a fresh leaf);
-  * dataset-specific measurement differences (e.g. chlorophyll extraction).
+  * how an RTM parameter maps onto a measured quantity;
+  * dataset-specific measurement differences. Dataset-years that miss consistently are
+    flagged on [Trait retrieval](a-retrieval.qmd#suspect-groups).
   * No per-leaf error model can absorb this.
 
-**Accuracy.** By trait log-CRPS (lower is better):
+**Accuracy.** By trait log-CRPS (lower is better), Hetero + OU is as good as or better than
+the alternatives:
 
-* PROSPECT-D with Hetero + OU (0.54) and Hetero + Matérn-3/2 (0.56) are close.
-* The learned discrepancy is clearly worse (0.71). It also costs more and needs per-class
-  cross-fitting.
+| Comparison | Hetero + OU | Matérn-3/2 | Learned discrepancy |
+|---|---|---|---|
+| PROSPECT-D, all leaves | **0.42** | 0.44 | 0.45 |
+| PROSPECT-D, reflectance only | **0.42** | 0.44 | 0.50 |
+| LeafSIP | **0.59** | 0.74 | 0.59 |
 
-**Convergence.** The Matérn model converges best in the R+T runs: 94 % of PROSPECT-D R+T
-fits converged, against 76 % with OU. It has no per-leaf length scale to sample.
+**LIBERTY** is the exception: Matérn scores 0.81 against OU's 0.85. But fewer than a third
+of LIBERTY fits converge under any error model, which makes that comparison weak.
 
-**Held-out transmittance.** When fitted to reflectance only, both predict T with an RMSE of
-about 0.046.
+**Correlated R/T errors** add nothing. On the same R+T leaves, mean log-CRPS is 0.40 with
+or without them.
 
-**The full run therefore uses:**
+**Matérn-3/2 has two small advantages:**
 
-* **Error model:** Hetero + Matérn-3/2, with correlated R/T errors wherever a leaf has
-  both.
-* **Models and quantities:** every RTM, fitted to every observation, including absorptance
-  and pseudo-absorbance.
-* **R only:** a PROSPECT-D fit to reflectance alone on R+T leaves.
+* It predicts held-out transmittance slightly better (RMSE 0.041 against 0.045). OU's
+  intervals cover more of it (20 % against 15 %).
+* It converges more often on R+T leaves (92 % against 86 %).
 
-The Matérn length scale and nugget come from the pilot's first-stage fits. PROSPECT versions
-that were not in the pilot use PROSPECT-D's (`config/config.yaml`, `docs/hpc.md`).
+Neither outweighs OU's better trait scores. OU also needs no learning stage.
+
+**Choice.** After commit `0cc1e51`, every fit uses **Hetero + OU with independent errors
+per quantity**. The fitting code no longer dispatches on error model. That commit
+(tag `v0.3-pilot-all-errmodels`) is the last version that can fit all four. The other
+models' likelihoods and learning code remain in the package as a reference
+([How the error models work](methods-error-models.qmd) explains them).
+
+**The full run** fits every RTM to every observation, including absorptance and
+pseudo-absorbance, plus PROSPECT-D on reflectance alone for leaves with R and T
+(`config/config.yaml`, `docs/hpc.md`).
