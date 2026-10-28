@@ -1,0 +1,39 @@
+dataset_id: soybean_aphid_2013
+source: ecosis
+source_id: productivity-and-characterization-of-soybean-foliar-traits-under-aphid-pressure
+# Greenhouse soybean (UW-Madison Walnut Street, Jul-Aug 2013) under soybean
+# aphid infestation levels C (none, control), L, M, H ("l" = typo for L).
+# One spectrum per row (SAMP_ID unique); upper (U) / lower (L) leaves of
+# 42 plants measured repeatedly at vegetative (V) and reproductive (R) stage.
+# The trait columns (LMA, N, C, fiber, lignin, cellulose, chl a/b,
+# carotenoids) are PLSR PREDICTIONS (one unique value per spectrum, negative
+# LMA values, chl b > chl a) -> not mapped.
+# Note: plants 14, 27 and 28 appear under two aphid levels (data entry
+# problem); the treatment is mapped per row as given.
+columns:
+  ymd: "YYYY * 10000 + MM * 100 + DD"
+spectra:
+  quantity: R
+  scale: auto
+  foreoptic: leaf_clip
+  instrument: asd-fs4
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [SAMP_ID]
+  plant: [PLANT]
+species: {name: SPECIES}
+date: {column: ymd, format: "%Y%m%d"}
+site: {name: "UW-Madison Walnut Street Greenhouse"}
+lat: LATITUDE
+lon: LONGITUDE
+ecosystem: greenhouse
+canopy_position: {column: LEAF_HEIGHT, map: {U: top, L: bottom}}
+treatments:
+  - factor: herbivory
+    column: TREAT
+    map: {C: none, L: low, l: low, M: medium, H: high}
+    control: [none]
+  - factor: phenology_stage
+    column: STAGE
+    map: {V: vegetative, R: reproductive}

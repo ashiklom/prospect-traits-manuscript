@@ -1,0 +1,56 @@
+dataset_id: neon_east_lma
+source: ecosis
+source_id: fresh-leaf-spectra-to-estimate-lma-over-neon-domains-in-eastern-united-states
+citation: "Wang, Z., Chlus, A., Geygan, R., Ye, Z., Zheng, T., Singh, A., Couture, J. J., Cavender-Bares, J., Kruger, E. L., Townsend, P. A. (2020). Foliar functional traits from imaging spectroscopy across biomes in eastern North America. New Phytol. 228, 494-511."
+# Individual-leaf fresh spectra with leaf LMA, 2017 eastern NEON domains.
+# Every leaf was measured twice: P#### = Spectral Evolution PSR+ (biased high below
+# ~410 nm), L#### = ASD FieldSpec 3 (serial 16122). The two series are numbered
+# independently; the same leaf is recognised by domain + species code + LMA
+# (unique for 3148/3152 P and 3156/3160 L rows; 3114 keys shared; key-linked P/L
+# pairs are spectrally much closer than random pairs). The instrument goes to
+# ids.time so each instrument is a separate observation of the leaf.
+# No site/date columns: the leaves are those pooled into the samples of
+# neon_east_2017, but cannot be linked to them.
+columns:
+  series: "Sample_ID.str[0]"
+  sp_key: "`USDA Symbol`.fillna('NA')"
+  lma_key: "LMA.round(2)"
+  # Species codes are USDA symbols without their numeric suffix (and the 'Latin Genus/Species'
+  # columns were filled by EcoSIS from those truncated codes, often wrongly; corrected per
+  # (name, code) pair in vocab/species_resolution.csv). Codes whose meaning differs from the
+  # same pair in another dataset are recoded here to the full USDA symbol:
+  #   CADE (D07 broadleaf) = Castanea dentata (CADE12); in neon_across CADE = Calocedrus decurrens
+  #   QUMA in D06/D09 = Quercus macrocarpa (QUMA2); in D08 ambiguous (Q. marilandica?)
+  #   SAAL (D08) = Sassafras albidum (SAAL5); in ngee_arctic_teller_2017 SAAL = Salix alaxensis
+  sp_code: >-
+    `USDA Symbol`.mask(`USDA Symbol`.eq('CADE'), 'CADE12')
+    .mask(`USDA Symbol`.eq('SAAL'), 'SAAL5')
+    .mask(`USDA Symbol`.eq('QUMA') & Domain.isin(['D06', 'D09']), 'QUMA2')
+spectra:
+  quantity: R
+  scale: auto
+  foreoptic: contact_probe
+  instrument: {column: series, map: {P: se-psr3500, L: asd-fs3}}
+  sample_state: fresh
+  target_config: single_leaf
+  wavelength_range: [400, 2500]      # drop PSR+ UV artefact (+0.18 at 350 nm)
+ids:
+  entity: [Domain, sp_key, lma_key]
+  time: [series]
+species:
+  name: ["Latin Genus", "Latin Species"]
+  code: sp_code
+  prefer_code: true   # 'Latin Genus/Species' were filled from the truncated codes by EcoSIS
+  code_map:
+    "Cornus sp.": Cornus
+    "Corus sp.": Cornus
+    "Helianthus sp.": Helianthus
+    "Malus sp.": Malus
+    "Salix": Salix
+    "Salix sp.": Salix
+    "Solidago sp.": Solidago
+date: 2017
+site: {column: Domain}               # NEON domain only
+ecosystem: mixed
+traits:
+  - {column: LMA, trait: lma, unit: "g/m**2"}

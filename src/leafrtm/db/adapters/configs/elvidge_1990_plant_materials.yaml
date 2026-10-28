@@ -1,0 +1,31 @@
+dataset_id: elvidge_1990_plant_materials
+source: ecosis
+source_id: fresh-and-dry-spectra-of-several-plant-tissues-and-chemical-and-phenological-constituents
+citation: "Elvidge, C. D. (1990). Visible and near infrared reflectance characteristics of dry plant materials. Int. J. Remote Sens. 11, 1775-1795."
+doi: 10.1080/01431169008955129
+# Beckman UV-5240 with integrating sphere; the reflectance of samples of various tissues.
+# Kept: leaf tissue only. Dropped: purified compound powders (cellulose, lignin, starch, ...),
+# bark, wood, stems, flowers, cones, pericarp, seed capsules, sap. Also dropped: weathered
+# "Grey Leaf" litter, decayed leaves and black (fungus-darkened) needles. Green and yellow
+# leaves are treated as fresh, and brown/senesced leaves/needles as dried_intact (dead, air-dry).
+filter:
+  - "`Sample category` == 'Plant Tissue'"
+  - "`Target Type`.isin(['Green Leaf', 'Yellow Leaf', 'Senesced Leaf', 'Brown Leaf', 'Brown Needle'])"
+spectra:
+  wavelength_scale: 1000               # export wavelengths are in micrometres
+  quantity: R
+  scale: auto                          # values are fractions (metadata says %)
+  foreoptic: integrating_sphere
+  instrument: unknown                  # Beckman UV-5240 is not in instruments.yaml
+  sample_state:
+    column: "Target Type"
+    map: {Green Leaf: fresh, Yellow Leaf: fresh, Senesced Leaf: dried_intact, Brown Leaf: dried_intact, Brown Needle: dried_intact}
+  target_config: unknown
+ids:
+  entity: ["Sample Code"]
+species: {name: "Latin Species"}
+date: 1990
+ecosystem: mixed
+leaf_age:
+  column: "Target Type"
+  map: {Yellow Leaf: senescent, Senesced Leaf: senescent, Brown Leaf: senescent, Brown Needle: senescent}

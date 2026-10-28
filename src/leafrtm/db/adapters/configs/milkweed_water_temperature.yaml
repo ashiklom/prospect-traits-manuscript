@@ -1,0 +1,33 @@
+dataset_id: milkweed_water_temperature
+source: ecosis
+source_id: common-milkweed-leaf-responses-to-water-stress-and-elevated-temperature
+citation: "Couture, J. J., Serbin, S. P., Townsend, P. A. (2015). Elevated temperature and periodic water stress alter growth and quality of common milkweed (Asclepias syriaca) and monarch (Danaus plexippus) larval performance. Arthropod-Plant Interactions 9, 149-161."
+doi: 10.1007/s11829-015-9367-y
+# One row per plant (735 individuals, one leaf spectrum each; ID is unique).
+# Plants were harvested after 4 or 8 weeks of treatment (Time), different
+# individuals at each harvest. Room x Block is the growth-chamber layout.
+# Leaf traits in this package (LMA, N, C, C:N, lignin, fiber, cardenolides,
+# Vcmax) were PREDICTED from the spectra (PLSR, see description) -> not mapped.
+# Measured latex, trichomes and biomass are not in the trait vocabulary.
+spectra:
+  quantity: R
+  scale: auto
+  foreoptic: leaf_clip        # ASD plant probe + leaf clip
+  instrument: asd-fs3
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [ID]
+  plant: [ID]
+species: {constant: "Asclepias syriaca"}
+date: 2012                    # Feb-Apr 2012 (package "Year" 2015 is the publication year)
+site: {name: "UW-Madison Biotron"}
+plot: {column: Room}
+lat: 43.075
+lon: -89.410
+ecosystem: greenhouse
+treatments:
+  - {factor: temperature, column: Temperature, control: ["23"]}   # 23 C ambient vs 30 C elevated (column values)
+  - {factor: water, column: Water treatment, control: [ww]}       # ww well-watered, ws periodic water stress
+  - {factor: genotype, column: Population}                        # seed source populations (northern/southern Midwest)
+  - {factor: phenology_stage, column: Time}                       # weeks of treatment at harvest (4 or 8)

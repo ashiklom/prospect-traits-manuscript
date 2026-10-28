@@ -1,0 +1,21 @@
+# Spectrometers. fwhm_nm: nominal native resolution (documentation only; the
+# observation operator decides from each spectrum's sampling, see obsop.py).
+# Seeded from spectra_db/instruments.yml.
+asd-fspro:      {manufacturer: ASD, model: FieldSpec Pro, fwhm_nm: 10}
+asd-fs3:        {manufacturer: ASD, model: FieldSpec 3, fwhm_nm: 10}
+asd-fs4:        {manufacturer: ASD, model: FieldSpec 4, fwhm_nm: 8}
+asd-fs:         {manufacturer: ASD, model: FieldSpec (unspecified), fwhm_nm: 10}
+asd-other:      {manufacturer: ASD, model: other/unspecified, fwhm_nm: null}
+svc-hr1024i:    {manufacturer: Spectra Vista Corporation, model: HR-1024i, fwhm_nm: 8}
+svc-other:      {manufacturer: Spectra Vista Corporation, model: other, fwhm_nm: null}
+se-psm3500:     {manufacturer: Spectral Evolution, model: PSM-3500, fwhm_nm: 8}
+se-psr3500:     {manufacturer: Spectral Evolution, model: PSR+ 3500, fwhm_nm: 8}
+se-other:       {manufacturer: Spectral Evolution, model: other, fwhm_nm: null}
+pe-lambda19:    {manufacturer: Perkin Elmer, model: Lambda 19, fwhm_nm: 2}
+pe-lambda950:   {manufacturer: Perkin Elmer, model: Lambda 950, fwhm_nm: 2}
+pe-lambda1050:  {manufacturer: Perkin Elmer, model: Lambda 1050, fwhm_nm: 2}
+pe-other:       {manufacturer: Perkin Elmer, model: other, fwhm_nm: null}
+foss-nirs6500:  {manufacturer: FOSS, model: NIRSystems 6500, fwhm_nm: 10}
+oo-usb2000:     {manufacturer: Ocean Optics, model: USB2000, fwhm_nm: 1.5}
+oo-usb4000:     {manufacturer: Ocean Optics, model: USB4000, fwhm_nm: 1.5}
+unknown:        {manufacturer: null, model: null, fwhm_nm: null}

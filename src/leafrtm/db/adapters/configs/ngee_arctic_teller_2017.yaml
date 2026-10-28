@@ -1,0 +1,31 @@
+dataset_id: ngee_arctic_teller_2017
+source: ecosis
+source_id: ngee-arctic-2017-leaf-spectral-reflectance-teller-watershed-seward-peninsula-alaska
+# Sample IDs with suffixes Q1-Q4 are separate samples (they have their own traits) and are kept
+# as separate entities. 43 rows (USDA code SALAC2) have no Latin name; the code is kept.
+columns:
+  latin_name: "`Latin Genus`.str.strip().str.cat(`Latin Species`.str.strip(), sep=' ')"
+  lwc_clean: "LWC.where(LWC < 99.9)"   # three samples have LWC = 100 %, a placeholder
+spectra:
+  quantity: R
+  scale: percent
+  foreoptic: leaf_clip             # SVC LC-RP-Pro leaf clip / plant probe
+  instrument: svc-hr1024i
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [SampleID]
+species: {name: latin_name, code: "USDA Symbol"}
+date: {column: "Measurement Date", format: "%Y%m%d"}
+site: {name: "Teller watershed (MM27), Seward Peninsula"}
+lat: 64.733
+lon: -165.942
+ecosystem: tundra
+traits:
+  - {column: LMA, trait: lma, unit: "g/m**2"}
+  - {column: lwc_clean, trait: lwc, unit: percent}
+  - {column: Nmass, trait: n_mass, unit: "mg/g"}   # 9-32 mg/g
+  - {column: Cmass, trait: c_mass, unit: "mg/g"}   # 307-539 mg/g
+  - {column: Narea, trait: n_area, unit: "g/m**2"}
+  - {column: Carea, trait: c_area, unit: "g/m**2"}
+  - {column: CNratio, trait: cn_ratio}

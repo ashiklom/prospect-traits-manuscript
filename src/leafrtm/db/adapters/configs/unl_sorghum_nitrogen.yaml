@@ -1,0 +1,37 @@
+dataset_id: unl_sorghum_nitrogen
+source: ecosis
+source_id: leaf-spectra-and-physiological-and-chemical-traits-from-sorghum-grown-under-nitrogen-stress
+# Sorghum association panel, Havelock Research Farm 2020, high (HN) vs low (LN)
+# nitrogen. One leaf spectrum per plot/individual (ID and PlotID unique);
+# 233 of 1434 leaves have ground truth.
+# N, P, K mapped as % DW (same lab/methods as the maize panel, Ge et al. 2019).
+# NOT mapped: CHL (Apogee MC-100 meter reading, umol/m2, optical index) and
+# SLA (values 52-125 with no stated unit; neither cm2/g -> LMA 80-190 g/m2 nor
+# m2/kg -> LMA 8-19 g/m2 is plausible for field sorghum; maize from the same
+# lab has SLA ~177 cm2/g).
+# 81 rows have no spectral values (and pheno is empty); dropped.
+filter: ["pheno.notna()"]
+spectra:
+  quantity: R
+  scale: auto
+  foreoptic: leaf_clip
+  instrument: asd-fs4
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [ID]
+  plant: [PlotID]
+species: {constant: "Sorghum bicolor"}
+date: 2020
+site: {name: "Havelock Research Farm"}
+plot: {column: PlotID}
+lat: 40.852
+lon: -96.616
+ecosystem: cropland
+treatments:
+  - {factor: nitrogen, column: Treatment, control: [HN]}
+  - {factor: genotype, column: Asseccion}
+traits:
+  - {column: N, trait: n_mass, unit: percent}
+  - {column: P, trait: p_mass, unit: percent}
+  - {column: K, trait: k_mass, unit: percent}

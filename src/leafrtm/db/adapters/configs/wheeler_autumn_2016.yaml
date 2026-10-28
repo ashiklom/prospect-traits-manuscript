@@ -1,0 +1,16 @@
+dataset_id: wheeler_autumn_2016
+source: ecosis
+source_id: spectra-from-in-situ-deciduous-leaves-and-leaves-collected-for-nitrogen-analysis-throughout-autumn
+include: false
+exclude_reason: >-
+  The EcoSIS export merges three resource files (in situ live leaves, collected fresh
+  leaves, the same collected leaves dried) into one table with only Tree, Date and
+  LeafNumber columns, so fresh and dried spectra cannot be told apart, and the trait
+  file (CollectedLeavesTraits_2016.csv: N, C, H %, area, fresh/dry mass) is not part of
+  the export. Spectra are also VNIR only (PSP-1100, 320-1100 nm). Recoverable only by
+  reading the per-resource CSVs (AutumnSpectraField2016, CollectedFreshAutumnSpectra2016,
+  CollectedDryAutumnSpectra2016, CollectedLeavesTraits_2016), which the ecosis loader
+  does not support.
+citation: "Wheeler, K. I., Levia, D. F., Vargas, R. (2016). Spectra from in situ deciduous leaves and leaves collected for nitrogen analysis throughout autumn. EcoSIS data set."
+ids:
+  entity: [Tree, LeafNumber]

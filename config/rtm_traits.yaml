@@ -1,0 +1,38 @@
+# How RTM parameters correspond to measured traits (canonical units of
+# src/leafrtm/db/vocab/traits.yaml). `expr` combines parameters; `factor`
+# converts units; `relative: true` marks quantities with no reliable absolute
+# scale (compared by correlation only).
+# Sources: PROSPECT units (Feret et al. 2008, 2017, 2021): pigments ug cm-2,
+# Cw/Cm/Cprot/Ccbc g cm-2 (x 1e4 -> g m-2); proteins = 4.43 x N (Feret et al.
+# 2021). LIBERTY units: rrtm::liberty documentation (Dawson et al. 1998).
+prospect4:   &p4
+  - {param: Cab, trait: chl_area, factor: 1}
+  - {param: Cw, trait: ewt, factor: 10000}
+  - {param: Cm, trait: lma, factor: 10000}
+prospect5:   &p5
+  - {param: Cab, trait: chl_area, factor: 1}
+  - {param: Car, trait: car_area, factor: 1}
+  - {param: Cw, trait: ewt, factor: 10000}
+  - {param: Cm, trait: lma, factor: 10000}
+prospect5b: *p5
+prospectd:   &pd
+  - {param: Cab, trait: chl_area, factor: 1}
+  - {param: Car, trait: car_area, factor: 1}
+  - {param: Canth, trait: anth_area, factor: 1}
+  - {param: Cw, trait: ewt, factor: 10000}
+  - {param: Cm, trait: lma, factor: 10000}
+leafsip: *pd
+prospectpro:
+  - {param: Cab, trait: chl_area, factor: 1}
+  - {param: Car, trait: car_area, factor: 1}
+  - {param: Canth, trait: anth_area, factor: 1}
+  - {param: Cw, trait: ewt, factor: 10000}
+  - {param: Cprot, trait: protein_area, factor: 10000}
+  - {param: Cprot, trait: n_area, factor: 2257.336}      # 1e4 / 4.43
+  - {expr: "Cprot + Ccbc", trait: lma, factor: 10000}
+liberty:     &lib
+  - {param: c_factor, trait: chl_area, factor: 0.1}      # mg m-2 -> ug cm-2
+  - {param: w_factor, trait: ewt, factor: 1}             # g m-2
+  - {param: p_factor, trait: n_area, factor: 1}          # g m-2
+  - {param: l_factor, trait: lignin_cellulose_area, factor: 1, relative: true}
+liberty_dawson: *lib

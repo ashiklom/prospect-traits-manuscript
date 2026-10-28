@@ -1,0 +1,78 @@
+dataset_id: ngee_tropics_puerto_rico_2017
+source: ecosis
+source_id: ngee-tropics-gliht-puerto-rico-campaign-leaf-spectral-reflectance-and-transmittance-march-2017
+# R: leaf clip on either an SVC HR-1024i or a Spectral Evolution PSR+ 3500.
+# T: SVC integrating sphere ("Relative" T); its SampleID carries a trailing "T", stripped to get
+# the leaf ID shared with R. Single campaign (3-9 March 2017), so no ids.time: a few T rows lack
+# the date.
+# 55 leaves have two R rows with identical metadata (both labelled PSR+3500). In every pair the
+# first row has the PSR+ signature (~20 % R at 360 nm) and the second the SVC one (~4 %), and the
+# second is ~10-15 % lower in the NIR: the second row is an SVC HR-1024i measurement of the same
+# leaf, mislabelled. Relabel it (instrument_model below); both stay as replicate R spectra of the
+# leaf, with different instruments.
+columns:
+  leaf_id: "SampleID.str.replace('T$', '', regex=True)"
+  second_r: "SampleID.duplicated(keep='first') & (Measurement == 'Reflectance')"
+  instrument_model: "`Instrument Model`.where(~second_r, 'HR-1024i')"
+# BNL12764T has two very different T spectra (550 nm: 1.8 vs 8.0 %); can't tell which belongs
+# to the leaf, so drop both.
+filter: ["SampleID != 'BNL12764T'"]
+spectra:
+  quantity: {column: Measurement, map: {Reflectance: R, Transmittance: T}}
+  scale: percent
+  foreoptic:
+    column: "Foreoptic Type"
+    map: {SVC_Integrating_Sphere: integrating_sphere, Fiber_1_LC_RP_Pro: leaf_clip, Fiber_Optic_LC_RP_Pro: leaf_clip}
+  instrument: {column: instrument_model, map: {HR-1024i: svc-hr1024i, PSR+3500: se-psr3500}}
+  sample_state: fresh
+  target_config: single_leaf
+  # PSR+ R is ~20 % at 360 nm and sphere T is noisy below 400 nm; crop.
+  wavelength_range: [400, 2500]
+ids:
+  entity: [leaf_id]
+species:
+  name: Full_Species_Name
+  map:   # typos and author strings
+    "Bourreria succculenta": "Bourreria succulenta"
+    "Clitorin fairchildan": "Clitoria fairchildiana"
+    "Guapira fragans": "Guapira fragrans"
+    "Andira inermis (MOCA)": "Andira inermis"
+    "Phlebotaenia (Polygala) cowellii": "Phlebotaenia cowellii"
+    "Pimenta racemosa var.?": "Pimenta racemosa"
+    "Pimenta racemosa (Mill.) J.W. Moore": "Pimenta racemosa"
+    "calophyllum calaba": "Calophyllum calaba"
+    "Licaria parvifolia (Lam.) Kosterm.": "Licaria parvifolia"
+    "Gymnanthes lucida Sw.": "Gymnanthes lucida"
+    "Alchornea latifolia Sw.": "Alchornea latifolia"
+    "Alchornea latifolia Sw": "Alchornea latifolia"
+    "Sideroxylon salicifolium (L.) Lam.": "Sideroxylon salicifolium"
+    "Cinnamomum elongatum (Vahl ex Nees) Kosterm.": "Cinnamomum elongatum"
+    "Cecropia schreberiana Miq.": "Cecropia schreberiana"
+    "Tabebuia heterophylla (DC.) Britton": "Tabebuia heterophylla"
+    "Krugiodendron ferreum (Vahl) Urb.": "Krugiodendron ferreum"
+    "Spathodea campanulata P. Beauv": "Spathodea campanulata"
+    "Albizia procera (Roxb.) Benth.": "Albizia procera"
+    "Clusia rosea Jacq.": "Clusia rosea"
+    "Zanthoxylum martinicense (Lam.) DC.": "Zanthoxylum martinicense"
+    "Ocotea leucoxylon (Sw.) De Laness.": "Ocotea leucoxylon"
+    "Inga laurina (Sw.) Willd.": "Inga laurina"
+date: {column: "Measurement Date", format: "%Y%m%d.0"}
+site: {column: "Location Name"}   # CAM II, CAR I, FLMM, IITF, FLMM+IITF, SB2
+lat: Latitude
+lon: Longitude
+ecosystem: forest
+canopy_position: {column: Canopy_Position, map: {Upper: top, Mid: middle, Lower: bottom}}
+sun_shade: {column: Light_Exposure, map: {Sunlit: sun, Shaded: shade}}   # Part_Sun -> missing
+leaf_age:
+  column: Leaf_Age
+  map: {Young: young, Mature: mature, Old: old, Senescent: senescent,
+        Old-epiphyll: old, Mature-epiphyll: mature, Mature-minor-epiphyll: mature}
+  # Young-Mature / Mature-Old -> missing
+traits:
+  - {column: LMA, trait: lma, unit: "g/m**2"}
+  - {column: Leaf_H2O_pc, trait: lwc, unit: percent}   # water % of fresh mass (44-85 %)
+  - {column: Nmass, trait: n_mass, unit: "mg/g"}       # 8-52 mg/g
+  - {column: Cmass, trait: c_mass, unit: "mg/g"}
+  - {column: Narea, trait: n_area, unit: "g/m**2"}
+  - {column: Carea, trait: c_area, unit: "g/m**2"}
+  - {column: CNratio, trait: cn_ratio}

@@ -1,0 +1,64 @@
+dataset_id: neon_east_2017
+source: ecosis
+source_id:
+  - fresh-leaf-spectra-to-estimate-foliar-functional-traits-over-neon-domains-in-eastern-united-states
+  - dried-leaf-spectra-to-estimate-foliar-functional-traits-over-neon-domains-in-eastern-united-states
+citation: "Wang, Z., Chlus, A., Geygan, R., Ye, Z., Zheng, T., Singh, A., Couture, J. J., Cavender-Bares, J., Kruger, E. L., Townsend, P. A. (2020). Foliar functional traits from imaging spectroscopy across biomes in eastern North America. New Phytol. 228, 494-511."
+# 2017 NEON eastern-domain foliar samples (one sample = pooled leaves of one plant).
+# The three ID series share their number: fresh P### (ASD, all samples), fresh S###
+# (the phenolics PLSR subset: same samples, 63 of 170 spectra identical to P###,
+# others near-identical re-processings) and dried/ground L###; site, date and species
+# agree for every shared number, and S/L phenolics are equal. So: entity = number,
+# state in ids.time; S### rows are dropped as duplicates of P###.
+# Chemistry was measured on the ground sample, so it is attached to the entity
+# (level: plant) and applies to both the fresh and the ground observation.
+# Same samples also appear (PSR+ spectra, other IDs) in dataset neon_across, and
+# their individual leaves in neon_east_lma; neither can be linked by ID.
+columns:
+  num: "Sample_ID.str.extract('([0-9]+)$', expand=False).astype('int64')"
+  state: "_package_index"
+  # 9 samples report C of 606-880 mg/g (physically implausible for leaf tissue): masked
+  carbon_qc: "Carbon.where(Carbon <= 600)"
+filter:
+  - "~((_package_index == 0) & Sample_ID.str.startswith('S'))"
+spectra:
+  quantity: R
+  scale: auto
+  foreoptic: contact_probe           # ASD contact probe (plant probe) for fresh and dried/ground
+  instrument: asd-fs3                # serial 16122
+  # package metadata: Target Status "dried, ground"; NIR/SWIR levels (R1450 ~0.6) indicate powder
+  sample_state: {column: state, map: {0: fresh, 1: ground}}
+  target_config: {column: state, map: {0: single_leaf, 1: unknown}}
+ids:
+  entity: [num]
+  time: [state]
+# Species codes are USDA symbols without their numeric suffix; the Latin Genus/Species
+# columns were filled by EcoSIS from those truncated codes and are often wrong (PIBA ->
+# Pinus balfouriana, ACSA -> Acacia saligna, ...). Corrections per (name, code) pair are in
+# vocab/species_resolution.csv (source usda_code_context).
+species:
+  name: ["Latin Genus", "Latin Species"]
+  code: "USDA Symbol"
+  code_map: {"Albizia spp.": Albizia, "Malus spp.": Malus, "Persea spp.": Persea, "Salix spp.": Salix}
+date: {column: Sample_Date, format: "%Y%m%d"}
+site: {column: Site}
+ecosystem: mixed                     # forest, grassland, shrubland sites
+traits:
+  # dried/ground-sample chemistry, all in mg/g dry mass
+  - {column: Nitrogen, trait: n_mass, unit: "mg/g", level: plant}
+  - {column: carbon_qc, trait: c_mass, unit: "mg/g", level: plant}
+  - {column: Phosphorus, trait: p_mass, unit: "mg/g", level: plant}
+  - {column: Potassium, trait: k_mass, unit: "mg/g", level: plant}
+  - {column: Calcium, trait: ca_mass, unit: "mg/g", level: plant}
+  - {column: Magnesium, trait: mg_mass, unit: "mg/g", level: plant}
+  - {column: Sulfur, trait: s_mass, unit: "mg/g", level: plant}
+  - {column: Cellulose, trait: cellulose_mass, unit: "mg/g", level: plant}
+  - {column: Lignin, trait: lignin_mass, unit: "mg/g", level: plant}
+  # 'Fiber' == Cellulose + Lignin exactly (derived): not mapped
+  - {column: NSC, trait: nsc_mass, unit: "mg/g", level: plant}
+  - {column: Starch, trait: starch_mass, unit: "mg/g", level: plant}
+  - {column: Sugar, trait: sugar_mass, unit: "mg/g", level: plant}
+  - {column: Phenolics, trait: phenolics_mass, unit: "mg/g", level: plant}
+  - {column: d13C, trait: d13c, unit: permille, level: plant}
+  - {column: d15N, trait: d15n, unit: permille, level: plant}
+  # not in vocab: Flavonoids, Al, B, Cu, Fe, Mn, Zn

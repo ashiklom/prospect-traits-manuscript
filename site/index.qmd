@@ -1,0 +1,52 @@
+---
+title: "Leaf radiative transfer models as trait instruments"
+---
+
+```{python}
+from _lib import *
+ds = read("inventory_datasets")
+em = read("error_model_comparison")
+```
+
+This site reports a Bayesian inversion of seven leaf radiative transfer models (RTMs) on a
+harmonized library of leaf spectra with paired trait measurements. Most of the library comes
+from EcoSIS, ECOSTRESS, NASA SHIFT and `spectra_db`. The models are PROSPECT-4, 5, 5B, D and
+PRO, LIBERTY and LeafSIP. The work serves the manuscript *Chloroplasts to canopies*, and
+results are organized around its two objectives:
+
+* **A · How good are leaf RTMs?** Spectral fit, agreement between models, retrieval accuracy
+  and calibration, out-of-sample transmittance, and where the models' assumptions break down
+  (dried and ground samples, measurement protocols).
+* **B · How do traits vary?** The best available trait estimate for every leaf, used for
+  variance partitioning, treatment effects, and correlations within and across species.
+
+```{python}
+if len(ds):
+    stats([(f"{int(ds['n_observations'].sum()):,}", "leaf observations"),
+           (f"{int(ds['n_spectra'].sum()):,}", "spectra"),
+           (f"{len(ds)}", "datasets"),
+           (f"{read('inventory_species').shape[0]:,}", "taxa")])
+```
+
+```{python}
+#| output: asis
+if len(em):
+    print(f"Fit set: **{FITSET}**, {em['run_id'].nunique()} model × error-model configurations "
+          "(see [Error models](error-models.qmd)).")
+else:
+    print(f"Fit set: **{FITSET}**. No inversion results are bundled with this build yet.")
+```
+
+## How it is built
+
+* **Workflow.** Every step, from download to this site, is a Snakemake rule
+  (`Snakefile`, `workflow/rules/`). Raw and processed data and fit results are not version
+  controlled; the tables behind this site are published as a GitHub release asset.
+* **Spectra are never resampled.** RTM output is mapped onto each spectrum's own wavelengths
+  by an observation operator (selection, interpolation, or a spectral response function for
+  coarse instruments).
+* **Replicates and quantities.** All replicate spectra of a leaf, and both reflectance (R) and
+  transmittance (T) where measured, enter one likelihood.
+* **Error models.** Residuals are correlated across wavelengths, so iid errors make posteriors
+  badly overconfident. Four structured error models are compared on the
+  [Error models](error-models.qmd) page.

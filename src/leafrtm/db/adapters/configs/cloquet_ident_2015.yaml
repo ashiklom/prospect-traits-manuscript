@@ -1,0 +1,31 @@
+dataset_id: cloquet_ident_2015
+source: ecosis
+source_id: leaf-spectra-ident-cloquet
+# Schweiger (Cavender-Bares lab), NSF/NASA Dimensions of Biodiversity project:
+# 6 tree species in the IDENT tree-diversity experiment at Cloquet, northern Minnesota, 2015.
+# SVC HR-1024i + leaf clip, single unaveraged spectra. The `ident` column is a spectrum
+# number shared across the six Schweiger packages (disjoint ranges: E120 1-4858, FAB 4859-5530,
+# chemistry 5531-5625 + 10526-11510, Cloquet 5626-5984, old fields 5985-7374, oak savanna
+# 7375-10525); no package repeats another's spectra. No leaf/plant/plot IDs or traits are
+# given; consecutive spectra of a species differ like different leaves, so each ident is
+# treated as one leaf.
+spectra:
+  quantity: R
+  scale: auto                      # metadata says %, values are fractions
+  foreoptic: leaf_clip
+  instrument: svc-hr1024i
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [ident]
+species:
+  name: ["Latin Genus", "Latin Species"]
+  map:
+    Petelostemum candidum: Petalostemum candidum
+    Taraxicum officinalis: Taraxacum officinale
+    Zanthoxylem americanum: Zanthoxylum americanum
+date: 2015
+site: {name: "IDENT Cloquet"}
+lat: 46.686
+lon: -92.392
+ecosystem: forest

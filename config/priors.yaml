@@ -1,0 +1,43 @@
+# Priors for RTM and error-model parameters.
+#   lognormal: {meanlog, sdlog}; truncnormal: {mu, sigma, lower, upper};
+#   uniform: {lower, upper}; halfnormal: {sigma}.
+# PROSPECT/LeafSIP constituent priors follow PEcAnRTM::prospect_bt_prior, as in
+# prospect-inversion-comparison/config/priors.json. Units: pigments ug cm-2;
+# Cw, Cm, Cprot, Ccbc g cm-2; Cbrown arbitrary.
+rtm:
+  N:      {dist: truncnormal, mu: 1.5, sigma: 1.0, lower: 1.0}
+  Cab:    {dist: lognormal, meanlog: 3.6889, sdlog: 0.9}
+  Car:    {dist: lognormal, meanlog: 2.3026, sdlog: 1.1}
+  Canth:  {dist: lognormal, meanlog: 0.6931, sdlog: 1.5}
+  Cbrown: {dist: lognormal, meanlog: -2.3026, sdlog: 1.5}
+  Cw:     {dist: lognormal, meanlog: -4.6052, sdlog: 1.0}
+  Cm:     {dist: lognormal, meanlog: -4.7105, sdlog: 1.0}
+  # PROSPECT-PRO (Feret et al. 2021 calibration ranges: protein ~0.0005-0.003,
+  # CBC ~0.002-0.02 g cm-2)
+  Cprot:  {dist: lognormal, meanlog: -6.725, sdlog: 1.0}
+  Ccbc:   {dist: lognormal, meanlog: -4.962, sdlog: 1.0}
+  # LIBERTY (typical values and ranges from rrtm::liberty documentation). thick >= 1:
+  # the model jumps from 2 to 1 layers at thick = 1. xu <= 0.2: NIR reflectance
+  # saturates in xu, changing < 2 % above 0.2. (The published model, liberty_dawson,
+  # needed xu <= 0.06 to stay where its R_inf equation has a real root; the fitted
+  # liberty corrects that equation and is defined everywhere.)
+  xu:       {dist: uniform, lower: 0.005, upper: 0.2}
+  thick:    {dist: truncnormal, mu: 1.6, sigma: 1.5, lower: 1.0, upper: 10.0}
+  baseline: {dist: lognormal, meanlog: -7.6, sdlog: 0.5}
+  element:  {dist: lognormal, meanlog: 0.693, sdlog: 0.8}
+  c_factor: {dist: lognormal, meanlog: 5.30, sdlog: 0.9}
+  w_factor: {dist: lognormal, meanlog: 4.61, sdlog: 0.9}
+  l_factor: {dist: lognormal, meanlog: 3.69, sdlog: 0.9}
+  p_factor: {dist: lognormal, meanlog: 0.0, sdlog: 0.9}
+error:
+  sigma0: {dist: halfnormal, sigma: 0.02}
+  sigma1: {dist: halfnormal, sigma: 0.1}
+  # OU correlation length (nm): median 50, truncated at 250. Within one leaf, a
+  # residual process correlated over thousands of nm acts as a free baseline that
+  # absorbs the broad dry-matter and water features: unbounded, the dominant
+  # posterior mode had ell 2500-4700 nm and Cm about half the measured LMA, and
+  # randomly started chains split between modes (R-hat ~1.5). Broad shared misfit
+  # is left to the learned discrepancy (ld), which is identified across leaves.
+  ell:    {dist: lognormal, meanlog: 3.912, sdlog: 0.75, upper: 250}
+  kappa:  {dist: lognormal, meanlog: 0.0, sdlog: 0.7}
+  rho:    {dist: beta, alpha: 2.0, beta: 2.0}             # rho = 2 * x - 1

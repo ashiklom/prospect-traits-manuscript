@@ -1,0 +1,40 @@
+dataset_id: ngee_tropics_panama_2016
+source: ecosis
+source_id: ngee-tropics-leaf-spectral-reflectance-measured-in-panama-collected-february-to-april-2016
+# 2016 ENSO campaign, crane sites PA-PNM and PA-SLZ, monthly Feb-Apr. Each BNL barcode is one
+# leaf (BNL11815 has two identical-metadata rows = replicate spectra).
+# The 709 SVC spectra are also in spectra_db `ngee_tropics` (708 obs, no traits besides LWP);
+# this EcoSIS version adds the PSR+ spectra, LMA, water content and CN; keep only one.
+columns:
+  latin_name: "Genus_species.str.strip()"
+  lat_site: "(`Location Name` == 'PA-PNM') * 8.9944 + (`Location Name` == 'PA-SLZ') * 9.2810"
+  lon_site: "(`Location Name` == 'PA-PNM') * -79.5431 + (`Location Name` == 'PA-SLZ') * -79.9746"
+spectra:
+  quantity: R
+  scale: percent
+  foreoptic: {column: Foreoptic, map: {Fiber_1_LC_RP: leaf_clip, SE_Contact_Probe: contact_probe}}
+  instrument: {column: "Instrument Model", map: {SVC_HR-1024i: svc-hr1024i, SE_PSRPlus: se-psr3500}}
+  sample_state: fresh
+  target_config: single_leaf
+  wavelength_range: [400, 2500]   # PSR+ contact probe reads 12-16 % at 350-360 nm (artefact)
+ids:
+  entity: [Sample_ID]
+species: {name: latin_name}
+date: {column: Sample_Date, format: "%Y%m%d"}
+site: {column: "Location Name"}
+lat: lat_site
+lon: lon_site
+ecosystem: forest
+canopy_position: {column: Canopy_position, map: {sunlit: top, understory: bottom}}
+sun_shade: {column: Canopy_position, map: {sunlit: sun, understory: shade}}
+traits:
+  - {column: LMA_gDW_m2, trait: lma, unit: "g/m**2"}
+  - {column: H20_pc, trait: lwc, unit: percent}        # water % of fresh mass (29-82 %)
+  - {column: Nmass_pc, trait: n_mass, unit: percent}
+  - {column: Cmass_pc, trait: c_mass, unit: percent}
+  - {column: Narea_g_m2, trait: n_area, unit: "g/m**2"}
+  - {column: Carea_g_m2, trait: c_area, unit: "g/m**2"}
+  - {column: CNratio, trait: cn_ratio}
+  # LWP given as positive tension in bar (4-37); water potential is negative.
+  - {column: LWP_bar, trait: water_potential, unit: bar, factor: -1}
+  - {column: TleafDegCpreSpec, trait: leaf_temperature, unit: degC}

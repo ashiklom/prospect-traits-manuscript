@@ -1,0 +1,32 @@
+dataset_id: couture_2016_aspen_birch
+source: ecosis
+source_id: couture-et-al--2016-mme-data
+citation: "Couture, J. J., Singh, A., Rubert-Nason, K. F., Serbin, S. P., Lindroth, R. L., Townsend, P. A. (2016). Spectroscopic determination of ecologically relevant plant secondary metabolites. Methods in Ecology and Evolution 7, 1402-1412."
+doi: 10.1111/2041-210X.12596
+# The export mixes two files without sample IDs:
+#  - 212 fresh-leaf spectra (350-2500 nm, ASD plant probe + leaf clip) with
+#    species (SPP: A = aspen, B = birch) and condensed tannins (CT, % DW);
+#  - 395 dried/ground aspen spectra whose 1100-2400 nm bands were exported as
+#    metadata columns "B1100".."B2400" (not read as wavelengths by the loader),
+#    with salicinoids and CT. Those rows only have 350-1099 + 2401-2500 nm and
+#    cannot be linked to the fresh leaves -> dropped (filter on SPP).
+# No leaf IDs exist: each fresh row is its own entity (row number).
+columns:
+  row: "(_package_index + 1).cumsum()"
+filter: ["SPP.notna()"]
+spectra:
+  quantity: R
+  scale: auto
+  foreoptic: leaf_clip
+  instrument: asd-fs3
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [row]
+species:
+  name: SPP
+  map: {A: Populus tremuloides, B: Betula papyrifera}
+site: {name: "UW-Madison (Arlington Research Station / Walnut Street greenhouse)"}
+ecosystem: mixed
+traits:
+  - {column: CT, trait: tannins_mass, unit: percent}   # condensed tannins, % DW

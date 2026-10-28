@@ -1,0 +1,35 @@
+dataset_id: cedar_creek_chem_spectra
+source: ecosis
+source_id: leaf-spectra-cedar-creek-lter-for-chemical-analyses
+# Schweiger (Cavender-Bares lab), NSF/NASA Dimensions of Biodiversity project:
+# fresh leaves collected for chemical analyses (chemistry not published here), Cedar Creek LTER.
+# SVC HR-1024i + leaf clip, single unaveraged spectra. The `ident` column is a spectrum
+# number shared across the six Schweiger packages (disjoint ranges: E120 1-4858, FAB 4859-5530,
+# chemistry 5531-5625 + 10526-11510, Cloquet 5626-5984, old fields 5985-7374, oak savanna
+# 7375-10525); no package repeats another's spectra. No leaf/plant/plot IDs or traits are
+# given; consecutive spectra of a species differ like different leaves, so each ident is
+# treated as one leaf.
+columns:
+  # No date given; year inferred from the ident sequence (5531-5625 fall between the 2015
+  # FAB and 2015 Cloquet spectra, 10526-11510 follow the 2016 oak savanna spectra).
+  year: "(ident.astype('int') >= 10526) + 2015"
+spectra:
+  quantity: R
+  scale: auto                      # metadata says %, values are fractions
+  foreoptic: leaf_clip
+  instrument: svc-hr1024i
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [ident]
+species:
+  name: ["Latin Genus", "Latin Species"]
+  map:
+    Petelostemum candidum: Petalostemum candidum
+    Taraxicum officinalis: Taraxacum officinale
+    Zanthoxylem americanum: Zanthoxylum americanum
+date: {year: year}
+site: {name: "Cedar Creek LTER"}
+lat: 45.40
+lon: -93.19
+ecosystem: mixed

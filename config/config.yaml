@@ -1,0 +1,89 @@
+# Workflow configuration. Select a fit set with `snakemake --config fitset=full`.
+fitset: pilot
+fit_version: v1
+
+# Quantities used in the likelihood. Absorbance (A) and pseudo-absorbance (PA)
+# are added once their feasibility check passes (see the Diagnostics page).
+fit_quantities: [R, T]
+# Optional wavelength masks [lo, hi] in nm, e.g. noisy water bands.
+mask_ranges: []
+
+sampler: {chains: 4, tune: 1000, draws: 1000, target_accept: 0.8}
+
+# A run = RTM x data use; errors are always hetero + OU (leafrtm.fit).
+#   data_use: all (every fitted quantity) | R (reflectance only; only for
+#   observations that also have T or A, so T can be predicted out of sample)
+#   only_rt: fit only observations with both R and T.
+
+# Trait analyses. `flag`: thresholds for flagging (dataset, year, trait) groups whose RTM
+# estimates miss the measurements much more than the same trait does elsewhere
+# (analysis table suspect_groups; site page "Suspect groups"). `exclude`: groups to leave out,
+# e.g. {dataset: yang_pheno, year: 2012, traits: [chl_area], reason: "...", scope: ecology}.
+# scope "ecology" (default) drops them from the trait-variation analyses (part B); "all"
+# also drops their measurements from validation and best-configuration selection.
+# `auto_exclude_flagged: true` adds every flagged group with scope "ecology".
+analysis:
+  flag: {min_n: 3, max_abs_log_deviation: 0.405, min_share_runs: 0.5}
+  auto_exclude_flagged: false
+  exclude: []
+
+fitsets:
+  pilot:
+    n_observations: 140
+    min_rt: 48          # R+T leaves for the R-only vs R+T and held-out T comparisons
+    n_batches: 8
+    quantities: [R, T]
+    sampler: {chains: 4, tune: 600, draws: 600}
+    # After commit 0cc1e51 runs are hetero + OU only; the pilot's results/pilot keeps the
+    # four-model comparison (Matern-3/2, learned discrepancy, R/T-correlated) for reference.
+    runs:
+      - {id: prospectd_ou,      model: prospectd, data_use: all}
+      - {id: liberty_ou,        model: liberty,   data_use: all}
+      - {id: leafsip_ou,        model: leafsip,   data_use: all}
+      - {id: prospectd_ou_R,    model: prospectd, data_use: R,   only_rt: true}
+  smoke:  # tiny end-to-end test of the workflow (CI-sized)
+    n_observations: 16
+    n_batches: 2
+    quantities: [R, T]
+    sampler: {chains: 2, tune: 150, draws: 150}
+    runs:
+      - {id: prospectd_ou,   model: prospectd, data_use: all}
+      - {id: leafsip_ou,     model: leafsip,   data_use: all}
+      - {id: prospectd_ou_R, model: prospectd, data_use: R,   only_rt: true}
+  feasibility:  # can absorbance (A) and pseudo-absorbance (PA) be fitted? (Diagnostics page)
+    datasets: [herrmann_pepper_nk, accp]
+    n_observations: 30
+    n_batches: 2
+    quantities: [R, T, A, PA]
+    fit_quantities: [R, T, A, PA]
+    strata: [dataset_id, sample_state]
+    sampler: {chains: 4, tune: 600, draws: 600}
+    runs:
+      - {id: prospectd_ou_RT, model: prospectd, data_use: R+T}
+      - {id: prospectd_ou_A,  model: prospectd, data_use: A}
+      - {id: prospectd_ou_PA, model: prospectd, data_use: PA}
+  full:
+    # Configured from the pilot (site: Error models, Diagnostics):
+    # * Errors: hetero + OU, independently for each quantity, the only error model fitted
+    #   after commit 0cc1e51 (tag v0.3-pilot-all-errmodels). In the pilot it matched or beat
+    #   Matern-3/2 and the learned discrepancy on trait log-CRPS (PROSPECT-D 0.42 vs 0.44 and
+    #   0.45; LeafSIP 0.59 vs 0.74 and 0.59); correlated R/T errors added nothing on the same
+    #   leaves (0.40 vs 0.40).
+    # * Every RTM is fitted to every observation (objective 1); PROSPECT-D is also fitted to
+    #   reflectance alone on R+T leaves (R only vs R+T; held-out T).
+    # * Absorptance (A) and pseudo-absorbance (PA) are fitted: in the pilot, A fits agreed with
+    #   R+T fits of the same leaves (pigments and LMA within 11 %) and PA fits converged.
+    n_observations: null
+    n_batches: 400
+    quantities: [R, T, A, PA]
+    fit_quantities: [R, T, A, PA]
+    sampler: {chains: 2, tune: 500, draws: 500}
+    runs:
+      - {id: prospect4_ou,   model: prospect4,   data_use: all}
+      - {id: prospect5_ou,   model: prospect5,   data_use: all}
+      - {id: prospect5b_ou,  model: prospect5b,  data_use: all}
+      - {id: prospectd_ou,   model: prospectd,   data_use: all}
+      - {id: prospectpro_ou, model: prospectpro, data_use: all}
+      - {id: liberty_ou,     model: liberty,     data_use: all}
+      - {id: leafsip_ou,     model: leafsip,     data_use: all}
+      - {id: prospectd_ou_R, model: prospectd,   data_use: R,   only_rt: true}

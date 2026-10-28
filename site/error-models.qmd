@@ -1,0 +1,110 @@
+---
+title: "Error models"
+---
+
+```{python}
+from _lib import *
+em = read("error_model_comparison")
+```
+
+[prospect-inversion-comparison](https://github.com/ashiklom/prospect-inversion-comparison)
+fitted 11 LOPEX/ANGERS leaves with iid normal errors and found:
+
+* Only 4 of 40 measured traits fell inside the 90 % credible intervals.
+* The 90 % prediction intervals for held-out transmittance covered only 27 % of it.
+* The residuals are smooth (AR(1) φ ≈ 0.999 at 1 nm), and are many times larger than
+  replicate noise.
+* The residuals' shape is shared across leaves. They are structural model error.
+
+The pilot therefore compares four structured error models:
+
+| ID | Model | Free per leaf | Notes |
+|---|---|---|---|
+| **ou** | Heteroskedastic scale $\sigma_0+\sigma_1\hat y$ with Ornstein–Uhlenbeck correlation $e^{-\lvert\Delta\lambda\rvert/\ell}$ | $\sigma_0,\sigma_1,\ell$ per quantity | Exact $O(n)$ on irregular grids. $\ell \le 250$ nm (lognormal prior, median 50 nm): left free it runs to thousands of nm and absorbs the dry-matter signal (see [How the error models work](methods-error-models.qmd)). |
+| **ss** | Heteroskedastic scale with Matérn-3/2 + nugget correlation | $\sigma_0,\sigma_1$ | $\ell$ and the nugget are learned from stage-1 residuals. Evaluated via a Vecchia factorization ($m=30$). |
+| **ld** | Learned shared discrepancy: mean bias $\mu_g(\lambda)$, $k$ factors $\Lambda$, per-band variance, Matérn leftover | one scale $\kappa$ per quantity | Learned per RTM × instrument class from stage-1 residuals, cross-fitted by dataset. Woodbury + Vecchia. |
+| **+rt** | Correlated R/T errors | $\rho$ (ou/ss) | ld: factors span the stacked [R; T] vector. |
+
+All four are $O(n)$ or $O(nk)$. They are tested against dense multivariate normal densities in
+`tests/test_likelihood.py`.
+
+## Pilot comparison
+
+```{python}
+#| tbl-cap: "Per run: mean 90 % coverage of measured traits, mean log-score (CRPS on log scale, lower is better), mean R² (log), held-out transmittance (fits that used R only), share of converged fits, and cost."
+if len(em):
+    em = em.assign(run=em.apply(run_label, axis=1))
+    cols = ["run", "traits", "coverage90", "crps_log", "r2_log", "heldout_T_rmse",
+            "heldout_T_coverage90", "converged", "median_seconds", "total_hours"]
+    show_table(fmt(em[[c for c in cols if c in em]].sort_values("crps_log")))
+else:
+    no_data()
+```
+
+```{python}
+#| fig-cap: "Calibration vs accuracy: mean coverage of the 90 % credible intervals for measured traits (ideal 0.9, dashed) against mean log-CRPS (lower is better). One marker per run; colour = error model, symbol = RTM (triangle: PROSPECT-D; star: LeafSIP; cross: LIBERTY)."
+if len(em) and em["coverage90"].notna().any():
+    fig = go.Figure()
+    for err, g in em.groupby("errmodel"):
+        fig.add_trace(go.Scatter(
+            x=g["crps_log"], y=g["coverage90"], mode="markers", name=ERR_LABEL.get(err, err),
+            marker=dict(size=12, color=ERR_COLOR.get(err), symbol=[MODEL_SYMBOL.get(m, "circle") for m in g["model"]],
+                        line=dict(color=SURFACE, width=2)),
+            customdata=g["run"], hovertemplate="%{customdata}<br>CRPS %{x:.3f}<br>coverage %{y:.2f}<extra></extra>"))
+    fig.add_hline(y=0.9, line=dict(color=MUTED, width=1, dash="dash"))
+    fig.update_layout(xaxis_title="mean log-CRPS (lower = better)", yaxis_title="90 % interval coverage",
+                      height=420, legend=dict(orientation="h", y=1.12))
+    show(fig)
+```
+
+## Findings and the choice for the full run
+
+These results are from the pilot refit with noisy detector ends trimmed (see
+[Observation operator](methods-observation.qmd)).
+
+**Calibration.** No error model gives calibrated trait intervals. 90 % credible intervals
+cover the measured trait for only 3–28 % of leaves, whatever the model.
+
+* **The cause is bias.** Most of the miss is systematic bias between the RTM parameter and
+  the measured trait (see [Trait retrieval](a-retrieval.qmd)), not intervals that are too
+  narrow.
+* **The inference itself is sound.** Synthetic recovery shows calibrated intervals and small
+  errors ([Diagnostics](a-diagnostics.qmd)).
+* **So the remaining error is in the RTMs and the measurements:**
+  * how an RTM parameter maps onto a measured quantity;
+  * dataset-specific measurement differences. Dataset-years that miss consistently are
+    flagged on [Trait retrieval](a-retrieval.qmd#suspect-groups).
+  * No per-leaf error model can absorb this.
+
+**Accuracy.** By trait log-CRPS (lower is better), Hetero + OU is as good as or better than
+the alternatives:
+
+| Comparison | Hetero + OU | Matérn-3/2 | Learned discrepancy |
+|---|---|---|---|
+| PROSPECT-D, all leaves | **0.42** | 0.44 | 0.45 |
+| PROSPECT-D, reflectance only | **0.42** | 0.44 | 0.50 |
+| LeafSIP | **0.59** | 0.74 | 0.59 |
+
+**LIBERTY** is the exception: Matérn scores 0.81 against OU's 0.85. But fewer than a third
+of LIBERTY fits converge under any error model, which makes that comparison weak.
+
+**Correlated R/T errors** add nothing. On the same R+T leaves, mean log-CRPS is 0.40 with
+or without them.
+
+**Matérn-3/2 has two small advantages:**
+
+* It predicts held-out transmittance slightly better (RMSE 0.041 against 0.045). OU's
+  intervals cover more of it (20 % against 15 %).
+* It converges more often on R+T leaves (92 % against 86 %).
+
+Neither outweighs OU's better trait scores. OU also needs no learning stage.
+
+**Choice.** After commit `0cc1e51`, every fit uses **Hetero + OU with independent errors
+per quantity**. The fitting code no longer dispatches on error model. That commit
+(tag `v0.3-pilot-all-errmodels`) is the last version that can fit all four. The other
+models' likelihoods and learning code remain in the package as a reference
+([How the error models work](methods-error-models.qmd) explains them).
+
+**The full run** fits every RTM to every observation, including absorptance and
+pseudo-absorbance, plus PROSPECT-D on reflectance alone for leaves with R and T
+(`config/config.yaml`, `docs/hpc.md`).

@@ -1,0 +1,7 @@
+dataset_id: arctic_moss_desiccation
+source: ecosis
+source_id: arctic-moss-spectral-reflectance-desiccation-experiment-from-samples-collected-in-northern-alaska
+include: false
+exclude_reason: >-
+  Sphagnum moss mats (10x10x8 cm cores) measured at 45 deg with a bare fiber at several moisture
+  levels; these are moss canopies, not leaves, so leaf RTMs don't apply.

@@ -1,0 +1,13 @@
+dataset_id: nasa_hyspiri_california
+source: ecosis
+source_id: nasa-hyspiri-california
+include: false
+exclude_reason: >-
+  Subset of uw-bnl-nasa-hyspiri-airborne-campaign-leaf-and-canopy-spectra-and-trait-data
+  (dataset uw_bnl_hyspiri_2013_2015): 83 CVARS leaf-clip reflectance spectra (pepper,
+  citrus, grape). The 37 ASD spectra are identical to UW-BNL spectra (CAAN -> CAAN4 in
+  the names); the 46 SE PSM-3500 spectra are the same named leaf measurements
+  (rms difference ~0.02, i.e. an earlier processing). No traits and mostly empty
+  metadata (dates missing for 72 rows).
+ids:
+  entity: [UniqueName]

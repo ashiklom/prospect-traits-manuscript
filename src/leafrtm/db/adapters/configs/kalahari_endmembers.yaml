@@ -1,0 +1,33 @@
+dataset_id: kalahari_endmembers
+source: ecosis
+source_id: kalahari-ecosystem-endmember-set
+# Endmember library (green vegetation, NPV, soil) along the Kalahari Transect, Botswana. Only green
+# leaf spectra are kept (level_1 == 'pv', notes == 'leaf'); 'leaf dry' rows are dead leaves (NPV),
+# not lab-dried samples, and are dropped with stems, litter, grass and soil.
+# ASD contact probe; values are fractions (despite "%" in the package metadata).
+# Small (often compound, e.g. Acacia) leaves under a contact probe: leaf arrangement unknown.
+filter: ["level_1 == 'pv' and notes == 'leaf'"]
+columns:
+  latin_name: "`Latin Genus`.str.strip().str.capitalize().str.cat(`Latin Species`.str.strip(), sep=' ')"
+  site_code: "fname.str.extract('^(s[0-9]+)', expand=False)"
+spectra:
+  quantity: R
+  scale: fraction
+  foreoptic: contact_probe
+  instrument: asd-fs3
+  sample_state: fresh
+  target_config: unknown
+ids:
+  entity: [fname]
+species:
+  name: latin_name
+  map:
+    "Unknown unknown": null
+    "Combretum spp": "Combretum"
+    "Grewia spp": "Grewia"
+    "Lonchocarpus spp": "Lonchocarpus"
+    "Rhigozum spp": "Rhigozum"
+site: {column: site_code}
+lat: Latitude
+lon: Longitude
+ecosystem: savanna

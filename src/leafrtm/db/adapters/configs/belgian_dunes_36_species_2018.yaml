@@ -1,0 +1,51 @@
+dataset_id: belgian_dunes_36_species_2018
+source: ecosis
+source_id: leaf-spectra-of-36-species-growing-in-rosa-rugosa-invaded-coastal-grassland-communities-in-belgium
+# Helsen et al., Rosa rugosa-invaded coastal dune grasslands, Belgian North Sea coast, summer
+# 2018. 256 plot x species combinations (36 species, 50 plots). Each spectrum is the
+# average of two separate leaves (SVC HR-1024 plant probe; metadata: leaf clip). Small
+# leaves were laid side by side to fill the probe's field of view, but the rows don't say
+# which -> target_config unknown. Traits are for the same plot x species sample.
+# Same plots and summer as belgian_dunes_4_species (individual plants of 4 species), but
+# different spectra (2-leaf means per plot x species), so not a duplicate.
+#
+# Nutrient columns are labelled "content per leaf area (mg/mm2)", but taken literally
+# (1 mg/mm2 = 1000 g/m2) N would be ~13 g/m2 (=37 % of LMA). Dividing by LMA (g/cm2) gives
+# N = 2.4 (median), P = 2.0, K = 11.3, Ca = 11.8, Mg = 2.8. These are plausible as N in % and
+# P, K, Ca, Mg in mg/g, i.e. the columns are mass concentrations times LMA in g/cm2.
+# Hence N_area = value / 100 in g/cm2 (median ~1.3 g/m2), and the mass-based values are
+# recovered as value / LMA.
+columns:
+  n_mass_pct: "`Leaf nitrogen content per leaf area (mg/mm2)` / `Leaf mass per area (g/cm2)`"
+  p_mass_mgg: "`Leaf phosphorus content per leaf area (mg/mm2)` / `Leaf mass per area (g/cm2)`"
+  k_mass_mgg: "`Leaf potassium content per leaf area (mg/mm2)` / `Leaf mass per area (g/cm2)`"
+  ca_mass_mgg: "`Leaf calcium content per leaf area (mg/mm2)` / `Leaf mass per area (g/cm2)`"
+  mg_mass_mgg: "`Leaf magnesium content per leaf area (mg/mm2)` / `Leaf mass per area (g/cm2)`"
+spectra:
+  quantity: R
+  scale: auto
+  foreoptic: leaf_clip
+  instrument: svc-other                # SVC HR-1024 (not stated as HR-1024i)
+  sample_state: fresh
+  target_config: unknown
+ids:
+  entity: [ids]                        # "<plot> <species code>"
+species: {name: "Latin Species"}
+date: 2018
+site: {name: "Belgian North Sea coast"}
+plot: {column: "plot code"}
+# no coordinates in this package; approximate centre of the Belgian coast
+lat: 51.2
+lon: 2.85
+ecosystem: grassland
+traits:
+  - {column: "Leaf mass per area (g/cm2)", trait: lma, unit: "g/cm**2"}
+  - {column: "Cw/EWT (cm3/cm2)", trait: ewt, unit: "g/cm**2"}      # 1 cm3 water = 1 g
+  - {column: "Leaf area (mm2)", trait: leaf_area, unit: "mm**2"}
+  - {column: "Leaf nitrogen content per leaf area (mg/mm2)", trait: n_area, unit: "g/cm**2", factor: 0.01}
+  - {column: n_mass_pct, trait: n_mass, unit: percent}
+  - {column: p_mass_mgg, trait: p_mass, unit: "mg/g"}
+  - {column: k_mass_mgg, trait: k_mass, unit: "mg/g"}
+  - {column: ca_mass_mgg, trait: ca_mass, unit: "mg/g"}
+  - {column: mg_mass_mgg, trait: mg_mass, unit: "mg/g"}
+  # plant height not mapped (not in traits.yaml)

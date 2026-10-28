@@ -1,0 +1,31 @@
+dataset_id: herrmann_pepper_nk
+source: ecosis
+source_id: fresh-and-dry-pepper-leaf-spectra-with-associated-potassium-and-nitrogen-measurements
+# 119 plants x 4 spectra: one leaf per plant (PlantNumber) measured fresh
+# (R and T in an LI-COR 1800 integrating sphere, plus "absorbance" = 1-R-T,
+# verified to 1e-12 -> quantity A) and then oven-dried, ground and measured
+# as powder with a contact probe. Same leaf => same entity; state in ids.time.
+# N and K were measured on the dried leaf (one value per leaf).
+columns:
+  state: "Measurement_Type.str.split(' ').str[0]"
+spectra:
+  quantity:
+    column: Measurement_Type
+    map: {Fresh Reflectance: R, Fresh Transmittance: T, Fresh Absorbance: A, Dry Reflectance: R}
+  scale: auto
+  foreoptic: {column: state, map: {Fresh: integrating_sphere, Dry: contact_probe}}
+  instrument: asd-fs              # "ASD FieldSpec" (model not given)
+  sample_state: {column: state, map: {Fresh: fresh, Dry: ground}}
+  target_config: {column: state, map: {Fresh: single_leaf, Dry: unknown}}
+ids:
+  entity: [PlantNumber]
+  time: [state]
+  plant: [PlantNumber]
+species: {constant: "Capsicum annuum"}
+site: {name: "Gilat Research Center net house"}
+lat: 31.33
+lon: 34.66
+ecosystem: cropland
+traits:
+  - {column: "Leaf nitrogen content per leaf dry mass (% DW)", trait: n_mass, unit: percent}
+  - {column: "Leaf potassium content per leaf dry mass (% DW)", trait: k_mass, unit: percent}

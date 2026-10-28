@@ -1,0 +1,50 @@
+dataset_id: wi_vcmax_2011
+source: ecosis
+source_id: leaf-spectral-reflectance-and-vcmax-measurements-for-tree-and-crop-species-collected-in-wisconsin
+citation: "Serbin, S. P., Kruger, E. L., Townsend, P. A. Leaf spectral reflectance and Vcmax measurements for tree and crop species collected in Wisconsin. EcoSIS data set (see also Serbin et al. 2012, J. Exp. Bot. 63, 489-502)."
+# Spectra_Name encodes site_species_plant/leaf plus a measurement-condition
+# suffix: leaf temperature setpoint (_15C/_25C/_35C, Biotron), time of day
+# (AFT/MORN/MORN2, KG) or leaf temperature level (MID/HIGH/HIGH2/LOWMID,
+# HIGHTEMP/LOWTEMP/MIDTEMP). The same leaf was measured under several
+# conditions (identical Vc25 across them), so the suffix goes to ids.time.
+columns:
+  name_u: "Spectra_Name.str.upper().str.replace('_LC_REFL$', '', regex=True)"
+  cond: "name_u.str.extract('(_[0-9]+C|AFT|MORN2?|LOWMID|MID|HIGH2?|HIGHTEMP|LOWTEMP|MIDTEMP)$', expand=False).fillna('')"
+  leaf: "name_u.str.replace('(_[0-9]+C|AFT|MORN2?|LOWMID|MID|HIGH2?|HIGHTEMP|LOWTEMP|MIDTEMP)$', '', regex=True)"
+  shade: "name_u.str.contains('SHADE')"
+  plant: "leaf.str.replace('_?L[0-9]+(SHADE)?$', '', regex=True)"
+  # approximate site coordinates (KG, an unidentified garden, stays missing; 0/0 -> NaN)
+  lat0: "(`Location Name` == 'BHI') * 43.64 + (`Location Name` == 'UW-Arboretum') * 43.041 + (`Location Name` == 'UW-Arlington') * 43.30 + (`Location Name` == 'UW-Biotron') * 43.0745 + (`Location Name` == 'UW-Campus') * 43.076 + (`Location Name` == 'US-WCr') * 45.806"
+  lon0: "(`Location Name` == 'BHI') * -89.80 + (`Location Name` == 'UW-Arboretum') * -89.426 + (`Location Name` == 'UW-Arlington') * -89.35 + (`Location Name` == 'UW-Biotron') * -89.4118 + (`Location Name` == 'UW-Campus') * -89.404 + (`Location Name` == 'US-WCr') * -90.080"
+  lat_: "lat0 / (lat0 != 0)"
+  lon_: "lon0 / (lon0 != 0)"
+spectra:
+  quantity: R
+  scale: fraction                    # Measurement Units = Ratio_0-1
+  foreoptic: leaf_clip
+  instrument: asd-fs3
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: ["Location Name", leaf]
+  time: [cond, "Measurement Date"]
+  plant: ["Location Name", plant]
+species:
+  name: ["Latin Genus", "Latin Species"]
+  map:
+    "Echinacea": "Echinacea purpurea"       # common name: purple coneflower
+    # USDA code PYCA8 was resolved to a lichen (Pyxine caesiopruinosa); these are
+    # leaves with Vcmax at UW Arboretum: almost certainly Pyrus calleryana (USDA PYCA80)
+    "Pyxine caesiopruinosa": "Pyrus calleryana"
+date: {column: "Measurement Date"}
+site: {column: "Location Name"}
+lat: lat_
+lon: lon_
+ecosystem: mixed                     # crops, forest trees and growth-chamber plants
+sun_shade: {column: shade, map: {true: shade}}
+traits:
+  # Vcmax at the measurement leaf temperature, and normalized to 25 C
+  - {column: Vcmax_umol_m2_s, trait: vcmax_area, unit: "umol/m**2/s"}
+  - {column: Vc25_umol_m2_s, trait: vcmax25_area, unit: "umol/m**2/s"}
+  - {column: IR_Leaf_Temp_degC, trait: leaf_temperature, unit: degC}
+  # PLSR_* columns are spectral predictions: not mapped. QC flag (0/1) kept, meaning undocumented.

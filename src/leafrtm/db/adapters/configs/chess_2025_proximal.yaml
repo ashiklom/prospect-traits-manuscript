@@ -1,0 +1,7 @@
+dataset_id: chess_2025_proximal
+source: ecosis
+source_id: proximal-spectra-for-the-2025-colorado-headwaters-ecological-spectroscopy-study--chess-
+include: false
+exclude_reason: >-
+  Canopy-level proximal spectra (pistol grip, 8 deg FOV, 0.6-0.9 m above meadow plots,
+  solar illumination). The only metadata are file name and date, so no leaf rows can be identified.

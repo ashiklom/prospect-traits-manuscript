@@ -1,0 +1,60 @@
+---
+title: "Model intercomparison"
+---
+
+```{python}
+from _lib import *
+est = read("estimates")
+ic = read("intercompare")
+```
+
+How do different RTMs (and different error models) estimate the "same" quantity? Examples:
+
+* chlorophyll from the PROSPECT versions, LeafSIP and LIBERTY
+* water (EWT) from all models
+* dry matter (LMA): Cm, Cprot + Ccbc in PROSPECT-PRO, and Cm in LeafSIP
+
+```{python}
+#| fig-cap: "Posterior medians of the same trait from each RTM vs PROSPECT-D, fresh leaves, Hetero + OU error model. Log axes; gray line = 1:1. One panel per trait."
+if len(est):
+    e = est[(est["errmodel"] == "ou") & ~est["rt"].astype(bool) & (est["data_use"] == "all") & ~est["relative"]]
+    ref = e[e["model"] == "prospectd"][["observation_id", "trait", "q50"]].rename(columns={"q50": "ref"})
+    j = e[e["model"] != "prospectd"].merge(ref, on=["observation_id", "trait"])
+    traits = [t for t in TRAIT if t in set(j["trait"])]
+    if traits:
+        from plotly.subplots import make_subplots
+        nc = min(3, len(traits)); nr = int(np.ceil(len(traits) / nc))
+        fig = make_subplots(rows=nr, cols=nc, subplot_titles=[trait_label(t) for t in traits],
+                            horizontal_spacing=0.08, vertical_spacing=0.14)
+        for i, t in enumerate(traits):
+            r, c = i // nc + 1, i % nc + 1
+            g = j[j["trait"] == t]
+            lo, hi = np.nanquantile(np.r_[g["ref"], g["q50"]], [0.005, 0.995])
+            one_to_one(fig, lo, hi, r, c)
+            for m in MODELS:
+                h = g[g["model"] == m]
+                if h.empty:
+                    continue
+                fig.add_trace(go.Scattergl(x=h["ref"], y=h["q50"], mode="markers", name=MODEL_LABEL[m],
+                                           legendgroup=m, showlegend=(i == 0),
+                                           marker=dict(color=MODEL_COLOR[m], size=7, symbol=MODEL_SYMBOL[m],
+                                                       line=dict(color=SURFACE, width=1)),
+                                           customdata=h["observation_id"],
+                                           hovertemplate="%{customdata}<br>PROSPECT-D %{x:.3g}<br>" + MODEL_LABEL[m] + " %{y:.3g}<extra></extra>"),
+                              r, c)
+            log_axis(fig, "x", [lo, hi], r, c, "PROSPECT-D")
+            log_axis(fig, "y", [lo, hi], r, c, "other RTM")
+        fig.update_layout(height=330 * nr + 60, margin=dict(t=110),
+                          legend=dict(orientation="h", y=1.0, yanchor="bottom", yref="container"))
+        show(fig)
+else:
+    no_data()
+```
+
+## Pairwise agreement
+
+```{python}
+#| tbl-cap: "Pairwise agreement between runs per trait: R² and concordance correlation (log scale), and the median ratio (run b / run a)."
+if len(ic):
+    show_table(fmt(ic.sort_values(["trait", "ccc_log"], ascending=[True, False])))
+```

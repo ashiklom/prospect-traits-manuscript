@@ -1,0 +1,13 @@
+dataset_id: wheat_hessian_fly_2019
+source: ecosis
+source_id: 2019-plosone-wheat-hessian-fly-ms
+include: false
+exclude_reason: >-
+  The EcoSIS export contains only the 491 reflectance spectra and no metadata
+  columns at all (no sample IDs, genotype, infestation treatment, or traits).
+  The spectra API shows the rows come from three trait files (LMA_data.csv,
+  Phenols_data.csv, C_N_data.csv) with the same leaves repeated across files
+  (only 434 of 491 spectra are unique), and the traits (LMA, N, C, phenols)
+  are only reachable per spectrum through the API, not the export. Cannot
+  identify leaves, deduplicate spectra or link traits/treatments.
+citation: "Campos-Medina, V. A., Cotrozzi, L., Stuart, J. J., Couture, J. J. (2019). Spectral characterization of wheat functional trait responses to Hessian fly: mechanisms for trait-based resistance. PLoS ONE 14, e0219431."

@@ -1,0 +1,67 @@
+---
+title: "Sample state & protocol"
+---
+
+```{python}
+from _lib import *
+met = read("validation_metrics")
+res = read("spectral_residuals")
+```
+
+Leaf RTMs describe intact, hydrated leaves. The library also contains:
+
+* dried intact leaves
+* herbarium-pressed leaves
+* ground powders (e.g. SHIFT, NEON, Sierra Nevada 2023), sometimes from the same leaves
+
+All of them are fitted. This page shows where the models' assumptions break down. It also
+compares measurement protocols (integrating sphere vs leaf clip vs contact probe), because
+they differ in illumination geometry and in what "reflectance" means.
+
+## Retrieval by sample state
+
+```{python}
+#| fig-cap: "R² (log scale) of estimate vs measurement by sample state, per trait (Hetero + OU, PROSPECT-D)."
+if len(met):
+    m = met[(met["group"] == "all") & (met["model"] == "prospectd") & (met["errmodel"] == "ou")
+            & ~met["rt"].astype(bool) & (met["data_use"] == "all")].dropna(subset=["r2_log"])
+    fig = go.Figure()
+    for st, g in m.groupby("sample_state"):
+        fig.add_trace(go.Bar(x=g["trait"].map(lambda t: trait_label(t, False)), y=g["r2_log"], name=st,
+                             marker=dict(color=STATE_COLOR.get(st, MUTED), line=dict(color=SURFACE, width=2)),
+                             customdata=g["n"], hovertemplate="%{x}: R² %{y:.2f} (n = %{customdata})<extra>" + st + "</extra>"))
+    fig.update_layout(barmode="group", yaxis_title="R² (log)", yaxis_range=[0, 1], height=400,
+                      legend=dict(orientation="h", y=1.12))
+    show(fig)
+else:
+    no_data()
+```
+
+## Spectral residuals by sample state
+
+```{python}
+#| fig-cap: "Mean reflectance residual by wavelength for each sample state (PROSPECT-D, Hetero + OU)."
+if len(res):
+    r = res[(res["model"] == "prospectd") & (res["errmodel"] == "ou") & (res["quantity"] == "R") & res["fitted"]
+            & ~res["rt"].astype(bool) & (res["data_use"] == "all")]
+    fig = go.Figure()
+    for st, g in r.groupby("sample_state"):
+        g = g.sort_values("wl_bin")
+        fig.add_trace(go.Scatter(x=g["wl_bin"], y=g["resid_mean"], mode="lines", name=st,
+                                 line=dict(color=STATE_COLOR.get(st, MUTED), width=2)))
+    fig.add_hline(y=0, line=dict(color=AXIS, width=1))
+    fig.update_layout(xaxis_title="wavelength (nm)", yaxis_title="mean residual (R)", height=380,
+                      legend=dict(orientation="h", y=1.12))
+    show(fig)
+```
+
+## By dataset
+
+```{python}
+#| tbl-cap: "Retrieval metrics per dataset (PROSPECT-D, Hetero + OU). Datasets differ in protocol (sphere, clip, probe), instrument and plant material."
+if len(met):
+    d = met[met["group"].str.startswith("dataset:") & (met["model"] == "prospectd") & (met["errmodel"] == "ou")
+            & ~met["rt"].astype(bool) & (met["data_use"] == "all")].copy()
+    d["dataset"] = d["group"].str.removeprefix("dataset:")
+    show_table(fmt(d[["dataset", "sample_state", "trait", "n", "r2_log", "bias_log", "coverage90", "crps_log"]]))
+```

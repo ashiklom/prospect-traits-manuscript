@@ -1,0 +1,359 @@
+---
+title: "How the error models work"
+---
+
+```{python}
+from _lib import *
+from plotly.subplots import make_subplots
+from leafrtm import likelihood as L
+from leafrtm.rtm import get_model
+
+rng = np.random.default_rng(7)
+wl = np.arange(400.0, 2501.0, 2.0)
+pd_model = get_model("prospectd")
+R, T = pd_model.simulate(dict(N=1.6, Cab=45, Car=9, Canth=1.5, Cbrown=0.05, Cw=0.012, Cm=0.006))
+Rg = np.interp(wl, pd_model.wavelength, R)
+
+
+def corr_matrix(kind, ell, nugget=0.0):
+    d = wl[:, None] - wl[None, :]
+    if kind == "iid":
+        return np.eye(len(wl))
+    if kind == "ou":
+        return np.exp(-np.abs(d) / ell)
+    return L.matern32(d, ell, nugget)
+
+
+def draw(kind, ell, nugget=0.0, seed=0):
+    C = corr_matrix(kind, ell, nugget)
+    Lc = np.linalg.cholesky(C + 1e-9 * np.eye(len(wl)))
+    return Lc @ np.random.default_rng(seed).normal(size=len(wl))
+```
+
+::: {.callout-note}
+**Which error model is fitted.** All four models below were compared in the pilot
+([Error models](error-models.qmd)). Hetero + OU (sections 2–3) was as good as or better than
+the others for trait retrieval, so after commit `0cc1e51` (tag `v0.3-pilot-all-errmodels`)
+it is the only one fitted, with independent errors for each quantity. The Matérn-3/2 model,
+the learned discrepancy and correlated R/T errors (sections 3–5) are documented here, and
+kept in the code, as a reference.
+:::
+
+The inversions treat a measured spectrum as
+
+$$y(\lambda) = \hat y(\lambda;\theta) + e(\lambda),$$
+
+where $\hat y$ is the RTM prediction and $e$ the residual. **The error model is the
+statistical description of $e$.** It decides how much information a spectrum carries about
+the leaf's traits, and therefore how wide the credible intervals are.
+
+The [comparison of inversion toolchains](https://github.com/ashiklom/prospect-inversion-comparison)
+showed that PROSPECT residuals are:
+
+1. **smooth** (neighbouring bands are almost perfectly correlated);
+2. **larger where reflectance is larger** (heteroskedastic);
+3. **much larger than replicate noise**, i.e. dominated by model structure, not the
+   instrument;
+4. **shaped similarly across leaves**: the RTM is wrong in the same places for most leaves.
+
+The common iid assumption ignores all four. The error models introduced here address them
+one at a time.
+
+## 1. Why iid errors make posteriors overconfident
+
+Suppose the residual is smooth but we assume it is iid. The likelihood then counts every
+band as an independent piece of evidence. In fact a smooth residual of 2000 bands holds
+only a few dozen independent pieces of information.
+
+The figure shows the consequence for the simplest possible parameter, a constant offset
+estimated from one spectrum. Its exact posterior SD under correlated errors (generalized
+least squares) is divided by the SD the iid assumption reports. Move the slider to change
+how smooth the true residual is.
+
+```{python}
+#| fig-cap: "Left: a residual realization with Ornstein-Uhlenbeck correlation length ℓ (slider). Right: how much the iid assumption understates the posterior SD of a constant offset, as a function of ℓ; the marker is the current ℓ. At ℓ ≈ 100 nm on a 2-nm grid the iid posterior is about 7× too narrow."
+ells = [2, 10, 30, 100, 300, 1000]
+ratios = []
+grid_l = np.geomspace(1, 2000, 40)
+one = np.ones(len(wl))
+for l in grid_l:
+    C = corr_matrix("ou", l)
+    v_gls = 1.0 / (one @ np.linalg.solve(C, one))
+    v_iid = 1.0 / len(wl)
+    ratios.append(np.sqrt(v_gls / v_iid))
+ratios = np.array(ratios)
+fig = make_subplots(rows=1, cols=2, column_widths=[0.6, 0.4], horizontal_spacing=0.12,
+                    subplot_titles=["residual realization", "true / iid posterior SD"])
+for k, l in enumerate(ells):
+    z = draw("ou", l, seed=1)
+    fig.add_trace(go.Scatter(x=wl, y=0.01 * z, mode="lines", line=dict(color="#2a78d6", width=1.5),
+                             visible=(k == 3), showlegend=False,
+                             hovertemplate="%{x} nm: %{y:.4f}<extra></extra>"), 1, 1)
+fig.add_trace(go.Scatter(x=grid_l, y=ratios, mode="lines", line=dict(color=INK2, width=2), showlegend=False,
+                         hovertemplate="ℓ = %{x:.0f} nm<br>ratio %{y:.1f}<extra></extra>"), 1, 2)
+for k, l in enumerate(ells):
+    r = np.interp(np.log(l), np.log(grid_l), ratios)
+    fig.add_trace(go.Scatter(x=[l], y=[r], mode="markers", marker=dict(size=11, color="#eb6834",
+                             line=dict(color=SURFACE, width=2)), visible=(k == 3), showlegend=False,
+                             hovertemplate=f"ℓ = {l} nm<br>ratio {r:.1f}<extra></extra>"), 1, 2)
+n = len(ells)
+steps = []
+for k, l in enumerate(ells):
+    vis = [i == k for i in range(n)] + [True] + [i == k for i in range(n)]
+    steps.append(dict(method="update", args=[{"visible": vis}], label=f"{l} nm"))
+fig.update_layout(sliders=[dict(active=3, steps=steps, currentvalue=dict(prefix="correlation length ℓ: "),
+                                pad=dict(t=40))], height=430)
+fig.update_xaxes(title_text="wavelength (nm)", row=1, col=1)
+log_axis(fig, "x", grid_l, 1, 2, "ℓ (nm)")
+fig.update_yaxes(title_text="residual", row=1, col=1)
+log_axis(fig, "y", ratios, 1, 2, "SD ratio")
+show(fig)
+```
+
+## 2. Heteroskedastic scale
+
+All structured error models multiply a unit-variance process $z(\lambda)$ by a
+wavelength-dependent scale:
+
+$$e(\lambda) = s(\lambda)\, z(\lambda), \qquad s(\lambda) = \sigma_0 + \sigma_1\,\hat y(\lambda),$$
+
+so misfit is allowed to be larger where the leaf is bright (NIR plateau, green peak). Each
+measured quantity (R, T, …) has its own $\sigma_0, \sigma_1$, so a noisy integrating-sphere
+transmittance is automatically down-weighted relative to reflectance.
+
+```{python}
+#| fig-cap: "PROSPECT-D reflectance (gray) with ±2 s(λ) bands for several σ₁ (slider), σ₀ = 0.003."
+s1s = [0.0, 0.02, 0.05, 0.1]
+fig = go.Figure()
+for k, s1 in enumerate(s1s):
+    s = 0.003 + s1 * Rg
+    fig.add_trace(go.Scatter(x=np.r_[wl, wl[::-1]], y=np.r_[Rg + 2 * s, (Rg - 2 * s)[::-1]], fill="toself",
+                             fillcolor="#2a78d6", opacity=0.18, line=dict(width=0), hoverinfo="skip",
+                             visible=(k == 2), showlegend=False))
+fig.add_trace(go.Scatter(x=wl, y=Rg, mode="lines", line=dict(color=INK2, width=2), name="R (PROSPECT-D)"))
+steps = [dict(method="update", args=[{"visible": [i == k for i in range(len(s1s))] + [True]}], label=str(s1))
+         for k, s1 in enumerate(s1s)]
+fig.update_layout(sliders=[dict(active=2, steps=steps, currentvalue=dict(prefix="σ₁: "), pad=dict(t=40))],
+                  xaxis_title="wavelength (nm)", yaxis_title="reflectance", height=400, showlegend=False)
+show(fig)
+```
+
+## 3. Correlation across wavelengths: OU and Matérn-3/2
+
+**Ornstein–Uhlenbeck (`ou`).** The correlation between two bands decays exponentially with
+their distance, $\rho(\Delta\lambda) = e^{-|\Delta\lambda|/\ell}$. The process is Markov: given
+the previous band, the next band is independent of everything before. The exact likelihood
+of an irregularly sampled, gappy spectrum is therefore a simple recursion that costs O(n):
+
+$$z_i \mid z_{i-1} \sim \mathcal N\!\left(\phi_i z_{i-1},\; 1-\phi_i^2\right), \qquad \phi_i = e^{-(\lambda_i-\lambda_{i-1})/\ell}.$$
+
+Gaps decorrelate naturally through $\Delta\lambda$, and detector joins start a new segment
+($\phi_i = 0$). Here $\sigma_0, \sigma_1$ and $\ell$ are estimated per leaf.
+
+* **Problem in the pilot: confounding with the RTM.** Left free, $\ell$ runs to
+  $10^3$–$10^4$ nm. A residual correlated over thousands of nanometres is a free baseline:
+  it absorbs the broad dry-matter and water features that the RTM parameters should
+  explain. The dominant posterior mode then has $C_m$ at about half the measured LMA, and
+  randomly started chains split between modes ($\hat R \approx 1.5$).
+* **Fix.** $\ell$ has a lognormal prior (median 50 nm) truncated at 250 nm, so OU
+  describes *local* correlation only. Broad misfit that recurs across leaves is left to
+  the learned discrepancy (`ld`), which is identified because it is learned from many
+  leaves. With the bound, $\ell$ usually sits near 250 nm, which shows the data want
+  broader structure than one leaf can separate from absorption.
+* **Multimodality.** Every fit (all error models) first finds the posterior mode with a
+  two-stage optimization from eight starts: the RTM parameters with the error model held
+  at its prior medians, then all parameters. All chains start next to the best mode.
+
+**Matérn-3/2 with a nugget (`ss`).** This process is once differentiable, so its sample
+paths are smooth like the observed residuals rather than rough like OU:
+
+$$\rho(\Delta\lambda) = (1-\tau^2)\left(1+\tfrac{\sqrt3\,|\Delta\lambda|}{\ell}\right)e^{-\sqrt3|\Delta\lambda|/\ell} + \tau^2\,\delta_{\Delta\lambda,0}.$$
+
+The nugget $\tau^2$ is a small white-noise share for instrument noise and quantization.
+Estimating $\ell$ per leaf is unstable, so $\ell$ and $\tau^2$ are learned once, from the
+pooled correlogram of first-stage residuals for each RTM and quantity. Each leaf then
+estimates only $\sigma_0$ and $\sigma_1$.
+
+```{python}
+#| fig-cap: "Left: correlation functions of OU and Matérn-3/2 for the same ℓ (slider). Right: one realization of each process. Matérn-3/2 paths are smooth at short lags; OU paths are rough at every scale."
+ells2 = [10, 30, 60, 120, 250]
+lag = np.linspace(0, 400, 400)
+fig = make_subplots(rows=1, cols=2, horizontal_spacing=0.1,
+                    subplot_titles=["correlation vs lag", "realizations (zoom 600-900 nm)"])
+zoom = (wl >= 600) & (wl <= 900)
+nper = 4
+for k, l in enumerate(ells2):
+    v = k == 2
+    fig.add_trace(go.Scatter(x=lag, y=np.exp(-lag / l), name="OU", line=dict(color="#2a78d6", width=2),
+                             visible=v, legendgroup="ou", showlegend=(k == 2)), 1, 1)
+    fig.add_trace(go.Scatter(x=lag, y=L.matern32(lag, l, 0.0), name="Matérn-3/2",
+                             line=dict(color="#eb6834", width=2), visible=v, legendgroup="m",
+                             showlegend=(k == 2)), 1, 1)
+    fig.add_trace(go.Scatter(x=wl[zoom], y=draw("ou", l, seed=3)[zoom], line=dict(color="#2a78d6", width=1.5),
+                             visible=v, showlegend=False, legendgroup="ou"), 1, 2)
+    fig.add_trace(go.Scatter(x=wl[zoom], y=draw("m", l, seed=3)[zoom], line=dict(color="#eb6834", width=1.5),
+                             visible=v, showlegend=False, legendgroup="m"), 1, 2)
+steps = []
+for k, l in enumerate(ells2):
+    vis = [j // nper == k for j in range(nper * len(ells2))]
+    steps.append(dict(method="update", args=[{"visible": vis}], label=f"{l} nm"))
+fig.update_layout(sliders=[dict(active=2, steps=steps, currentvalue=dict(prefix="ℓ: "), pad=dict(t=40))],
+                  height=420, legend=dict(orientation="h", y=1.15))
+fig.update_xaxes(title_text="lag (nm)", row=1, col=1)
+fig.update_xaxes(title_text="wavelength (nm)", row=1, col=2)
+show(fig)
+```
+
+### Fast exact-enough likelihood: the Vecchia factorization
+
+A Matérn-3/2 process with a nugget is not Markov in the observed values, so its likelihood
+would normally need an $n\times n$ Cholesky factor: about 2000 bands per quantity at every
+gradient evaluation. Because the correlation is fixed, each leaf's likelihood can instead be
+precomputed as a sparse **Vecchia** factorization. Each band is conditioned on its $m$
+nearest predecessors:
+
+$$p(z) \approx \prod_i p\!\left(z_i \mid z_{i-1},\dots,z_{i-m}\right) = \prod_i \mathcal N\!\left(z_i;\; b_i^\top z_{N(i)},\, S_i\right).$$
+
+The coefficients $b_i$ and $S_i$ are computed once per leaf, so each gradient costs O(nm).
+The figure shows the error of the log density against the exact dense value for draws from
+the model. With the default m = 30 it is below 0.01 nats.
+
+```{python}
+#| fig-cap: "Absolute error of the Vecchia log density vs number of conditioning neighbours m (log scale), for Matérn-3/2 with ℓ = 60 nm on a 1-nm grid (400-1000 nm), for several nugget fractions τ². Larger nuggets weaken the screening effect and need more neighbours."
+from scipy.stats import multivariate_normal
+w1 = np.arange(400.0, 1001.0, 1.0)
+start = np.zeros(len(w1), bool); start[0] = True
+fig = go.Figure()
+cols = {0.001: "#2a78d6", 0.01: "#eb6834", 0.05: "#1baf7a"}
+for nug, col in cols.items():
+    corr = lambda d, nug=nug: L.matern32(d, 60.0, nug)
+    C = L.dense_corr(w1, start, corr)
+    z = np.linalg.cholesky(C) @ np.random.default_rng(2).normal(size=len(w1))
+    exact = multivariate_normal(np.zeros(len(w1)), C).logpdf(z)
+    ms, errs = [2, 5, 10, 20, 30, 50], []
+    for m in ms:
+        nb, b, S = L.vecchia(w1, start, corr, m=m)
+        u = (z - np.sum(b * z[nb], 1)) / np.sqrt(S)
+        errs.append(abs(-0.5 * np.sum(L.LOG2PI + np.log(S) + u**2) - exact))
+    fig.add_trace(go.Scatter(x=ms, y=np.maximum(errs, 1e-6), mode="lines+markers", name=f"τ² = {nug}",
+                             line=dict(color=col, width=2), marker=dict(size=8, line=dict(color=SURFACE, width=2))))
+fig.add_vline(x=30, line=dict(color=MUTED, width=1))
+fig.update_layout(xaxis_title="neighbours m", height=400, legend=dict(orientation="h", y=1.12))
+fig.update_yaxes(type="log", title_text="|log density error| (nats)", exponentformat="power", dtick=1)
+show(fig)
+```
+
+## 4. Learned shared discrepancy (`ld`)
+
+The residual shapes recur across leaves: the blue edge, the green peak, the red edge, the
+water bands. A zero-mean stationary process can't represent a systematic error that always
+has the same sign at the same wavelength, so it either inflates $\sigma$ everywhere or biases
+the traits. The learned discrepancy model treats this structure as something to estimate
+from many leaves:
+
+$$e(\lambda) - \mu_g(\lambda) \;\sim\; \mathcal N\!\Big(0,\; \kappa^2\big[D_g^{1/2} C D_g^{1/2} + \Lambda_g\Lambda_g^\top\big]\Big).$$
+
+Its parts:
+
+* $\mu_g$ is the mean bias of the RTM for measurement class $g$ (fresh or dry × sphere,
+  clip or other).
+* $\Lambda_g$ holds $k = 6$ factors: the main recurring shapes of misfit, from probabilistic
+  PCA with missing data.
+* $D_g$ is the per-band leftover variance.
+* $C$ is a Matérn-3/2 correlation for what the factors miss.
+* $\kappa$ is the only per-leaf error parameter: one scale per quantity.
+
+How it is learned and used:
+
+* **Two stages.** First-stage (`ou`) fits give residuals. Their posterior means are
+  interpolated to a common 5-nm grid, $\mu_g, \Lambda_g, D_g, \ell, \tau^2$ are learned, and
+  then every leaf is refitted.
+* **Cross-fitting.** Datasets are split into 5 folds, and each leaf's discrepancy is learned
+  only from the other folds. No leaf's error model is learned from its own data or its own
+  dataset.
+* **Cost.** Woodbury's identity on top of the Vecchia factorization keeps the likelihood at
+  O(nk + nm) per gradient.
+
+```{python}
+#| fig-cap: "Learned discrepancy for PROSPECT-D (fold 0; first class available): mean bias μ(λ) with ±2√D band, and the leading factors (slider). Each factor is a recurring shape of misfit that can appear in a leaf with either sign."
+ld = read("discrepancy_learned")
+if len(ld):
+    d = ld[(ld["model"] == "prospectd") & (ld["tag"] == "rt")]
+    d = d[d["key"] == d["key"].iloc[0]] if len(d) else d
+    if len(d):
+        qs = [q for q in ["R", "T"] if q in set(d["quantity"])]
+        fcols = sorted([c for c in d.columns if c.startswith("factor")], key=lambda c: int(c[6:]))
+        fig = make_subplots(rows=len(qs), cols=1, shared_xaxes=True, subplot_titles=qs, vertical_spacing=0.08)
+        ntr = 0
+        for i, q in enumerate(qs, 1):
+            g = d[d["quantity"] == q].sort_values("wavelength")
+            fig.add_trace(go.Scatter(x=np.r_[g["wavelength"], g["wavelength"][::-1]],
+                                     y=np.r_[g["mu"] + 2 * g["sd"], (g["mu"] - 2 * g["sd"])[::-1]],
+                                     fill="toself", fillcolor="#86b6ef", opacity=0.3, line=dict(width=0),
+                                     hoverinfo="skip", showlegend=False), i, 1)
+            fig.add_trace(go.Scatter(x=g["wavelength"], y=g["mu"], name="mean bias μ", legendgroup="mu",
+                                     showlegend=(i == 1), line=dict(color="#2a78d6", width=2)), i, 1)
+            for j, fc in enumerate(fcols):
+                fig.add_trace(go.Scatter(x=g["wavelength"], y=g[fc], name="factor", legendgroup="f",
+                                         showlegend=(i == 1 and j == 0), visible=(j == 0),
+                                         line=dict(color="#eb6834", width=2)), i, 1)
+            fig.add_hline(y=0, line=dict(color=AXIS, width=1), row=i, col=1)
+        per_q = 2 + len(fcols)
+        steps = []
+        for j, fc in enumerate(fcols):
+            vis = []
+            for _ in qs:
+                vis += [True, True] + [jj == j for jj in range(len(fcols))]
+            steps.append(dict(method="update", args=[{"visible": vis}], label=fc.replace("factor", "")))
+        fig.update_layout(sliders=[dict(active=0, steps=steps, currentvalue=dict(prefix="factor: "), pad=dict(t=40))],
+                          height=300 * len(qs) + 80, legend=dict(orientation="h", y=1.08))
+        fig.update_xaxes(title_text="wavelength (nm)", row=len(qs), col=1)
+        show(fig)
+else:
+    no_data("The learned discrepancy is shown once the pilot's first stage has been fitted.")
+```
+
+## 5. Correlated reflectance and transmittance errors (`+rt`)
+
+When a leaf is measured in an integrating sphere, its R and T residuals share causes: leaf
+structure the RTM misrepresents, and sample placement. If R and T are treated as independent,
+one structural error counts twice.
+
+* **For `ou` and `ss`:** a separable bivariate process. On a shared grid,
+  $z_T = \rho\, z_R + \sqrt{1-\rho^2}\,\xi$, where $\xi$ has the same correlation as $z_R$ and
+  $\rho$ is estimated per leaf.
+* **For `ld`:** the factors are learned on the stacked $[R;T]$ residual vector, so a factor
+  can move R and T together (or in opposition) with the learned cross-pattern.
+
+```{python}
+#| fig-cap: "Simulated R and T residuals (Matérn-3/2, ℓ = 60 nm) for several cross-correlations ρ (slider)."
+rhos = [-0.8, -0.4, 0.0, 0.4, 0.8]
+zr = draw("m", 60, 0.0, seed=11)
+xi = draw("m", 60, 0.0, seed=12)
+fig = go.Figure()
+for k, rho in enumerate(rhos):
+    zt = rho * zr + np.sqrt(1 - rho**2) * xi
+    fig.add_trace(go.Scatter(x=wl, y=0.01 * zr, name="R residual", line=dict(color="#2a78d6", width=1.5),
+                             visible=(k == 3), legendgroup="r", showlegend=(k == 3)))
+    fig.add_trace(go.Scatter(x=wl, y=0.01 * zt, name="T residual", line=dict(color="#eb6834", width=1.5),
+                             visible=(k == 3), legendgroup="t", showlegend=(k == 3)))
+steps = [dict(method="update", args=[{"visible": [j // 2 == k for j in range(2 * len(rhos))]}], label=str(r))
+         for k, r in enumerate(rhos)]
+fig.update_layout(sliders=[dict(active=3, steps=steps, currentvalue=dict(prefix="ρ: "), pad=dict(t=40))],
+                  xaxis_title="wavelength (nm)", yaxis_title="residual", height=400,
+                  legend=dict(orientation="h", y=1.12))
+show(fig)
+```
+
+## Choosing among them
+
+The four models (plus their R/T variants) are compared in the pilot on three criteria:
+
+* **Calibration and accuracy:** how well the trait credible intervals cover measured traits
+  (CRPS).
+* **Out-of-sample structure:** prediction of transmittance by fits that used reflectance only.
+* **Cost:** time per fit, and convergence.
+
+The results and the choice for the full run are on [Error models](error-models.qmd). All
+likelihoods are tested against dense multivariate normal densities on irregular, gappy grids
+with detector segments (`tests/test_likelihood.py`).

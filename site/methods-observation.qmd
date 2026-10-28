@@ -1,0 +1,148 @@
+---
+title: "Observation operator & replicates"
+---
+
+```{python}
+from _lib import *
+from plotly.subplots import make_subplots
+from leafrtm.obsop import operator
+from leafrtm.rtm import get_model
+
+pdm = get_model("prospectd")
+R, T = pdm.simulate(dict(N=1.6, Cab=45, Car=9, Canth=1.5, Cbrown=0.05, Cw=0.012, Cm=0.006))
+```
+
+## Observed spectra are never resampled
+
+The library mixes many instruments, wavelength grids and processing histories: 1-nm ASD
+data, 2-nm grids, 5-nm grids, irregular SVC bands, gappy grids with water bands removed, and
+spectra in micrometres. Many studies interpolate all spectra to a common grid first. That
+discards information, invents values in gaps, and makes neighbouring bands look more
+correlated than they are.
+
+Here the data stay as measured. Instead, the *model output* is mapped onto each spectrum's
+own bands with a sparse operator: each observed band $j$ takes a weighted sum of a few model
+bands,
+
+$$\hat y_j = \sum_k w_{jk}\, m(\lambda_{i_{jk}}).$$
+
+The operator is chosen per spectrum:
+
+* **Selection:** observed band on the model grid ($w = 1$).
+* **Linear interpolation:** the observed band falls between model bands, or the model is
+  coarser than the data (LIBERTY's 5-nm grid).
+* **Gaussian spectral response:** band-averaged data sampled more coarsely than 8 nm.
+  Applying an SRF to finer data would smooth twice, because the RTM coefficients were
+  calibrated on spectrometer data that are already smoothed.
+
+```{python}
+#| fig-cap: "PROSPECT-D reflectance on its 1-nm grid (gray) and its image under the observation operator for different observed grids (slider): 1- and 2-nm grids use selection, the irregular 3.3-nm grid linear interpolation, and band-averaged 10- and 20-nm data a Gaussian SRF with FWHM equal to the band spacing. Zoom into the red edge (650-760 nm) to see the difference between point sampling and the spectral response function."
+cases = [("1 nm", np.arange(400, 2501, 1.0), None),
+         ("2 nm", np.arange(400, 2501, 2.0), None),
+         ("3.3 nm irregular", np.cumsum(np.r_[400.3, np.full(630, 3.33)]), None),
+         ("10 nm SRF", np.arange(405, 2500, 10.0), 10.0),
+         ("20 nm SRF", np.arange(410, 2500, 20.0), 20.0)]
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=pdm.wavelength, y=R, mode="lines", line=dict(color=AXIS, width=1.5),
+                         name="RTM output (1 nm)", hoverinfo="skip"))
+for k, (lab, wl, fwhm) in enumerate(cases):
+    wl = wl[wl <= 2500]
+    idx, w = operator(pdm.wavelength, wl, fwhm)
+    y = np.sum(w * R[idx], 1)
+    fig.add_trace(go.Scatter(x=wl, y=y, mode="markers", name=lab, visible=(k == 3),
+                             marker=dict(size=6, color="#2a78d6", line=dict(color=SURFACE, width=1)),
+                             hovertemplate="%{x:.1f} nm: %{y:.4f}<extra></extra>"))
+steps = [dict(method="update", args=[{"visible": [True] + [i == k for i in range(len(cases))]}], label=lab)
+         for k, (lab, _, _) in enumerate(cases)]
+fig.update_layout(sliders=[dict(active=3, steps=steps, currentvalue=dict(prefix="observed grid: "), pad=dict(t=40))],
+                  xaxis=dict(title="wavelength (nm)", range=[600, 800]), yaxis_title="reflectance", height=450,
+                  legend=dict(orientation="h", y=1.1))
+show(fig)
+```
+
+## Noisy detector ends are trimmed at fit time
+
+The ends of many spectra are dominated by noise: the blue end near 400 nm and the SWIR end
+near 2500 nm, where detector sensitivity falls off. Some contain impossible values, such as
+reflectance of −0.6 next to bands at 0.06.
+
+Fitting such bands is not merely noisy; it breaks the heteroskedastic error model. Its scale
+$\sigma_0+\sigma_1\hat y$ grows with the predicted spectrum. The cheapest way for the
+likelihood to accommodate wild residuals is therefore to inflate the prediction everywhere,
+which inflates $\sigma$. In the pilot, Harvard Forest 2012 leaves were fitted at about 0.8
+reflectance across the SWIR against about 0.2 observed. Chlorophyll came out at 400 µg cm⁻²
+or more, and water and dry matter at zero.
+
+So before fitting, each block (replicate mean per quantity, grid and instrument) drops:
+
+* values outside the physically possible range: [−0.02, 1.02] for R, T and A; [−0.1, 4] for PA;
+* bands at the ends of the spectrum, within the outer zones (below 450 nm, above 2350 nm), for
+  as long as the local roughness exceeds 10× the spectrum's median roughness. Local
+  roughness is the running median over 15 bands of the absolute second difference.
+
+The stored data keep every band. On the two Harvard Forest test leaves, the fit RMSE over
+450–2350 nm fell from 0.47 to 0.02–0.03, as good as the 2011 leaves. Removing only the
+impossible values was not enough (RMSE 0.36–0.43).
+
+## Replicates enter through their mean, and why that is correct
+
+Many datasets contain several spectra of one leaf at one time: repeated scans, both leaf
+sides, or several spots. Write replicate $r$ as
+
+$$y_r = \hat y(\theta) + \delta + \varepsilon_r,$$
+
+with $\delta$ the RTM's structural discrepancy for this leaf, shared by all replicates, and
+$\varepsilon_r$ replicate noise. The replicate mean $\bar y$ is then a **sufficient
+statistic** for $\theta$. Its error covariance is $\Sigma_\delta + \Sigma_\varepsilon/m$, so
+extra replicates shrink only the noise part.
+
+Treating replicates as independent observations of the leaf (summing their likelihoods)
+counts the shared discrepancy $m$ times. The posterior then narrows by $\sqrt m$, although
+the systematic error never averages away.
+
+```{python}
+#| fig-cap: "Posterior SD of a constant offset vs the number of replicates m, for a discrepancy SD of 0.01 and replicate noise SD of 0.003 (typical magnitudes from LOPEX). Correct: mean-based likelihood; wrong: replicates as independent observations."
+m = np.arange(1, 21)
+sd_d, sd_e = 0.01, 0.003
+correct = np.sqrt(sd_d**2 + sd_e**2 / m)
+wrong = np.sqrt((sd_d**2 + sd_e**2) / m)
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=m, y=correct, mode="lines+markers", name="replicate mean (used here)",
+                         line=dict(color="#2a78d6", width=2), marker=dict(size=8, line=dict(color=SURFACE, width=2))))
+fig.add_trace(go.Scatter(x=m, y=wrong, mode="lines+markers", name="replicates as independent",
+                         line=dict(color="#eb6834", width=2), marker=dict(size=8, line=dict(color=SURFACE, width=2))))
+fig.update_layout(xaxis_title="number of replicate spectra m", yaxis_title="posterior SD of offset",
+                  height=400, legend=dict(orientation="h", y=1.12))
+show(fig)
+```
+
+Replicates are averaged only within one instrument and grid. Some observations combine
+spectrometers with different radiometric offsets; each instrument then forms its own block
+in the likelihood. The spread between replicates is kept as a diagnostic, and outlying
+replicates are flagged by QC and left out of the mean.
+
+## One likelihood for R, T, absorptance and pseudo-absorbance
+
+Each observation's blocks (one per quantity × grid × instrument) are concatenated, and the
+error models apply within and across blocks (see
+[How the error models work](methods-error-models.qmd)). The RTM produces R and T. Other
+reported quantities are deterministic transforms of them, so no data need converting:
+
+* absorptance $A = 1 - R - T$
+* pseudo-absorbance $PA = \log_{10}(1/R)$, used by NIR laboratory instruments
+
+```{python}
+#| fig-cap: "The four quantities for one simulated PROSPECT-D leaf. A and PA enter the likelihood as transforms of the modeled R and T."
+fig = make_subplots(rows=1, cols=2, subplot_titles=["R, T, A", "pseudo-absorbance log₁₀(1/R)"],
+                    horizontal_spacing=0.1)
+for y, nm, c in ((R, "R", "#2a78d6"), (T, "T", "#eb6834"), (1 - R - T, "A = 1 − R − T", "#1baf7a")):
+    fig.add_trace(go.Scatter(x=pdm.wavelength, y=y, name=nm, line=dict(color=c, width=2)), 1, 1)
+fig.add_trace(go.Scatter(x=pdm.wavelength, y=-np.log10(R), name="PA", line=dict(color="#eda100", width=2)), 1, 2)
+fig.update_xaxes(title_text="wavelength (nm)")
+fig.update_layout(height=380, legend=dict(orientation="h", y=1.15))
+show(fig)
+```
+
+Whether A and PA spectra give the same trait estimates as R and T is checked empirically on
+[Diagnostics](a-diagnostics.qmd), using pepper leaves with R, T and A of the same leaf. They
+are added to the analysis only if they do.

@@ -1,0 +1,51 @@
+---
+title: "R only vs R + T"
+---
+
+```{python}
+from _lib import *
+met = read("validation_metrics")
+held = read("heldout")
+```
+
+Most field spectra are reflectance-only, while integrating-sphere data also have
+transmittance. For leaves with both, the same model is fitted twice:
+
+1. **Using R and T.** This gives the best use of the data; transmittance from integrating
+   spheres can be noisy, and the error model gives it its own scale.
+2. **Using R only, and then predicting T.** This is a structural, out-of-sample test of the
+   RTM (objective A).
+
+These fits also answer objective B's question: do trait estimates improve when T is used?
+
+## Held-out transmittance
+
+```{python}
+#| tbl-cap: "Prediction of measured transmittance from fits that used reflectance only: median per-leaf RMSE and bias, and the share of bands inside the 90 % prediction band of the RTM output."
+if len(held):
+    show_table(fmt(held.assign(run=lambda d: d.apply(run_label, axis=1))[["run", "quantity", "n", "rmse", "bias", "coverage90"]]))
+else:
+    no_data()
+```
+
+## Do traits improve with T?
+
+```{python}
+#| fig-cap: "Log-CRPS (lower is better) of trait estimates from R-only vs R+T fits of the same leaves (leaves with both R and T), per RTM × error model × trait. Points below the 1:1 line: T helps."
+duc = read("data_use_comparison")
+if len(duc):
+    fig = go.Figure()
+    for err, g in duc.groupby("errmodel"):
+        fig.add_trace(go.Scatter(x=g["crps_log_R"], y=g["crps_log_RT"], mode="markers+text",
+                                 text=g["model"].map(MODEL_LABEL) + " " + g["trait"], textposition="top center",
+                                 textfont=dict(color=INK2, size=10), name=ERR_LABEL.get(err, err),
+                                 marker=dict(size=11, color=ERR_COLOR.get(err), line=dict(color=SURFACE, width=2))))
+    v = np.r_[duc["crps_log_R"], duc["crps_log_RT"]]
+    one_to_one(fig, np.nanmin(v), np.nanmax(v))
+    fig.update_layout(xaxis_title="log-CRPS, R only", yaxis_title="log-CRPS, R + T", height=480,
+                      legend=dict(orientation="h", y=1.1))
+    show(fig)
+    show_table(fmt(duc))
+else:
+    no_data()
+```

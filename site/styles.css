@@ -1,0 +1,8 @@
+:root { --surface-1: #fcfcfb; }
+body { background: var(--surface-1); }
+.callout { border-left-width: 3px; }
+table.dataTable td, table.dataTable th { font-variant-numeric: tabular-nums; }
+.stat-row { display: flex; gap: 1.5rem; flex-wrap: wrap; margin: 0.5rem 0 1.5rem; }
+.stat { min-width: 9rem; }
+.stat .v { font-size: 1.8rem; font-weight: 600; color: #0b0b0b; line-height: 1.1; }
+.stat .l { color: #52514e; font-size: 0.85rem; }

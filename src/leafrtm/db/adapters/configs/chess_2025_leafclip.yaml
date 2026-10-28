@@ -1,0 +1,49 @@
+dataset_id: chess_2025_leafclip
+source: ecosis
+source_id: leaf-clip-spectra-for-the-2025-colorado-headwaters-ecological-spectroscopy-study--chess-
+# CHESS 2025 (Gothic / Crested Butte, Colorado) endmember spectra taken with the ASD
+# FS4 leaf clip. Only green-vegetation (sample_type PV) rows are kept; NPV, bark (BR),
+# flowers, white reference and lupine pods are dropped. No traits. Two spectra per
+# basename/species/notes are treated as replicates of one sample. No asd_file appears
+# in the contact-probe or proximal CHESS packages (both excluded, see chess_2025_*.yaml).
+columns:
+  sample_key: "`asd_basename`.str.cat(`species`.fillna(''), sep='|').str.cat(`notes`.fillna(''), sep='|')"
+  species_fill: "`species`.fillna(`asd_basename`)"
+filter:
+  - "sample_type == 'PV'"
+  - "~`notes`.fillna('').str.contains('pods')"
+  # cow parsnip leaf measured over a white background (not the clip's black background)
+  - "~`notes`.fillna('').str.contains('white background')"
+spectra:
+  quantity: R
+  scale: auto
+  foreoptic: leaf_clip
+  instrument: asd-fs4
+  sample_state: fresh
+  target_config:
+    column: notes
+    regex: [["stacked", leaf_stack], ["needles", needle_array]]
+    default: single_leaf
+  segments: [1001, 1801]
+ids:
+  entity: [sample_key]
+species:
+  name: species_fill
+  map:
+    "Helionthella quinquenenius": "Helianthella quinquenervis"
+    "Potentila polcherrima": "Potentilla pulcherrima"
+    "Delphinium barberii": "Delphinium barbeyi"
+    "Artemisia sp.": "Artemisia"
+    "20250710_lc_willowleaf": "Salix"
+    "20250710_lc_spruceneedle": "Picea"
+    # unnamed "transect green" leaves
+    "20250710_lc_vc_1leaf": null
+    "20250710_lc_vc_2leaf": null
+    "20250710_lc_vc_3leaf": null
+    "20250710_lc_vc_4leaf": null
+date: {column: date, format: "%Y%m%d"}
+site: {column: sampling_area}
+# no coordinates in the package; approximate location of Gothic, CO (RMBL)
+lat: 38.959
+lon: -106.990
+ecosystem: grassland

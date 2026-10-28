@@ -1,0 +1,97 @@
+---
+title: "Diagnostics"
+---
+
+```{python}
+from _lib import *
+diag = read("diagnostics")
+ident = read("identifiability")
+pc = read("posterior_correlations")
+rec = read("recovery")
+feas = read("apa_feasibility")
+excl = read("excluded_fits")
+```
+
+## Convergence and cost
+
+Two thresholds apply:
+
+* **Converged** (reported here): every RTM parameter has rank-normalized R̂ < 1.01, and
+  both bulk and tail ESS are ≥ 200.
+* **Usable** (screen for every trait analysis): R̂ ≤ 1.05, bulk ESS ≥ 100 and at most 10 %
+  divergent transitions. Fits that fail it are left out of validation, intercomparison and
+  the best-estimate product, and are listed below. Spectral-fit pages keep every fit.
+
+LIBERTY is fitted with Eq. 16 of Dawson et al. (1998) corrected. As published, LIBERTY has
+no solution for bright leaves, and fits pressed against that edge failed this screen; see
+[LIBERTY: a bug in the original paper, and its fix](a-liberty.qmd).
+
+```{python}
+if len(diag):
+    show_table(fmt(diag.assign(run=lambda d: d.apply(run_label, axis=1)).drop(columns=["model", "errmodel", "rt", "data_use"])))
+else:
+    no_data()
+```
+
+```{python}
+#| tbl-cap: "Fits excluded from the trait analyses, with the failed criteria. frac_at_bound is the share of posterior draws within 1 % of a hard prior bound."
+if len(excl):
+    cols = [c for c in ["run_id", "observation_id", "reason", "max_rhat", "min_ess_bulk", "divergent_share",
+                        "wall_margin_q05", "frac_at_bound"] if c in excl]
+    show_table(fmt(excl[cols].sort_values(["run_id", "max_rhat"], ascending=[True, False])))
+else:
+    no_data("No fits were excluded.")
+```
+
+## What do the data inform?
+
+Each parameter's posterior SD is divided by its prior SD, on the log scale: values near 1
+mean the posterior is still the prior, and small values mean the data constrain the
+parameter.
+
+```{python}
+#| fig-cap: "Median prior-to-posterior SD ratio (log scale) per RTM parameter; Hetero + OU error model, all quantities."
+if len(ident):
+    d = ident[ident["errmodel"] == "ou"].drop_duplicates(["model", "param"])
+    piv = d.pivot_table(index="model", columns="param", values="contraction_median")
+    piv = piv.reindex([m for m in MODELS if m in piv.index])
+    fig = go.Figure(go.Heatmap(z=piv.to_numpy(), x=piv.columns, y=[MODEL_LABEL[m] for m in piv.index],
+                               zmin=0, zmax=1, colorscale=[[0, "#104281"], [0.5, "#86b6ef"], [1, "#f0efec"]],
+                               hovertemplate="%{y} · %{x}: %{z:.2f}<extra></extra>", colorbar=dict(title="post/prior SD")))
+    fig.update_layout(height=320)
+    show(fig)
+```
+
+## Posterior correlations
+
+```{python}
+#| tbl-cap: "Median (across leaves) posterior correlation between parameters (log scale), strongest first."
+if len(pc):
+    show_table(fmt(pc.reindex(pc["median_corr"].abs().sort_values(ascending=False).index).head(60)))
+```
+
+## Synthetic recovery
+
+Spectra are simulated from each RTM, with known parameters and correlated noise, and then
+fitted. This checks the inference machinery for bias and calibration.
+
+```{python}
+if len(rec):
+    show_table(fmt(rec))
+else:
+    print("Synthetic recovery results are not part of this build.")
+```
+
+## Absorbance and pseudo-absorbance
+
+Some datasets report absorptance $A = 1 - R - T$ or pseudo-absorbance $PA = \log_{10}(1/R)$
+instead of R and T. Both are deterministic functions of modeled R and T, so they can enter
+the likelihood directly. Before adding them to the analysis, a feasibility check fitted them
+on leaves that also have R and T.
+
+```{python}
+if len(feas):
+    show_table(fmt(feas))
+else:
+    print("The feasibility check has not been run for this build.")
+```

@@ -1,0 +1,8 @@
+dataset_id: wu_tapajos_2012_ecosis
+source: ecosis
+source_id: 2012-leaf-reflectance-spectra-of-tropical-trees-in-tapajos-national-forest
+include: false
+exclude_reason: >-
+  Duplicate of spectra_db dataset `wu_brazil` (config wu_brazil.yaml): all 166 spectra are
+  identical. The EcoSIS export has no metadata columns at all (no leaf ID, species or traits;
+  the LMA file is a separate, unjoined resource), so wu_brazil is the better copy.

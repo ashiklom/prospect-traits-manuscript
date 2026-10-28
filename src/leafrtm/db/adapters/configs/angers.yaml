@@ -1,0 +1,28 @@
+dataset_id: angers
+source: ecosis
+source_id: angers-leaf-optical-properties-database--2003-
+citation: "Feret, J.-B., Francois, C., Asner, G. P., et al. (2008). PROSPECT-4 and 5: Advances in the leaf optical properties model separating photosynthetic pigments. Remote Sens. Environ. 112, 3030-3043."
+doi: 10.1016/j.rse.2008.02.012
+spectra:
+  quantity: {column: Measurement_type, map: {reflectance: R, transmittance: T}}
+  scale: fraction
+  foreoptic: integrating_sphere      # ASD FieldSpec + LI-COR 1800-12 integrating sphere
+  instrument: asd-fs
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: ["Sample_#"]
+species: {name: "Latin Name"}
+date: 2003
+site: {name: "INRA Angers"}
+lat: 47.48
+lon: -0.61
+ecosystem: mixed
+traits:
+  - {column: "Chlorophyll_a+b ( g/cm )", trait: chl_area, unit: "ug/cm**2"}
+  - {column: "Chlorophyll_a ( g/cm )", trait: chla_area, unit: "ug/cm**2"}
+  - {column: "Chlorophyll_b ( g/cm )", trait: chlb_area, unit: "ug/cm**2"}
+  - {column: "Carotenoid ( g/cm )", trait: car_area, unit: "ug/cm**2"}
+  - {column: "Equivalent Water Thickness (g/cm )", trait: ewt, unit: "g/cm**2"}
+  - {column: "Leaf mass per area (g/cm )", trait: lma, unit: "g/cm**2"}
+  - {column: "Structure parameter", trait: prospect_n}

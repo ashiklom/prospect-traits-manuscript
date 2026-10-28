@@ -1,0 +1,56 @@
+# Canonical leaf traits. `unit` is the canonical unit (pint syntax) every
+# value is converted to. Extends spectra_db/traits.yml.
+#   basis: area | mass | fresh_mass | none
+# Trait names follow <quantity>_<basis>.
+chl_area:        {description: "Chlorophyll a+b per leaf area", unit: "ug/cm**2", basis: area}
+chla_area:       {description: "Chlorophyll a per leaf area", unit: "ug/cm**2", basis: area}
+chlb_area:       {description: "Chlorophyll b per leaf area", unit: "ug/cm**2", basis: area}
+car_area:        {description: "Total carotenoids per leaf area", unit: "ug/cm**2", basis: area}
+anth_area:       {description: "Anthocyanins per leaf area", unit: "ug/cm**2", basis: area}
+chl_mass:        {description: "Chlorophyll a+b per dry mass", unit: "mg/g", basis: mass}
+car_mass:        {description: "Carotenoids per dry mass", unit: "mg/g", basis: mass}
+lma:             {description: "Leaf dry mass per area", unit: "g/m**2", basis: area}
+ewt:             {description: "Equivalent water thickness (water mass per leaf area)", unit: "g/m**2", basis: area}
+lwc:             {description: "Leaf water content, fraction of fresh mass", unit: "percent", basis: fresh_mass}
+ldmc:            {description: "Leaf dry matter content (dry/fresh mass)", unit: "mg/g", basis: fresh_mass}
+rwc:             {description: "Relative water content", unit: "percent", basis: none}
+leaf_area:       {description: "One-sided leaf area", unit: "cm**2", basis: none}
+leaf_thickness:  {description: "Leaf thickness", unit: "um", basis: none}
+n_mass:          {description: "Nitrogen per dry mass", unit: "percent", basis: mass}
+n_area:          {description: "Nitrogen per leaf area", unit: "g/m**2", basis: area}
+c_mass:          {description: "Carbon per dry mass", unit: "percent", basis: mass}
+c_area:          {description: "Carbon per leaf area", unit: "g/m**2", basis: area}
+h_mass:          {description: "Hydrogen per dry mass", unit: "percent", basis: mass}
+o_mass:          {description: "Oxygen per dry mass", unit: "percent", basis: mass}
+p_mass:          {description: "Phosphorus per dry mass", unit: "percent", basis: mass}
+k_mass:          {description: "Potassium per dry mass", unit: "percent", basis: mass}
+ca_mass:         {description: "Calcium per dry mass", unit: "percent", basis: mass}
+mg_mass:         {description: "Magnesium per dry mass", unit: "percent", basis: mass}
+s_mass:          {description: "Sulfur per dry mass", unit: "percent", basis: mass}
+cn_ratio:        {description: "Carbon:nitrogen mass ratio", unit: "dimensionless", basis: none}
+protein_mass:    {description: "Protein per dry mass", unit: "percent", basis: mass}
+protein_area:    {description: "Protein per leaf area", unit: "g/m**2", basis: area}
+lignin_mass:     {description: "Lignin per dry mass", unit: "percent", basis: mass}
+cellulose_mass:  {description: "Cellulose per dry mass", unit: "percent", basis: mass}
+hemicellulose_mass: {description: "Hemicellulose per dry mass", unit: "percent", basis: mass}
+ndf_mass:        {description: "Neutral detergent fiber per dry mass", unit: "percent", basis: mass}
+adf_mass:        {description: "Acid detergent fiber per dry mass", unit: "percent", basis: mass}
+starch_mass:     {description: "Starch per dry mass", unit: "percent", basis: mass}
+sugar_mass:      {description: "Soluble sugars per dry mass", unit: "percent", basis: mass}
+nsc_mass:        {description: "Non-structural carbohydrates per dry mass", unit: "percent", basis: mass}
+phenolics_mass:  {description: "Total phenolics per dry mass", unit: "percent", basis: mass}
+tannins_mass:    {description: "Condensed tannins per dry mass", unit: "percent", basis: mass}
+ash_mass:        {description: "Ash per dry mass", unit: "percent", basis: mass}
+fat_mass:        {description: "Fat / lipids per dry mass", unit: "percent", basis: mass}
+d13c:            {description: "Leaf carbon isotope ratio", unit: "permille", basis: none}
+d15n:            {description: "Leaf nitrogen isotope ratio", unit: "permille", basis: none}
+vcmax_area:      {description: "Maximum carboxylation rate (Vcmax), area basis", unit: "umol/m**2/s", basis: area}
+vcmax25_area:    {description: "Vcmax at 25 C, area basis", unit: "umol/m**2/s", basis: area}
+jmax_area:       {description: "Maximum electron transport rate (Jmax), area basis", unit: "umol/m**2/s", basis: area}
+jmax25_area:     {description: "Jmax at 25 C, area basis", unit: "umol/m**2/s", basis: area}
+asat_area:       {description: "Light-saturated photosynthesis, area basis", unit: "umol/m**2/s", basis: area}
+gs_area:         {description: "Stomatal conductance", unit: "mol/m**2/s", basis: area}
+rd_area:         {description: "Dark respiration, area basis", unit: "umol/m**2/s", basis: area}
+water_potential: {description: "Leaf water potential", unit: "MPa", basis: none}
+leaf_temperature: {description: "Leaf temperature at measurement", unit: "degC", basis: none}
+prospect_n:      {description: "PROSPECT structure parameter N reported by data providers", unit: "dimensionless", basis: none}

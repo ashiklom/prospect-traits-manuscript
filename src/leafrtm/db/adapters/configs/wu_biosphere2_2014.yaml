@@ -1,0 +1,24 @@
+dataset_id: wu_biosphere2_2014
+source: ecosis
+source_id: leaf-spectral-reflectance-of-tropical-plants-growing-in-biosphere-2
+# Same 76 spectra as the metadata-less 2014-leaf-reflectance-...-biosphere2 package
+# (excluded as wu_biosphere2_2014_v1). No species information in the export.
+spectra:
+  quantity: R
+  scale: fraction                  # package says %, but values are 0-0.6
+  foreoptic: leaf_clip             # ASD plant probe + leaf clip
+  instrument: asd-fspro
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [Leaf_Number]            # L1..L76, one spectrum per leaf
+date: 2014
+site: {name: "Biosphere 2 tropical rainforest biome"}
+lat: 32.579
+lon: -110.851
+ecosystem: greenhouse
+traits:
+  - {column: LMA_gDW_m2, trait: lma, unit: "g/m**2"}
+  # "Relative_Leaf_Water_Perc" holds fractions 0.54-0.88; magnitudes match water content as a
+  # fraction of fresh mass (as in the companion Tapajos data, wu_brazil), not turgor-based RWC.
+  - {column: Relative_Leaf_Water_Perc, trait: lwc, unit: dimensionless}

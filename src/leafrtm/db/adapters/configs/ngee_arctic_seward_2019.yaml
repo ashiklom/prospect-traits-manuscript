@@ -1,0 +1,27 @@
+dataset_id: ngee_arctic_seward_2019
+source: ecosis
+source_id: ngee-arctic-2019-leaf-spectral-reflectance-seward-peninsula-alaska
+columns:
+  latin_name: "`Latin Genus`.str.strip().str.cat(`Latin Species`.str.strip(), sep=' ')"
+spectra:
+  quantity: R
+  scale: percent
+  foreoptic: leaf_clip             # SVC LC-RP-Pro
+  instrument: svc-hr1024i
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [SampleID]
+species: {name: latin_name, code: "USDA Symbol"}
+date: {column: "Measurement Date", format: "%Y%m%d"}
+site: {column: "Location Name"}   # Seward_Kougarok (MM64, MM80) / Seward_Teller (MM27)
+lat: Latitude
+lon: Longitude
+ecosystem: tundra
+traits:
+  - {column: LMA, trait: lma, unit: "g/m**2"}
+  - {column: Nmass, trait: n_mass, unit: "mg/g"}   # 14-33 mg/g
+  - {column: Cmass, trait: c_mass, unit: "mg/g"}
+  - {column: Narea, trait: n_area, unit: "g/m**2"}
+  - {column: Carea, trait: c_area, unit: "g/m**2"}
+  - {column: CNratio, trait: cn_ratio}

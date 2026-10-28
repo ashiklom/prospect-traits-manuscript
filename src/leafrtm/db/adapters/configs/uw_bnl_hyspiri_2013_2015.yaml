@@ -1,0 +1,63 @@
+dataset_id: uw_bnl_hyspiri_2013_2015
+source: ecosis
+source_id: uw-bnl-nasa-hyspiri-airborne-campaign-leaf-and-canopy-spectra-and-trait-data
+citation: "Serbin, S. P., DuBois, S., Jablonski, A., Shiklomanov, A., Desai, A., Kruger, E. L., Townsend, P. A. (2019). UW-BNL NASA HyspIRI Airborne Campaign Leaf and Canopy Spectra and Trait Data. EcoSIS data set."
+# California crop, shrubland and forest sites, 2013-2015. Leaf reflectance with leaf
+# clips (ASD FS3/FS4, SE PSM-3500), leaf transmittance in an integrating sphere,
+# plus gas exchange (A-Ci fits) and CHN/LMA on subsets. Canopy rows (pistol grip /
+# 4/10 deg foreoptics, incl. soil, NPV, ground) are dropped.
+# Supersedes package nasa-hyspiri-california (see nasa_hyspiri_california.yaml).
+# Entity = Sample_Name (one leaf). The same leaf was often measured on different
+# days or with different instruments (e.g. LC reflectance with ASD and SE, sphere
+# transmittance two days later), so date and instrument go to ids.time; suffix
+# variants of the spectrum name (RG, RGa, Rw, LCH/LCV ...) on the same day and
+# instrument are kept as replicate spectra.
+columns:
+  pos: "CHN_Canopy_Position.fillna(GE_Canopy_Position)"
+  age: "CHN_Leaf_Age.fillna(GE_Leaf_Age)"
+  conifer: "`Latin Genus`.isin(['Pinus', 'Abies', 'Calocedrus'])"
+filter:
+  - "Leaf_or_Canopy == 'leaf'"
+spectra:
+  quantity: {column: "Measurement Quantity", map: {Reflectance: R, Transmittance: T}}
+  scale: fraction                    # Measurement Units = Ratio
+  foreoptic: {column: "Acquisition Method", map: {LC: leaf_clip, IS: integrating_sphere}}
+  instrument: {column: "Instrument Model", map: {ASD_FS3: asd-fs3, ASD_FS4: asd-fs4, SpecEvo_PSM3500: se-psm3500}}
+  sample_state: fresh
+  target_config: {column: conifer, map: {true: needle_array, false: single_leaf}}
+  # sphere transmittance is very noisy below ~450 nm and above ~2300 nm (values
+  # < 0 or > 1 in ~200 of 358 T spectra over the full range); crop to 400-2400.
+  # ~80 T spectra still contain out-of-range points inside this range.
+  wavelength_range: [400, 2400]
+ids:
+  entity: [Sample_Name]
+  time: ["Measurement Date", "Instrument Model"]
+species:
+  name: ["Latin Genus", "Latin Species"]
+  code: "USDA Symbol"
+  code_map:
+    Grape: "Vitis vinifera"
+    MandarinOrange: "Citrus reticulata"
+    LemonTree: "Citrus ×limon"
+    Orange: "Citrus ×sinensis"
+date: {column: "Measurement Date", format: "%m/%d/%y"}
+site: {column: "Location Name"}
+lat: Latitude
+lon: Longitude
+ecosystem: mixed                     # crops, shrubland, forest
+canopy_position: {column: pos, map: {T: top, M: middle, B: bottom, Top: top, Mid: middle, Bot: bottom}}
+leaf_age: {column: age, map: {New: young, Old: old}}   # current-year vs older foliage
+traits:
+  - {column: LMA_gDW_m2, trait: lma, unit: "g/m**2"}
+  # columns named *_g_g but values are percent (N 1-5, C ~40-50)
+  - {column: N_mass_g_g, trait: n_mass, unit: percent}
+  - {column: C_mass_g_g, trait: c_mass, unit: percent}
+  - {column: CN_Ratio, trait: cn_ratio}
+  # A-Ci fits at the measurement leaf temperature (Mean_Tleaf, ~25-35 C), PAR 2000
+  - {column: Fitted_Vcmax, trait: vcmax_area, unit: "umol/m**2/s"}
+  - {column: Fitted_Jmax, trait: jmax_area, unit: "umol/m**2/s"}
+  - {column: Fitted_Rd, trait: rd_area, unit: "umol/m**2/s"}
+  - {column: Meas_Photo_at_CO2R_400, trait: asat_area, unit: "umol/m**2/s"}
+  - {column: Mean_Tleaf, trait: leaf_temperature, unit: degC}
+  # not mapped: Mean_Cond (averaged over the A-Ci curve), fluorescence, modelled
+  # photosynthesis, Calculated_VIS_Leaf_Abs (derived), SLA (redundant with LMA)

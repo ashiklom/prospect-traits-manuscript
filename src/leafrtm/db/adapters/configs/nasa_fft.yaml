@@ -1,0 +1,173 @@
+dataset_id: nasa_fft
+source: ecosis
+# NASA Forest Functional Types (Serbin et al. 2014): the same leaf samples in four packages.
+#  0: fresh reflectance, ASD leaf clip (v2, QA/QC'd traits)
+#  1: fresh transmittance, ASD integrating sphere (v2); 756/765 SampleIDs also in package 0
+#  2: dried (60 C) and ground leaves, reflectance with ASD contact probe (doi:10.21232/C21593);
+#     954/1226 UniqueIDs match package 0, 272 are ground-only samples
+#  3: "Fresh Leaf Spectra ..." (v1, doi:10.21232/C2WC75). Its leaf-clip R (1382) and sphere T
+#     (765) are the same spectra as packages 0/1 (max abs diff ~5e-5, rounding) with fewer
+#     traits, so only its 107 integrating-sphere REFLECTANCE spectra (absent from v2) are used.
+#     Dropped from v1: LC_REFL/IS_TRAN (duplicates), *_WHIT ("transflectance", leaf over white
+#     background), 3 LC_TRAN.
+# SampleID / UniqueID = <plot>_<species>_<height[+needle age]>_<year>: one leaf sample.
+source_id:
+  - nasa-fft-project-leaf-reflectance-morphology-and-biochemistry-for-northern-temperate-forests
+  - nasa-fft-project-leaf-transmittance-morphology-and-biochemistry-for-northern-temperate-forests
+  - dried-leaf-spectra-to-estimate-leaf-morphology-and-biochemistry-for-northern-temperate-forests
+  - fresh-leaf-spectra-to-estimate-leaf-morphology-and-biochemistry-for-northern-temperate-forests
+citation: "Serbin, S. P., Singh, A., McNeil, B. E., Kingdon, C. C., Townsend, P. A. (2014). Spectroscopic determination of leaf morphological and biochemical traits for northern temperate and boreal tree species. Ecological Applications 24, 1651-1669."
+doi: 10.1890/13-2110.1
+# H2O_perc uses -999900 (= -9999 * 100) as missing value.
+sentinels: [-999, -9999, -99999, -999900]
+columns:
+  uid: "`SampleID`.fillna(`UniqueID`)"
+  state: "`_package`.where(`_package_index` != 2, 'ground').where(`_package_index` == 2, 'fresh')"
+  is_isr: "(`_package_index` == 3) & `Spectra`.str.endswith('_IS_REFL').fillna(False)"
+  # Leaves with sphere R: sphere R + sphere T form the 'fresh' observation and the
+  # leaf-clip R becomes a separate observation 'fresh_leafclip' (otherwise LC R and IS R
+  # would be pooled as replicates of one observation).
+  has_isr: "`uid`.isin(`uid`.where(`is_isr`))"
+  obs_time: "`state`.where(~(`has_isr` & (`_package_index` == 0)), 'fresh_leafclip')"
+  # Plot / site codes from the sample ID (v1 rows lack the Plot/Site columns).
+  plot_code: "`uid`.str.split('_').str[0]"
+  site_code: "`plot_code`.str.extract('^([A-Z]+)', expand=False)"
+  species_code: "`USDA Symbol`.fillna(`Species`)"
+  tc_key: "`state`.str.cat(`species_code`.str.upper(), sep=' ')"
+  age: "`Age`.astype('str').str.replace('.0', '', regex=False)"
+  # QC flag 2 = questionable; the dried package blanks LMA exactly for LMA_QC == 2, so drop them.
+  lma_ok: "`LMA_gDW_m2`.where(`LMA_QC` != 2).fillna(`LMA_gm2`.where(`_package_index` == 2))"
+  ewt_ok: "`EWT_gDW_cm2`.where(`LMA_QC` != 2)"
+  lwc_ok: "`H2O_perc`.where(`LMA_QC` != 2)"
+  ldmc_ok: "`LDMC_g_g`.where(`LMA_QC` != 2)"
+  n_ok: "`Nmass_perc`.where(`CN_QC` != 2)"
+  c_ok: "`Cmass_perc`.where(`CN_QC` != 2)"
+  cn_ok: "`CNRatio`.where(`CN_QC` != 2)"
+  adf_ok: "`ADF_PERC_DW`.where(`FibLigCell_QC` != 2)"
+  adl_ok: "`ADL_PERC_DW`.where(`FibLigCell_QC` != 2)"
+  cell_ok: "`CELL_PERC_DW`.where(`FibLigCell_QC` != 2)"
+  d15n_ok: "`SAMPLE_dN15`.where(`d15N_QC` != 2)"
+filter:
+  - "(`_package_index` != 3) | `is_isr`"
+  - "`Comments` != 'FLOWERS'"   # MW42_ANGE_T_2009: flowers, not leaves
+spectra:
+  quantity: {column: _package_index, map: {0: R, 1: T, 2: R, 3: R}}
+  # Packages 1-3 say "Percent" but values are fractions (medians 0.27 / 0.57 / 0.46).
+  scale: fraction
+  foreoptic: {column: _package_index, map: {0: leaf_clip, 1: integrating_sphere, 2: contact_probe, 3: integrating_sphere}}
+  instrument: asd-fs3
+  sample_state: {column: state}
+  # Needles (Pinus, Picea, Abies, Tsuga, Larix) measured as needle arrays; scale-leaved
+  # Thuja / Juniperus sprays -> unknown; everything else single leaves; ground powders unknown.
+  target_config:
+    column: tc_key
+    regex: [["^ground", unknown], ["^fresh (?:PI|AB|TS|LA)[A-Z]{2}$", needle_array], ["^fresh (?:THOC|JUVI)$", unknown]]
+    default: single_leaf
+ids:
+  entity: [uid]
+  time: [obs_time]
+# The 'Latin Genus/Species' columns were filled by matching 4-letter codes against USDA
+# symbols without their numeric suffix and are often wrong (PIBA -> Pinus balfouriana,
+# THOC -> Thalictrum occidentale, POTR -> Poa tracyi, BEAL -> Besseya alpina, ...).
+# Names below come from the project's own codes (northern US forest species); codes not
+# listed (CACO, SORU, GRASS, UNKN1) stay unresolved here. species.resolve() looks codes up in
+# USDA before names, so the (name, code) pairs whose code is another USDA species, and CACO
+# (= Carya cordiformis, as in the NEON packages), are fixed in vocab/species_resolution.csv.
+species:
+  code: species_code
+  code_map:
+    ABBA: Abies balsamea
+    ACNE: Acer negundo
+    ACPE: Acer pensylvanicum
+    ACPL: Acer platanoides
+    ACRU: Acer rubrum
+    ACSM: Acer saccharum          # comments: "CHANGED FROM ACSA TO ACSM"
+    ACSN: Acer saccharinum
+    ACSP: Acer spicatum
+    ALIN: Alnus incana
+    ANGE: Andropogon gerardii
+    BEAL: Betula alleghaniensis
+    BEGL: Betula glandulosa
+    BELE: Betula lenta
+    BEPA: Betula papyrifera
+    CAAL: Carya alba              # IDS (Maryland), sampled at B/M/T canopy heights
+    CAOV: Carya ovata
+    CAREX: Carex
+    CEOC: Celtis occidentalis
+    CHCA: Chamaedaphne calyculata
+    COAM: Corylus americana
+    COFL: Cornus florida
+    FAGR: Fagus grandifolia
+    FRAM: Fraxinus americana
+    FRNI: Fraxinus nigra
+    FRPE: Fraxinus pennsylvanica
+    HAVI: Hamamelis virginiana
+    JUNI: Juglans nigra
+    JUVI: Juniperus virginiana
+    KALA: Kalmia latifolia
+    LALA: Larix laricina
+    LEGR: Rhododendron groenlandicum
+    LITU: Liriodendron tulipifera
+    LONICERA: Lonicera
+    MAAC: Magnolia acuminata
+    NYSY: Nyssa sylvatica
+    OSVI: Ostrya virginiana
+    PHAR: Phalaris arundinacea    # comment: "Phalaris arundinacea (Reed canarygrass)"
+    PIBA: Pinus banksiana
+    PIMA: Picea mariana
+    PIPU: Picea pungens
+    PIRE: Pinus resinosa
+    PIRU: Picea rubens
+    PIST: Pinus strobus
+    PISY: Pinus sylvestris
+    PIVI: Pinus virginiana
+    PODE: Populus deltoides
+    POGR: Populus grandidentata
+    POTR: Populus tremuloides
+    PRPE: Prunus pensylvanica
+    PRSE: Prunus serotina
+    PRUNUS: Prunus
+    QUAL: Quercus alba
+    QUEL: Quercus ellipsoidalis
+    QUMA: Quercus macrocarpa
+    QUPR: Quercus montana         # chestnut oak (Q. prinus)
+    QURU: Quercus rubra
+    QUVE: Quercus velutina
+    RHCA: Rhamnus cathartica
+    RHMA: Rhododendron maximum
+    ROPS: Robinia pseudoacacia
+    SAAL: Sassafras albidum       # IDS (Maryland); not Salix alaxensis
+    SALIX: Salix
+    SOLIDAGO: Solidago
+    SPPE: Spartina pectinata
+    THOC: Thuja occidentalis
+    TIAM: Tilia americana
+    TSCA: Tsuga canadensis
+    TYLA: Typha latifolia
+    ULAM: Ulmus americana
+date: {year: Sample_Year}
+site:
+  column: site_code
+  map: {AK: Adirondacks, BH: Baraboo Hills, BI: Blackhawk Island, DC: Madison / Dane County,
+        GR: Green Ridge, IDS: IDS, KM: Kettle Moraine State Forest, MN: Finland SF / Superior NF,
+        MW: Madison, NC: Flambeau River SF / Cheq. NF, OF: Ottawa NF / Sylvania Wilderness,
+        PB: Bayfield / Pine Barrens, PM: Porcupine Mountains, SF: Ely / Superior NF}
+plot: {column: plot_code}
+lat: Latitude
+lon: Longitude
+ecosystem: forest
+canopy_position: {column: Height, map: {T: top, M: middle, B: bottom}}
+# Needle cohorts: N = current-year (new), O = older, 2/3 = 2nd/3rd-year needles.
+leaf_age: {column: age, map: {N: young, O: old, "2": old, "3": old}}
+traits:
+  - {column: lma_ok, trait: lma, unit: "g/m**2"}
+  - {column: ewt_ok, trait: ewt, unit: "g/cm**2"}      # EWT_gDW_cm2: g water / cm2
+  - {column: lwc_ok, trait: lwc, unit: percent}        # % of fresh mass
+  - {column: ldmc_ok, trait: ldmc, unit: "g/g"}
+  - {column: n_ok, trait: n_mass, unit: percent}
+  - {column: c_ok, trait: c_mass, unit: percent}
+  - {column: cn_ok, trait: cn_ratio}
+  - {column: adf_ok, trait: adf_mass, unit: percent}
+  - {column: adl_ok, trait: lignin_mass, unit: percent}   # acid detergent lignin
+  - {column: cell_ok, trait: cellulose_mass, unit: percent}
+  - {column: d15n_ok, trait: d15n, unit: permille}

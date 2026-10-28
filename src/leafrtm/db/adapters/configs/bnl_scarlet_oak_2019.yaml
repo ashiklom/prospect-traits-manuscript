@@ -1,0 +1,42 @@
+dataset_id: bnl_scarlet_oak_2019
+source: ecosis
+source_id: seasonal-measurements-of-photosynthesis-and-leaf-traits-in-scarlet-oak
+# Burnett et al. (2021, Tree Physiol., doi:10.1093/treephys/tpab015): top-of-canopy
+# Quercus coccinea branches shotgun-sampled at Brookhaven National Laboratory on 8 dates
+# in 2019 (6 trees x 8 dates), stems re-cut under water, measured in the lab.
+# One leaf per Sample_ID (spectra + gas exchange + traits on the same leaf).
+spectra:
+  quantity: R
+  scale: auto
+  foreoptic: leaf_clip             # SVC LC-RP-Pro leaf clip
+  # metadata lists both an SE PSR+ and an SVC HR-1024i with no per-spectrum column; the
+  # spectra look homogeneous across dates, but the instrument cannot be assigned
+  instrument: unknown
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [Sample_ID]
+  plant: [Tree_ID]
+species: {name: ["Latin Genus", "Latin Species"]}
+date: {column: "Measurement Date", format: "%Y%m%d"}
+site: {name: "Brookhaven National Laboratory"}
+lat: 40.874
+lon: -72.873
+ecosystem: forest
+canopy_position: top
+sun_shade: sun
+traits:
+  - {column: LMA, trait: lma, unit: "g/m**2"}
+  - {column: Narea, trait: n_area, unit: "g/m**2"}
+  - {column: Nmass, trait: n_mass, unit: "mg/g"}            # 9-19 mg/g
+  # Column is named RWC but values (43-64 %, declining over the season) are typical of
+  # water content as % of fresh mass for oak, not relative water content (~90-100 %).
+  - {column: RWC, trait: lwc, unit: percent}
+  - {column: Vcmax25, trait: vcmax25_area, unit: "umol/m**2/s"}
+  - {column: VcmaxT, trait: vcmax_area, unit: "umol/m**2/s"}  # at leaf temperature Tleaf
+  - {column: Jmax25, trait: jmax25_area, unit: "umol/m**2/s"}
+  - {column: JmaxT, trait: jmax_area, unit: "umol/m**2/s"}
+  - {column: Asat, trait: asat_area, unit: "umol/m**2/s"}
+  - {column: gs, trait: gs_area, unit: "mol/m**2/s"}
+  - {column: Tleaf, trait: leaf_temperature, unit: degC}     # during gas exchange
+  # not mapped: ChlNDI, PRI (indices), CiCa, NUE, WUEi, g1, Modelled_A

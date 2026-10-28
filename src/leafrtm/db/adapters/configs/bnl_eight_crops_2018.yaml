@@ -1,0 +1,52 @@
+dataset_id: bnl_eight_crops_2018
+source: ecosis
+source_id: leaf-spectra--structural-and-biochemical-leaf-traits-of-eight-crop-species
+# Ely, Serbin, Lieberman-Cribbin & Rogers (BNL), greenhouse at Upton NY. 8 crop/tree
+# species; fully expanded mature leaves measured with an SVC HR-1024i and LC-RP leaf clip
+# (internal lamp). One spectrum per leaf (sample_id); traits are from the same leaf.
+# Not mapped as treatments: `manipulations` (0, LE0-LE3, VS, FR, HLFR, FLR, HLR; on a few
+# plants, codes undocumented in the package). Not mapped as traits: nitrate, amino acids,
+# per-fresh-mass duplicates.
+# Carbohydrates are in nmol glucose-equivalents per mg dry mass. They are converted to mass
+# fractions as glucose equivalents (1 nmol = 0.18016 ug): starch, total soluble sugars
+# (glucose + fructose + sucrose) and TNC (= sugars + starch).
+columns:
+  # one sample has the note "lost some supernate. Do not use starch assay."
+  starch_ok: "`starch_nmol_Glc_mg_DW`.where(`Notes`.isna())"
+  tnc_ok: "`TNC_nmol_Glc_mg`.where(`Notes`.isna())"
+spectra:
+  quantity: R
+  scale: auto                          # percent
+  foreoptic: leaf_clip
+  instrument: svc-hr1024i
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [sample_id]
+species:
+  name: ["Latin Genus", "Latin Species"]
+  code: "USDA Symbol"
+  # "cottonwood" (USDA POPUL = genus Populus); species not given
+  map: {"Populus nan": "Populus", "Solanum lycopersicum var. lycopersicum": "Solanum lycopersicum"}
+date: 2018                             # package Year; no collection date given
+site: {name: "Brookhaven National Laboratory greenhouse, Upton NY"}
+lat: 40.87
+lon: -72.88
+ecosystem: greenhouse
+traits:
+  - {column: LMA_g_m2, trait: lma, unit: "g/m**2"}
+  - {column: H20_g_m2, trait: ewt, unit: "g/m**2"}
+  - {column: H2O_pc, trait: lwc, unit: percent}
+  - {column: DW_FW, trait: ldmc, unit: "g/g"}
+  - {column: N_pc_dry, trait: n_mass, unit: percent}
+  - {column: C_pc_dry, trait: c_mass, unit: percent}
+  - {column: H_pc_dry, trait: h_mass, unit: percent}
+  - {column: N_g_m2, trait: n_area, unit: "g/m**2"}
+  - {column: C_g_m2, trait: c_area, unit: "g/m**2"}
+  - {column: C_N_mass, trait: cn_ratio}
+  - {column: protein_ug_mg_DW, trait: protein_mass, unit: "ug/mg"}
+  # labelled mg/m2 but equals protein_ug_mg_DW * LMA / 1000 (e.g. 249 * 36.4 / 1000 = 9.07), i.e. g/m2
+  - {column: protein_mg_m2, trait: protein_area, unit: "g/m**2"}
+  - {column: starch_ok, trait: starch_mass, unit: "ug/mg", factor: 0.18016}
+  - {column: all_sugar_nmol_Glc_mg, trait: sugar_mass, unit: "ug/mg", factor: 0.18016}
+  - {column: tnc_ok, trait: nsc_mass, unit: "ug/mg", factor: 0.18016}

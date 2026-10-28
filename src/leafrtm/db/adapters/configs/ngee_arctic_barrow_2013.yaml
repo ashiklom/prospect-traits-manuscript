@@ -1,0 +1,38 @@
+dataset_id: ngee_arctic_barrow_2013
+source: ecosis
+source_id: ngee-arctic-leaf-spectral-reflectance-utqiagvik--barrow--alaska-2013
+# Same 69 spectra are in spectra_db `ngee_arctic` (year 2013); keep only one.
+columns:
+  latin_name: "`Latin Genus`.str.strip().str.cat(`Latin Species`.str.strip(), sep=' ')"
+spectra:
+  quantity: R
+  scale: fraction                  # values 0.01-0.56 despite "%" in package metadata
+  foreoptic: leaf_clip             # ASD plant probe + leaf clip
+  instrument: asd-fs3
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [Sample_ID]
+species:
+  name: latin_name
+  code: "USDA Symbol"
+  # The 10 rows without a Latin name are SAPU6; the package description lists Saxifraga
+  # punctata as the ninth species and it is the only one missing from the named rows.
+  code_map: {SAPU6: "Saxifraga punctata"}
+date: {column: "Measurement Date", format: "%Y%m%d"}
+site: {name: "Barrow Environmental Observatory, Utqiagvik"}
+lat: 71.275
+lon: -156.641
+ecosystem: tundra
+traits:
+  - {column: LMA_g_m2, trait: lma, unit: "g/m**2"}
+  - {column: Nmass_g_g, trait: n_mass, unit: percent}   # labelled g/g, values are % (0.9-3.9)
+  - {column: Cmass_g_g, trait: c_mass, unit: percent}
+  - {column: N_area_g_m2, trait: n_area, unit: "g/m**2"}
+  - {column: C_area_g_m2, trait: c_area, unit: "g/m**2"}
+  - {column: CN_ratio, trait: cn_ratio}
+  # Pigments: *_P = Porra equations, *_L = Lichtenthaler; area values are mg/m2 (chl a+b
+  # 256-613 mg/m2; consistent with the umol/m2 columns). Carotenoids are all -9999.
+  - {column: Chl_ab_area_P, trait: chl_area, unit: "mg/m**2"}
+  - {column: Chl_a_area_P, trait: chla_area, unit: "mg/m**2"}
+  - {column: Chl_b_area_P, trait: chlb_area, unit: "mg/m**2"}

@@ -1,0 +1,137 @@
+---
+title: "Trait retrieval"
+---
+
+```{python}
+from _lib import *
+from plotly.subplots import make_subplots
+leaf = read("validation_leaf")
+met = read("validation_metrics")
+spm = read("validation_species")
+plant = read("validation_plant")
+```
+
+How well do RTM estimates match direct measurements of the corresponding trait (see
+[Models](models.qmd) for the mapping, e.g. PROSPECT Cm ↔ LMA, Cw ↔ EWT, Cab ↔ extracted
+chlorophyll a+b)? Error bars are 90 % credible intervals. Only fresh leaves are shown here;
+dried, pressed and ground samples are on [Sample state & protocol](a-state-protocol.qmd).
+
+```{python}
+def scatter_grid(df, est="q50", lo="q05", hi="q95", meas="measured", key="observation_id", title_note=""):
+    runs = df[["run_id", "model", "errmodel", "rt", "data_use"]].drop_duplicates()
+    traits = [t for t in TRAIT if t in set(df["trait"])]
+    nc = min(3, len(traits)); nr = int(np.ceil(len(traits) / nc))
+    fig = make_subplots(rows=nr, cols=nc, subplot_titles=[trait_label(t) for t in traits],
+                        horizontal_spacing=0.08, vertical_spacing=0.14)
+    for i, t in enumerate(traits):
+        r, c = i // nc + 1, i % nc + 1
+        g = df[df["trait"] == t]
+        v = np.r_[g[meas], g[est]]
+        v = v[np.isfinite(v) & (v > 0)]
+        if len(v) == 0:
+            continue
+        lo_, hi_ = np.quantile(v, [0.002, 0.998])
+        one_to_one(fig, lo_ / 1.2, hi_ * 1.2, r, c)
+        for m in MODELS:
+            h = g[g["model"] == m]
+            if h.empty:
+                continue
+            fig.add_trace(go.Scattergl(
+                x=h[meas], y=h[est], mode="markers", name=MODEL_LABEL[m], legendgroup=m, showlegend=(i == 0),
+                marker=dict(color=MODEL_COLOR[m], size=7, symbol=MODEL_SYMBOL[m], line=dict(color=SURFACE, width=1)),
+                error_y=dict(type="data", symmetric=False, array=h[hi] - h[est], arrayminus=h[est] - h[lo],
+                             color=MODEL_COLOR[m], thickness=1, width=0),
+                customdata=np.c_[h[key], h[lo], h[hi]],
+                hovertemplate="%{customdata[0]}<br>measured %{x:.3g}<br>estimate %{y:.3g} [%{customdata[1]:.3g}, %{customdata[2]:.3g}]<extra>" + MODEL_LABEL[m] + "</extra>"),
+                r, c)
+        rng = [lo_ / 1.2, hi_ * 1.2]
+        log_axis(fig, "x", rng, r, c, "measured")
+        log_axis(fig, "y", rng, r, c, "RTM estimate")
+    fig.update_layout(height=340 * nr + 60, margin=dict(t=110),
+                      legend=dict(orientation="h", y=1.0, yanchor="bottom", yref="container"))
+    return fig
+```
+
+## Leaves
+
+```{python}
+#| fig-cap: "RTM estimates vs measurements for individual fresh leaves (Hetero + OU error model, all measured quantities). Log axes; gray = 1:1."
+if len(leaf):
+    d = leaf[(leaf["sample_state"] == "fresh") & (leaf["errmodel"] == "ou") & ~leaf["rt"].astype(bool)
+             & (leaf["data_use"] == "all") & ~leaf["relative"]]
+    show(scatter_grid(d))
+else:
+    no_data()
+```
+
+```{python}
+#| tbl-cap: "Retrieval metrics per run and trait, fresh leaves, all datasets pooled. r2_log/ccc on log scale; bias_log = mean log(estimate/measured); coverage90 = share of measurements inside the 90 % interval; crps_log = log-score."
+if len(met):
+    m = met[(met["group"] == "all") & (met["sample_state"] == "fresh")].assign(run=lambda d: d.apply(run_label, axis=1))
+    cols = ["run", "trait", "n", "r2_log", "spearman", "ccc", "bias_log", "slope_log", "nrmse", "coverage90", "crps_log"]
+    show_table(fmt(m[[c for c in cols if c in m]]))
+```
+
+## Species means
+
+Species means use leaves that have both a measurement and an estimate. The posterior
+uncertainty of the estimates is propagated draw by draw into the species mean.
+
+```{python}
+#| fig-cap: "Species-mean RTM estimates vs species-mean measurements (≥ 3 leaves per species). Hetero + OU error model."
+if len(spm):
+    d = spm[(spm["errmodel"] == "ou") & ~spm["rt"].astype(bool) & (spm["data_use"] == "all")]
+    d = d[d["trait"].isin(TRAIT)]
+    if len(d):
+        show(scatter_grid(d, key="species_id"))
+```
+
+```{python}
+#| tbl-cap: "Species-mean retrieval: Pearson R² (log) and Spearman correlation across species."
+if len(spm):
+    rows = []
+    for (rid, t), g in spm.groupby(["run_id", "trait"]):
+        ok = (g["q50"] > 0) & (g["measured"] > 0)
+        if ok.sum() >= 5:
+            rows.append({"run_id": rid, "trait": t, "n_species": int(ok.sum()),
+                         "r2_log": np.corrcoef(np.log(g.loc[ok, "q50"]), np.log(g.loc[ok, "measured"]))[0, 1] ** 2,
+                         "spearman": g.loc[ok, "q50"].corr(g.loc[ok, "measured"], method="spearman")})
+    show_table(fmt(pd.DataFrame(rows)))
+```
+
+## Pooled-sample (plant-level) traits
+
+Some traits were measured on a pooled sample of several leaves; LOPEX pigments and chemistry
+are an example. These are compared with the mean of the RTM estimates over those leaves.
+
+```{python}
+if len(plant):
+    show_table(fmt(plant))
+else:
+    print("No plant-level comparisons in this fit set.")
+```
+
+## Suspect groups
+
+Sometimes most leaves of one dataset and year miss their measured trait by a similar factor.
+That points to the measurements (units, method) or to that group's spectra rather than to the
+RTM. Each (dataset, year, trait) group is compared with the same trait in all other groups:
+the ratio of its median log(estimate / measured) to theirs (`deviation_ratio`). Comparing
+with the other groups means a bias shared by a trait everywhere is not blamed on one dataset.
+
+A group is flagged when, in at least half of the runs estimating the trait, it has at least
+3 leaves and deviates by more than a factor of 1.5 either way. The thresholds are in
+`config/config.yaml` (`analysis.flag`).
+
+Flagged groups are not excluded automatically. To exclude a group, add it to
+`analysis.exclude` with a reason, or set `analysis.auto_exclude_flagged`; see
+[Best trait estimates](b-best.qmd).
+
+```{python}
+#| tbl-cap: "(Dataset, year, trait) groups, flagged first. median_ratio: median estimate / measured; deviation_ratio: the same relative to the trait's ratio in other groups (1 = typical); share_runs_flagged: share of runs in which the group deviates by more than the threshold."
+sus = read("suspect_groups")
+if len(sus):
+    show_table(fmt(sus))
+else:
+    no_data()
+```

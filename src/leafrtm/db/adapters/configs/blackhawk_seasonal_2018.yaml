@@ -1,0 +1,49 @@
+dataset_id: blackhawk_seasonal_2018
+source: ecosis
+source_id:
+  - seasonal-fresh-leaf-spectra-and-traits--blackhawk-island--wi
+  - seasonal-dried-and-ground-leaf-spectra-and-traits--blackhawk-island--wi
+citation: "Chlus, A., Townsend, P. A. Seasonal fresh leaf spectra and traits / Seasonal dried and ground leaf spectra and traits, Blackhawk Island, WI (2018). EcoSIS data sets."
+# Fresh package: one row per leaf (plot_tree_branch_age_leaf, PSR+ leaf clip).
+# Dried package: one row per pooled branch sample (plot_tree_branch_age, ASD contact
+# probe on ground material); each branch-age group has 17-28 fresh leaves, all
+# collected on the same date. The pooled sample is used as ids.plant for both
+# fresh leaves and the ground sample, so the pooled chemistry (level: plant, on the
+# ground-sample entity) can be joined to the leaves through plant_id.
+columns:
+  state: "_package_index"
+  ent: "plot_tree_branch_age_leaf.fillna(plot_tree_branch_age)"
+  pooled: "plot_tree_branch_age.fillna(plot_tree_branch_age_leaf.str.replace('_l[0-9]+$', '', regex=True))"
+  # 'chl_a_mmol_m2' (154-642) is only plausible as umol/m2 (-> 14-57 ug/cm2 chl a);
+  # converted with M(chl a) = 893.51 g/mol: ug/cm2 = umol/m2 * 893.51 / 1e4
+  chla_ug_cm2: "chl_a_mmol_m2 * 893.51 / 10000"
+spectra:
+  quantity: R
+  scale: auto                        # fresh in percent, dried in fraction
+  foreoptic: {column: state, map: {0: leaf_clip, 1: contact_probe}}
+  instrument: {column: state, map: {0: se-psr3500, 1: asd-fs3}}
+  sample_state: {column: state, map: {0: fresh, 1: ground}}
+  target_config: {column: state, map: {0: single_leaf, 1: unknown}}
+  wavelength_range: [400, 2500]      # PSR+ fresh spectra are inflated below ~400 nm (median R350 = 0.21)
+ids:
+  entity: [ent]
+  time: [state]
+  plant: [pooled]
+species: {name: ["Latin Genus", "Latin Species"], code: "USDA Symbol"}
+date: {column: "Sample Collection Date", format: "%Y%m%d"}
+site: {name: "Blackhawk Island, WI"}
+plot: {column: plot_num}
+lat: Latitude
+lon: Longitude
+ecosystem: forest
+# 'age' (a0/a1) is undocumented (a0 only for one Acer plot on one date): not mapped
+traits:
+  - {column: lma_g_m2, trait: lma, unit: "g/m**2"}
+  - {column: chla_ug_cm2, trait: chla_area, unit: "ug/cm**2"}
+  # pooled branch-sample chemistry (percent of dry mass)
+  - {column: "Leaf nitrogen content per leaf dry mass", trait: n_mass, unit: percent, level: plant}
+  - {column: "Leaf phosphorus content per leaf dry mass", trait: p_mass, unit: percent, level: plant}
+  - {column: "Leaf potassium content per leaf dry mass", trait: k_mass, unit: percent, level: plant}
+  - {column: "Leaf calcium content per leaf dry mass", trait: ca_mass, unit: percent, level: plant}
+  - {column: lignin, trait: lignin_mass, unit: percent, level: plant}
+  - {column: tot_phenolics, trait: phenolics_mass, unit: percent, level: plant}   # 5-32: % assumed (no units given)

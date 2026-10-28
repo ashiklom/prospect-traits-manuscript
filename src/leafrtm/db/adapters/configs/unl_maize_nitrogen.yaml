@@ -1,0 +1,52 @@
+dataset_id: unl_maize_nitrogen
+source: ecosis
+source_id: leaf-spectra-and-physiological-and-chemical-traits-from-maize-grown-under-nitrogen-stress
+citation: "Ge, Y., Atefi, A., Zhang, H., Miao, C., Ramamurthy, R. K., Sigmon, B., Yang, J., Schnable, J. C. (2019). High-throughput analysis of leaf physiological and chemical traits with VIS-NIR-SWIR spectroscopy: a case study with a maize diversity panel. Plant Methods 15, 66."
+doi: 10.21232/y5TTxY3N
+# Maize association panel, one leaf per individual (ID unique; 1210 rows).
+# Field (Havelock Farm, high vs low N) in 2018-2019 and UNL Greenhouse
+# Innovation Center in 2018. Units from Ge et al. (2019): N, P, K in % DW;
+# leaf area in cm2 (LI-3100, whole leaf), fresh/dry weight in g of the same
+# leaf -> LMA, EWT and LWC derived per leaf.
+# Chlorophyll (umol/m2) is an Apogee MC-100 meter reading (optical index),
+# not an extraction -> not mapped.
+columns:
+  lma_gcm2: "Leaf_Dry_Weight / Leaf_Area"
+  ewt_gcm2: "(Leaf_Fresh_Weight - Leaf_Dry_Weight) / Leaf_Area"
+  lwc_pct: "(Leaf_Fresh_Weight - Leaf_Dry_Weight) / Leaf_Fresh_Weight * 100"
+  site_lat: "40.852 - 0.020 * (Conditions == 'Greenhouse')"
+  site_lon: "-96.616 - 0.050 * (Conditions == 'Greenhouse')"
+spectra:
+  quantity: R
+  scale: auto
+  foreoptic: leaf_clip
+  instrument: asd-fs4
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [ID]
+  plant: [ID]
+species: {constant: "Zea mays"}
+date: {year: Year}
+site:
+  column: Conditions
+  map: {High_Nitrogen: Havelock Research Farm, Low_Nitrogen: Havelock Research Farm,
+        Greenhouse: UNL Greenhouse Innovation Center}
+lat: site_lat
+lon: site_lon
+ecosystem: cropland
+treatments:
+  # Greenhouse plants were not part of the N contrast -> no nitrogen level.
+  - factor: nitrogen
+    column: Conditions
+    map: {High_Nitrogen: high_N, Low_Nitrogen: low_N}
+    control: [high_N]
+  - {factor: genotype, column: Genotype}     # diversity panel accessions
+traits:
+  - {column: Nitrogen, trait: n_mass, unit: percent}
+  - {column: Phosphorus, trait: p_mass, unit: percent}
+  - {column: Potassium, trait: k_mass, unit: percent}
+  - {column: Leaf_Area, trait: leaf_area, unit: "cm**2"}
+  - {column: lma_gcm2, trait: lma, unit: "g/cm**2"}
+  - {column: ewt_gcm2, trait: ewt, unit: "g/cm**2"}
+  - {column: lwc_pct, trait: lwc, unit: percent}

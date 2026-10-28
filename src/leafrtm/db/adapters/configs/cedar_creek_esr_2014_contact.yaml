@@ -1,0 +1,53 @@
+dataset_id: cedar_creek_esr_2014_contact
+source: ecosis
+source_id: 2014-cedar-creek-esr-grassland-biodiversity-experiment--leaf-level-contact-data--trait-predictions
+# Couture/Townsend lab (UW-Madison): ASD FieldSpec 3 + plant probe/leaf clip on 18
+# grassland species in 30 plots of the E120 biodiversity experiment, June/July/Sept 2014.
+# All trait columns (N, C, C:N, LMA, Chl, fiber, lignin, cellulose) are PLSR
+# PREDICTIONS from these spectra, and PRI/NDWI are indices: none are mapped.
+# Each row (ID) is treated as its own leaf: `Rep` labels (1,2,3,g1,v1,vn1a,...) recur
+# across months but it is not documented whether the same leaf/plant was re-measured,
+# and Div_level is inconsistent within some plots, so no plant ID is set.
+columns:
+  month_year: '`Sample Collection Date`.str.replace("^(...).*$", r"\1 2014", regex=True)'   # June -> Jun 2014
+spectra:
+  quantity: R
+  scale: auto                      # metadata says percent, values are fractions
+  foreoptic: leaf_clip
+  instrument: asd-fs3
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [ID]
+species:
+  # lab codes (first 3 letters of genus + 2 of species, old names: PET = Petalostemum = Dalea,
+  # KOECR = Koeleria cristata). "leppe" (2 rows, plot 45) is probably LUPPE but left unmapped.
+  code: "USDA Symbol"
+  code_type: lab                   # not real USDA symbols
+  code_map:
+    achmi: Achillea millefolium
+    amoca: Amorpha canescens
+    andge: Andropogon gerardii
+    asctu: Asclepias tuberosa
+    koecr: Koeleria macrantha
+    lesca: Lespedeza capitata
+    liaas: Liatris aspera
+    luppe: Lupinus perennis
+    monfi: Monarda fistulosa
+    panvi: Panicum virgatum
+    petca: Dalea candida
+    petpu: Dalea purpurea
+    petvi: Dalea villosa
+    poapr: Poa pratensis
+    schsc: Schizachyrium scoparium
+    solri: Solidago rigida
+    sornu: Sorghastrum nutans
+date: {column: month_year, format: "%b %Y"}
+site: {name: "Cedar Creek LTER"}
+plot: {column: Plot}
+lat: 45.403
+lon: -93.190
+ecosystem: grassland
+treatments:
+  # planted species richness of the E120 plot (1 = monoculture)
+  - {factor: other, column: N_spp, control: ["1"]}

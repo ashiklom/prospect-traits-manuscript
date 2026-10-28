@@ -1,0 +1,45 @@
+dataset_id: aqgrad_mantua_2021
+source: ecosis
+source_id: leaf-reflectance-and-traits-of-plants-sampled-along-a-water-affinity-gradient--aqgrad-
+# AQGRAD (Villa et al.), Mantua lakes system, Italy, June/July 2021. 13 species from
+# hydrophytes to terrestrial plants. SR-3500 contact probe (internal halogen lamp),
+# resampled to 1 nm, 400-2500 nm. One spectrum per leaf: `code` = species+stand+sample_leaf
+# (e.g. NNf1_3). Leaf-level pigments, thickness, EWT, LMA and DMC. LNC and LCC are constant
+# within each sample group (prefix before "_"), so they are pooled-sample (plant-level) values.
+# The 2016-2018 macrophyte package by the same group (macrophytes_villa_2016_2018) covers
+# other years; no overlap.
+columns:
+  group_id: "`code`.str.split('_').str[0]"
+  chl_ab: "`Chl-a` + `Chl-b`"
+spectra:
+  quantity: R
+  scale: auto
+  foreoptic: contact_probe
+  instrument: se-other                 # Spectral Evolution SR-3500
+  sample_state: fresh
+  target_config: single_leaf
+ids:
+  entity: [code]
+  plant: [group_id]
+species:
+  name: ["Latin Genus", "Latin Species"]
+  code: "USDA Symbol"
+  code_map: {LUHE5: "Ludwigia hexapetala"}     # Latin name missing in the export
+  map:
+    "Phragmites australis ssp. australis": "Phragmites australis subsp. australis"
+date: {year: "Measurement Date"}         # only the month (June/July) is given
+site: {name: "Mantua lakes system"}
+lat: 45.16
+lon: 10.79
+ecosystem: wetland
+traits:
+  - {column: chl_ab, trait: chl_area, unit: "ug/cm**2"}
+  - {column: Chl-a, trait: chla_area, unit: "ug/cm**2"}
+  - {column: Chl-b, trait: chlb_area, unit: "ug/cm**2"}
+  - {column: Car, trait: car_area, unit: "ug/cm**2"}
+  - {column: Thickness, trait: leaf_thickness, unit: "um"}
+  - {column: EWT, trait: ewt, unit: "g/m**2"}
+  - {column: LMA, trait: lma, unit: "g/m**2"}
+  - {column: DMC, trait: ldmc, unit: "g/g"}
+  - {column: LNC, trait: n_mass, unit: "g/g", level: plant}
+  - {column: LCC, trait: c_mass, unit: "g/g", level: plant}
