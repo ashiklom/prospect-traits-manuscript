@@ -107,8 +107,8 @@ class Liberty(RTM):
         )
 
     # -- NumPy -----------------------------------------------------------------
-    def simulate(self, values, return_rinf=False):
-        th = self.theta(values)
+    def _quadratic(self, th):
+        """Coefficients of a R^2 + b R + c = 0 for R_inf, plus x and Tt."""
         C = np.array([th[a] for a in ABSORBERS], dtype=float)
         coeff = th["D"] * (th["baseline"] + self.K @ C)
         me, mi, xu = self.me, self.mi, th["xu"]
@@ -118,6 +118,21 @@ class Liberty(RTM):
         a = me * Tt + x * Tt - me - Tt - x * me * Tt
         b = 1 + x * me * Tt - 2 * x**2 * me**2 * Tt
         c = 2 * me * x**2 * Tt - x * Tt - 2 * x * me
+        return a, b, c, x, Tt
+
+    def discriminant(self, values) -> np.ndarray:
+        """b^2 - 4ac per wavelength; negative where R_inf has no real root (no model)."""
+        a, b, c, _, _ = self._quadratic(self.theta(values))
+        return b**2 - 4 * a * c
+
+    def validity_margin(self, values) -> float:
+        """Smallest discriminant over wavelengths (weakly absorbing NIR bands go first)."""
+        return float(np.min(self.discriminant(values)))
+
+    def simulate(self, values, return_rinf=False):
+        th = self.theta(values)
+        me = self.me
+        a, b, c, x, Tt = self._quadratic(th)
         with np.errstate(invalid="ignore"):
             R = -2 * c / (b + np.sqrt(b**2 - 4 * a * c))
             rb = 2 * x * me + x * Tt - x * Tt * 2 * x * me

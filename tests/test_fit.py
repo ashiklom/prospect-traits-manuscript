@@ -68,3 +68,24 @@ def test_error_priors_sample_without_divergences():
     trace = nutpie.sample(nutpie.compile_pymc_model(model, backend="numba"), draws=500, tune=500,
                           chains=2, seed=1, progress_bar=False)
     assert int(np.asarray(trace.sample_stats["diverging"]).sum()) == 0
+
+
+def test_liberty_boundary_stats():
+    """LIBERTY's validity margin turns negative (no real R_inf) for strong scattering with
+    weak absorption, and boundary_stats reports draws piled at the xu bound."""
+    import pandas as pd
+
+    from leafrtm.fit import load_priors
+    from leafrtm.run import boundary_stats
+
+    m = get_model("liberty")
+    base = dict(xu=0.03, thick=1.6, baseline=0.0005, element=2, c_factor=200, w_factor=100,
+                l_factor=40, p_factor=1)
+    assert m.validity_margin(base) > 0
+    assert m.validity_margin({**base, "xu": 0.06, "baseline": 1e-5, "element": 0.01}) < 0
+    draws = pd.DataFrame([{**base, "xu": 0.0599}] * 5 + [base] * 5)
+    st = boundary_stats(m, draws, load_priors())
+    assert st["frac_at_bound"] == 0.5
+    assert st["wall_margin_q05"] < 0 < st["wall_margin"]  # xu = 0.0599 is already past the wall here
+    assert "wall_margin" not in boundary_stats(get_model("prospectd"), pd.DataFrame(
+        [dict(N=1.5, Cab=40, Car=10, Canth=1, Cbrown=0.1, Cw=0.01, Cm=0.005)]), load_priors())

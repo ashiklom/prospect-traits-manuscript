@@ -34,6 +34,11 @@ class RTM:
             raise ValueError(f"{self.name}: missing parameters {sorted(missing)}")
         return {**self.fixed, **values}
 
+    def validity_margin(self, values) -> float | None:
+        """Distance from the edge of the region where the model is defined
+        (positive inside), or None if the model is defined everywhere."""
+        return None
+
     def simulate(self, values, **kwargs):  # pragma: no cover - abstract
         raise NotImplementedError
 

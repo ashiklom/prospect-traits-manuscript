@@ -25,7 +25,7 @@ import yaml
 
 from leafrtm import discrepancy as disc
 from leafrtm import likelihood as L
-from leafrtm.fit import FitSpec, Inverter, data_arrays
+from leafrtm.fit import FitSpec, Inverter, data_arrays, load_priors
 from leafrtm.obsop import QCODE, make_obsdata
 from leafrtm.prep import data_use_variants, read_batch
 from leafrtm.rtm import get_model
@@ -122,6 +122,36 @@ def summarize(trace, oid, run_id, rtm_params) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def boundary_stats(model, draws: pd.DataFrame, priors: dict) -> dict:
+    """Where the posterior sits relative to hard limits.
+
+    ``wall_margin`` / ``wall_margin_q05``: the model's validity margin (e.g. the
+    smallest LIBERTY discriminant) at the posterior median and its 5 % quantile
+    over the thinned draws. ``frac_at_bound``: share of draws with any RTM
+    parameter within 1 % (of its range) of a hard prior bound."""
+    out = {}
+    med = {p: float(draws[p].median()) for p in model.params}
+    if model.validity_margin(med) is not None:
+        m = np.array([model.validity_margin({p: r[p] for p in model.params})
+                      for _, r in draws.iterrows()])
+        out["wall_margin"] = model.validity_margin(med)
+        out["wall_margin_q05"] = float(np.quantile(m, 0.05))
+    near = np.zeros(len(draws), bool)
+    for p in model.params:
+        spec = priors["rtm"][p]
+        lo, hi = spec.get("lower"), spec.get("upper")
+        if lo is None and hi is None:
+            continue
+        x = draws[p].to_numpy()
+        tol = 0.01 * ((hi - lo) if lo is not None and hi is not None else abs(lo if hi is None else hi))
+        if lo is not None:
+            near |= x - lo < tol
+        if hi is not None:
+            near |= hi - x < tol
+    out["frac_at_bound"] = float(near.mean())
+    return out
+
+
 def thinned_draws(trace, params, n=N_KEEP_DRAWS, seed=0) -> pd.DataFrame:
     post = trace.posterior
     total = post.sizes["chain"] * post.sizes["draw"]
@@ -174,6 +204,7 @@ def run_batch(fitset_dir: Path, run: dict, batch: int, cfg: dict) -> dict:
         for p in (fitset_dir / "discrepancy").glob(f"{run['model']}/*/*/fold*.npz"):
             rel = p.relative_to(fitset_dir / "discrepancy").with_suffix("")
             discs[str(rel)] = disc.Discrepancy.load(p)
+    priors = load_priors()
     inverters: dict[str, Inverter] = {}
     status = []
     meta = inputs["meta"].set_index("observation_id")
@@ -224,7 +255,8 @@ def run_batch(fitset_dir: Path, run: dict, batch: int, cfg: dict) -> dict:
                     "quantities": "".join(od.quantities), "discrepancy": dkey,
                     "max_rhat": float(summ.loc[summ.is_rtm, "rhat"].max()),
                     "min_ess_bulk": float(summ.loc[summ.is_rtm, "ess_bulk"].min()),
-                    "min_ess_tail": float(summ.loc[summ.is_rtm, "ess_tail"].min())}
+                    "min_ess_tail": float(summ.loc[summ.is_rtm, "ess_tail"].min()),
+                    **boundary_stats(model, draws, priors)}
             payload = {"summary": summ, "draws": draws, "spectra": spec_sum, "info": info}
         except Exception as e:  # record and continue
             info = {"observation_id": oid, "run_id": run_id, "status": f"error: {e}",
