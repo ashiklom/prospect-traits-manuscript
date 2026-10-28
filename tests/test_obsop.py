@@ -63,3 +63,21 @@ def test_absorbance_transform():
     od = make_obsdata([Block("A", np.arange(400, 500, 1.0), np.zeros(100))], MODEL_WL)
     pred = od.predict_np(np.full(len(MODEL_WL), 0.2), np.full(len(MODEL_WL), 0.3))
     np.testing.assert_allclose(pred, 0.5)
+
+
+def test_usable_bands_trims_noisy_detector_ends_only():
+    """Noise-dominated ends (and impossible values) are dropped; the interior and
+    smooth ends are kept, even where the interior has sharp features."""
+    from leafrtm.prep import usable_bands
+
+    rng = np.random.default_rng(0)
+    wl = np.arange(400.0, 2501.0)
+    y = 0.3 + 0.2 * np.tanh((wl - 720) / 20) + rng.normal(0, 1e-4, wl.size)  # smooth, with a red edge
+    assert usable_bands(y, wl, "R").all()
+    noisy = y.copy()
+    noisy[wl > 2440] += rng.normal(0, 0.15, (wl > 2440).sum())  # wild SWIR tail
+    noisy[wl < 420] += rng.normal(0, 0.05, (wl < 420).sum())    # noisy blue end
+    noisy[1200] = -0.4                                           # impossible value inside
+    k = usable_bands(noisy, wl, "R")
+    assert not k[wl > 2445].any() and not k[wl < 415].any()
+    assert not k[1200] and k[(wl > 450) & (wl < 2350) & (wl != wl[1200])].all()

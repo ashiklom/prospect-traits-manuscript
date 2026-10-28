@@ -20,7 +20,7 @@ The pilot therefore compares four structured error models:
 
 | ID | Model | Free per leaf | Notes |
 |---|---|---|---|
-| **ou** | Heteroskedastic scale $\sigma_0+\sigma_1\hat y$ with Ornstein–Uhlenbeck correlation $e^{-\lvert\Delta\lambda\rvert/\ell}$ | $\sigma_0,\sigma_1,\ell$ per quantity | Exact $O(n)$ on irregular grids. With a vague prior, $\ell$ runs to $10^3$–$10^4$ nm and the chains disagree; the prior below keeps it identifiable. |
+| **ou** | Heteroskedastic scale $\sigma_0+\sigma_1\hat y$ with Ornstein–Uhlenbeck correlation $e^{-\lvert\Delta\lambda\rvert/\ell}$ | $\sigma_0,\sigma_1,\ell$ per quantity | Exact $O(n)$ on irregular grids. $\ell \le 250$ nm (lognormal prior, median 50 nm): left free it runs to thousands of nm and absorbs the dry-matter signal (see [How the error models work](methods-error-models.qmd)). |
 | **ss** | Heteroskedastic scale with Matérn-3/2 + nugget correlation | $\sigma_0,\sigma_1$ | $\ell$ and the nugget are learned from stage-1 residuals. Evaluated via a Vecchia factorization ($m=30$). |
 | **ld** | Learned shared discrepancy: mean bias $\mu_g(\lambda)$, $k$ factors $\Lambda$, per-band variance, Matérn leftover | one scale $\kappa$ per quantity | Learned per RTM × instrument class from stage-1 residuals, cross-fitted by dataset. Woodbury + Vecchia. |
 | **+rt** | Correlated R/T errors | $\rho$ (ou/ss) | ld: factors span the stacked [R; T] vector. |
@@ -36,13 +36,14 @@ if len(em):
     em = em.assign(run=em.apply(run_label, axis=1))
     cols = ["run", "traits", "coverage90", "crps_log", "r2_log", "heldout_T_rmse",
             "heldout_T_coverage90", "converged", "median_seconds", "total_hours"]
-    show_table(fmt(em[[c for c in cols if c in em]].sort_values("crps_log")))
+    show_table(fmt(em[[c for c in cols if c in em]].sort_values("crps_log").reset_index(drop=True)),
+               showIndex=False)
 else:
     no_data()
 ```
 
 ```{python}
-#| fig-cap: "Calibration vs accuracy: mean coverage of the 90 % credible intervals for measured traits (ideal 0.9, dashed) against mean log-CRPS (lower is better). One marker per run; colour = error model, symbol = RTM."
+#| fig-cap: "Calibration vs accuracy: mean coverage of the 90 % credible intervals for measured traits (ideal 0.9, dashed) against mean log-CRPS (lower is better). One marker per run; colour = error model, symbol = RTM (triangle: PROSPECT-D; star: LeafSIP; cross: LIBERTY)."
 if len(em) and em["coverage90"].notna().any():
     fig = go.Figure()
     for err, g in em.groupby("errmodel"):
@@ -56,3 +57,41 @@ if len(em) and em["coverage90"].notna().any():
                       height=420, legend=dict(orientation="h", y=1.12))
     show(fig)
 ```
+
+## Findings and the choice for the full run
+
+**No error model gives calibrated trait intervals.** 90 % credible intervals cover the
+measured trait for 4–30 % of leaves, whatever the model.
+
+* **The cause is bias.** Most of the miss is systematic bias between the RTM parameter and
+  the measured trait (see [Trait retrieval](a-retrieval.qmd)), not intervals that are too
+  narrow.
+* **The inference itself is sound.** Synthetic recovery shows calibrated intervals and
+  small errors ([Diagnostics](a-diagnostics.qmd)).
+* **So the remaining error is in the RTMs and the measurements:**
+  * how an RTM parameter maps onto a measured quantity (e.g. $C_m$ vs LMA of a fresh leaf);
+  * dataset-specific measurement differences (e.g. chlorophyll extraction).
+  * No per-leaf error model can absorb this.
+
+**Accuracy.** By trait log-CRPS (lower is better):
+
+* PROSPECT-D with Hetero + OU (0.54) and Hetero + Matérn-3/2 (0.56) are close.
+* The learned discrepancy is clearly worse (0.71). It also costs more and needs per-class
+  cross-fitting.
+
+**Convergence.** The Matérn model converges best in the R+T runs: 94 % of PROSPECT-D R+T
+fits converged, against 76 % with OU. It has no per-leaf length scale to sample.
+
+**Held-out transmittance.** When fitted to reflectance only, both predict T with an RMSE of
+about 0.046.
+
+**The full run therefore uses:**
+
+* **Error model:** Hetero + Matérn-3/2, with correlated R/T errors wherever a leaf has
+  both.
+* **Models and quantities:** every RTM, fitted to every observation, including absorptance
+  and pseudo-absorbance.
+* **R only:** a PROSPECT-D fit to reflectance alone on R+T leaves.
+
+The Matérn length scale and nugget come from the pilot's first-stage fits. PROSPECT versions
+that were not in the pilot use PROSPECT-D's (`config/config.yaml`, `docs/hpc.md`).

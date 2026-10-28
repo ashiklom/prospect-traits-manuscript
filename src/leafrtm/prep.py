@@ -77,6 +77,41 @@ def select(obs: pd.DataFrame, fitset: dict, seed=20261027) -> pd.DataFrame:
     return obs
 
 
+PLAUSIBLE = {"R": (-0.02, 1.02), "T": (-0.02, 1.02), "A": (-0.02, 1.02), "PA": (-0.1, 4.0)}
+
+
+def usable_bands(y: np.ndarray, wavelength: np.ndarray, quantity: str, factor: float = 10.0,
+                 window: int = 15, ends=(450.0, 2350.0)) -> np.ndarray:
+    """Bands to fit: physically possible values, minus noise-dominated detector ends.
+
+    The blue end (below ``ends[0]`` nm) and the SWIR end (above ``ends[1]`` nm) are often
+    dominated by noise. Within those zones only, bands are trimmed from the spectrum's
+    ends while the local roughness (running median of |second difference| over
+    ``window`` bands) exceeds ``factor`` times the median roughness of the spectrum.
+    Values are not changed; the database keeps every band."""
+    lo, hi = PLAUSIBLE.get(quantity, (-np.inf, np.inf))
+    keep = np.isfinite(y) & (y >= lo) & (y <= hi)
+    n = len(y)
+    if n < 4 * window:
+        return keep
+    d2 = np.abs(np.diff(np.where(keep, y, np.nan), 2))
+    d2 = np.concatenate([[d2[0]], d2, [d2[-1]]])
+    rough = pd.Series(d2).rolling(window, center=True, min_periods=window // 2).median().to_numpy()
+    ref = np.nanmedian(rough[n // 4: 3 * n // 4])
+    if not np.isfinite(ref) or ref <= 0:
+        return keep
+    noisy = ~(rough <= factor * ref)
+    i = 0
+    while i < n and wavelength[i] < ends[0] and noisy[i]:
+        keep[i] = False
+        i += 1
+    j = n - 1
+    while j >= 0 and wavelength[j] > ends[1] and noisy[j]:
+        keep[j] = False
+        j -= 1
+    return keep
+
+
 def blocks_for(obs_ids, db=None, mask_ranges=(), quantities=("R", "T", "A", "PA")) -> dict:
     """{observation_id: [Block, ...]} with replicate means per quantity and grid."""
     db = db or load()
@@ -102,6 +137,7 @@ def blocks_for(obs_ids, db=None, mask_ranges=(), quantities=("R", "T", "A", "PA"
         # gaps decorrelate through distance
         step = np.median(np.diff(wl)) if len(wl) > 1 else 1.0
         y = X.mean(axis=0)
+        keep &= usable_bands(y, wl, q)
         out.setdefault(oid, []).append(Block(
             quantity=q, wavelength=wl[keep], y=y[keep], n_rep=len(X),
             rep_sd=X.std(axis=0, ddof=1)[keep] if len(X) > 1 else None,
