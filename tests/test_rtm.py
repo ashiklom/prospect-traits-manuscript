@@ -7,7 +7,8 @@ import pytest
 
 from leafrtm.rtm import MODELS, get_model
 from leafrtm.rtm.e1 import e1_fast_np
-from leafrtm.rtm.liberty import ABSORBERS
+from leafrtm.rtm.gpm import tav
+from leafrtm.rtm.liberty import ABSORBERS, _cell, _slab_m_np
 from liberty_rrtm import liberty_rrtm
 from scipy.special import exp1
 from sip_matlab import sip_model
@@ -30,6 +31,11 @@ CASES = {
                      l_factor=40, p_factor=1),
                 dict(xu=0.02, thick=3.4, baseline=0.0004, element=1, c_factor=400, w_factor=250,
                      l_factor=60, p_factor=1.5)],
+    # the second case has no real R_inf in LIBERTY as published
+    "liberty_fixed": [dict(xu=0.045, thick=1.6, baseline=0.0006, element=2, c_factor=200, w_factor=100,
+                           l_factor=40, p_factor=1),
+                      dict(xu=0.1, thick=2.5, baseline=0.0003, element=1, c_factor=200, w_factor=100,
+                           l_factor=40, p_factor=1)],
     "leafsip": [dict(Cab=30, Car=10, Canth=1, Cbrown=0, Cw=0.015, Cm=0.009),
                 dict(Cab=60, Car=15, Canth=3, Cbrown=0.3, Cw=0.03, Cm=0.02)],
 }
@@ -132,16 +138,52 @@ def test_leafsip_matches_matlab_transliteration(case):
     np.testing.assert_allclose(T, Tm, atol=1e-12)
 
 
+def _interface(m):
+    """The oracle with this port's (corrected) interface reflectances."""
+    return dict(me_override=m.me, mi_override=m.mi)
+
+
+def _fresnel(theta, n_from, n_to):
+    """Fresnel reflectance of unpolarized light at incidence angle theta (in
+    the medium of index n_from); 1 beyond the critical angle."""
+    s = n_from / n_to * np.sin(theta)
+    out = np.arcsin(np.minimum(s, 1))
+    p, d = theta + out, theta - out
+    r = 0.5 * (np.sin(d) ** 2 / np.sin(p) ** 2 + np.tan(d) ** 2 / np.tan(p) ** 2)
+    return np.where(s >= 1, 1.0, r)
+
+
+@pytest.mark.parametrize("i", [0, 80, 320, 419])
+def test_liberty_interface_reflectances_are_dawson_eqs_1_2(i):
+    # Eq. 1 (with the factor 2 that the printed equation omits) and Eq. 2, by
+    # Gauss-Legendre quadrature, with the Fresnel reflectance of light from the
+    # air (me) and from inside the cell (mi)
+    x, w = np.polynomial.legendre.leggauss(400)
+
+    def integral(f, lo, hi):
+        t = (hi - lo) / 2 * x + (hi + lo) / 2
+        return (hi - lo) / 2 * np.sum(w * f(t))
+
+    n = 1.4891 - 0.0005 * i
+    crit = np.arcsin(1 / n)
+    me = integral(lambda t: 2 * _fresnel(t, 1, n) * np.sin(t) * np.cos(t), 0, np.pi / 2)
+    mi = (1 - np.sin(crit) ** 2) + integral(lambda t: 2 * _fresnel(t, n, 1) * np.sin(t) * np.cos(t),
+                                            0, crit)
+    np.testing.assert_allclose([me, mi], [1 - tav(90, n), 1 - tav(90, n) / n**2], atol=1e-10)
+    m = get_model("liberty")
+    np.testing.assert_allclose([m.me[i], m.mi[i]], [me, mi], atol=1e-10)
+
+
 @pytest.mark.parametrize("case", CASES["liberty"])
 def test_liberty_matches_converged_rrtm(case):
     m = get_model("liberty")
     R, T, Rinf = m.simulate(case, return_rinf=True)
-    Ro, To, Rinfo = liberty_rrtm(m.K, m.fixed["D"], **case, n_iter=20000)
+    Ro, To, Rinfo = liberty_rrtm(m.K, m.fixed["D"], **case, n_iter=20000, **_interface(m))
     np.testing.assert_allclose(R, Ro, atol=1e-11)
     np.testing.assert_allclose(T, To, atol=1e-11)
     np.testing.assert_allclose(Rinf, Rinfo, atol=1e-11)
     # rrtm's 50 iterations are close to, but not exactly at, the fixed point
-    Ro50, To50, _ = liberty_rrtm(m.K, m.fixed["D"], **case)
+    Ro50, To50, _ = liberty_rrtm(m.K, m.fixed["D"], **case, **_interface(m))
     assert np.abs(R - Ro50).max() < 1e-4
 
 
@@ -150,7 +192,7 @@ def test_liberty_integer_layers_match_loop(thick):
     m = get_model("liberty")
     case = {**CASES["liberty"][0], "thick": thick}
     R, T = m.simulate(case)
-    Ro, To, _ = liberty_rrtm(m.K, m.fixed["D"], **case, n_iter=20000)
+    Ro, To, _ = liberty_rrtm(m.K, m.fixed["D"], **case, n_iter=20000, **_interface(m))
     np.testing.assert_allclose(R, Ro, atol=1e-11)
     np.testing.assert_allclose(T, To, atol=1e-11)
 
@@ -171,6 +213,47 @@ def test_liberty_no_real_root_region_is_nan():
     m = get_model("liberty")
     R, _ = m.simulate({**CASES["liberty"][0], "xu": 0.1, "baseline": 0.0001})
     assert np.isnan(R).any()
+
+
+def test_liberty_fixed_rinf_is_the_sum_of_dawson_eq_15():
+    # R_inf must reproduce itself as the R under the surface layer in Eq. 15,
+    # summed term by term; Eq. 16 (LIBERTY as published) does not
+    m = get_model("liberty_fixed")
+    rng = np.random.default_rng(0)
+    for _ in range(50):
+        i = rng.integers(420)
+        me, mi = m.me[i], m.mi[i]
+        x, tau = _cell(mi, rng.uniform(0.005, 0.5), _slab_m_np(np.exp(rng.uniform(-8, 2))))
+        rd, tb, R = m._layer(me, x, tau, np)
+        q = (1 - me) * tau * R / (1 - me * R)
+        eq15 = 2 * x * me + sum(x * (1 - x) ** j * (1 - 2 * x * me) * tau * q**j for j in range(5000))
+        assert eq15 == pytest.approx(R, rel=1e-12)
+        assert tb**2 == pytest.approx((R - rd) * (1 - R * rd) / R, rel=1e-9, abs=1e-15)  # Eq. 19
+        with np.errstate(invalid="ignore"):
+            R16 = get_model("liberty")._layer(me, x, tau, np)[2]
+        if np.isfinite(R16):
+            assert not np.isclose(R16, R, rtol=1e-6, atol=0)
+
+
+def test_liberty_fixed_defined_everywhere_and_conserves_energy():
+    m, pub = get_model("liberty_fixed"), get_model("liberty")
+    zero = dict(element=0, c_factor=0, w_factor=0, l_factor=0, p_factor=0)
+    n_pub_undefined = 0
+    for xu in (0.005, 0.03, 0.06, 0.1, 0.3, 0.5):
+        for baseline in (1e-8, 1e-6, 1e-4, 1e-3, 1e-2):
+            for thick in (1.0, 1.6, 3.4, 10.0):
+                case = {**CASES["liberty"][0], "xu": xu, "baseline": baseline, "thick": thick}
+                R, T = m.simulate(case)
+                assert np.all(np.isfinite(R) & np.isfinite(T)), case
+                assert np.all((R > 0) & (T > 0) & (R + T <= 1 + 1e-12)), case
+                n_pub_undefined += np.isnan(pub.simulate(case)[0]).any()
+        # no absorption: no light is lost (R and T themselves are 0/0 there)
+        _, _, Rinf = m.simulate({**zero, "xu": xu, "baseline": 0.0, "thick": 2.3}, return_rinf=True)
+        np.testing.assert_allclose(Rinf, 1, atol=1e-12)
+        R, T = m.simulate({**zero, "xu": xu, "baseline": 1e-8, "thick": 2.3})
+        np.testing.assert_allclose(R + T, 1, atol=1e-5)
+    assert n_pub_undefined > 0
+    assert m.validity_margin(CASES["liberty"][0]) is None
 
 
 def _compile(m):

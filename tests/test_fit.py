@@ -87,5 +87,6 @@ def test_liberty_boundary_stats():
     st = boundary_stats(m, draws, load_priors())
     assert st["frac_at_bound"] == 0.5
     assert st["wall_margin_q05"] < 0 < st["wall_margin"]  # xu = 0.0599 is already past the wall here
+    assert "wall_margin" not in boundary_stats(get_model("liberty_fixed"), draws, load_priors())
     assert "wall_margin" not in boundary_stats(get_model("prospectd"), pd.DataFrame(
         [dict(N=1.5, Cab=40, Car=10, Canth=1, Cbrown=0.1, Cw=0.01, Cm=0.005)]), load_priors())

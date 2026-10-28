@@ -1,13 +1,14 @@
 """Literal transliteration of ``liberty()`` from ashiklom/rrtm (R/liberty.R),
 used as the test oracle for ``leafrtm.rtm.liberty``. ``n_iter`` defaults to
 rrtm's 50 fixed-point iterations; pass a large value to get the converged
-solution."""
+solution. ``me_override`` and ``mi_override`` (arrays over wavelength) replace
+rrtm's interface reflectances when given (``leafrtm.rtm.liberty`` corrects rrtm's ``mi``)."""
 
 import numpy as np
 
 
 def liberty_rrtm(K, D, xu, thick, baseline, element, c_factor, w_factor, l_factor,
-                 p_factor, n_iter=50):
+                 p_factor, n_iter=50, me_override=None, mi_override=None):
     k_chloro, k_water, ke, k_ligcell, k_protein = K.T
     nwl = 420
     reflR = np.zeros(nwl)
@@ -35,6 +36,8 @@ def liberty_rrtm(K, D, xu, thick, baseline, element, c_factor, w_factor, l_facto
         refl = 0.5 * (np.sin(dif) ** 2 / np.sin(plus) ** 2 + np.tan(dif) ** 2 / np.tan(plus) ** 2)
         mint = np.sum(refl * np.sin(alpha) * np.cos(alpha) * width)
         mi = (1 - np.sin(critical * np.pi / 180) ** 2) + 2 * mint
+        if me_override is not None:
+            me, mi = me_override[i], mi_override[i]
         M = 2 * (1 - (coeff + 1) * np.exp(-coeff)) / coeff**2
         Tt = ((1 - mi) * M) / (1 - (mi * M))
         x = xu / (1 - (1 - 2 * xu) * Tt)

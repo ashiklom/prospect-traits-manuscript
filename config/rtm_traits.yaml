@@ -30,8 +30,9 @@ prospectpro:
   - {param: Cprot, trait: protein_area, factor: 10000}
   - {param: Cprot, trait: n_area, factor: 2257.336}      # 1e4 / 4.43
   - {expr: "Cprot + Ccbc", trait: lma, factor: 10000}
-liberty:
+liberty:     &lib
   - {param: c_factor, trait: chl_area, factor: 0.1}      # mg m-2 -> ug cm-2
   - {param: w_factor, trait: ewt, factor: 1}             # g m-2
   - {param: p_factor, trait: n_area, factor: 1}          # g m-2
   - {param: l_factor, trait: lignin_cellulose_area, factor: 1, relative: true}
+liberty_fixed: *lib

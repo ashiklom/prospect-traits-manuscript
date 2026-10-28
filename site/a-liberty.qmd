@@ -222,3 +222,24 @@ Every fit that fails the convergence screen is left out of the trait analyses, a
 [Diagnostics](a-diagnostics.qmd). Comparisons of LIBERTY with the other RTMs therefore cover
 the leaves that LIBERTY can represent. This limits LIBERTY's use for retrieving traits from
 bright leaves.
+
+## The cause, and `liberty_fixed`
+
+The hole comes from an algebra error in the paper. Dawson et al. (1998, Fig. 1 and Eq. 15)
+build $R_\infty$ as a series: light reflected by the top layer of cells, plus light that passes
+through that layer, is reflected by the leaf below, and returns through the top layer. The
+correct sum of that series is
+
+$$R_\infty = 2xm_e + \frac{x(1-2xm_e)\,\tau\,(1-m_eR_\infty)}{(1-m_eR_\infty) - (1-x)(1-m_e)\,\tau R_\infty}.$$
+
+Their closed form (Eq. 16) puts $2xm_e$ over the common denominator without multiplying it by
+that denominator. `rrtm` and our `liberty` implement Eq. 16. Eq. 15 describes a layer of cells
+that loses light only by absorption, so its sum always has a solution, and $R_\infty \to 1$ as
+absorption goes to zero. Eq. 16 behaves as if the layer gave back slightly more light than it
+received, $m_e(1+m_e)/2 \approx 4.6\,\%$ more at zero absorption. Where absorption is weaker
+than that, Eq. 16 has no solution. That is the gray region above.
+
+`liberty_fixed` replaces Eq. 16 with the correct sum and changes nothing else. It is defined for
+all parameter values. At the same parameters it transmits less than published LIBERTY, by
+about 15–30 %, and reflects slightly less, so parameter values calibrated with Eq. 16
+(including Dawson et al.'s Table 1) do not carry over.

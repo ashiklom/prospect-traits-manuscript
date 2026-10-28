@@ -1,6 +1,7 @@
 """LIBERTY (Leaf Incorporating Biochemistry Exhibiting Reflectance and
 Transmittance Yields; Dawson, Curran & Plummer 1998, RSE 65:50-60,
-doi:10.1016/S0034-4257(98)00007-8).
+doi:10.1016/S0034-4257(98)00007-8), as published (``liberty``) and with its
+infinite-reflectance equation corrected (``liberty_fixed``).
 
 Port of ``liberty()`` in ashiklom/rrtm (``R/liberty.R``, MIT), with that
 package's coefficients (``data-raw/liberty_raw.dat``, Dawson et al. 1998
@@ -20,12 +21,50 @@ literal transliteration of the R loop (``tests/reference/liberty_rrtm.py``):
 * The 0/0 limit of the slab transmission ``M(coeff)`` as coeff -> 0 is handled
   with a series expansion.
 
+One correction relative to rrtm, in both models: the internal reflectance
+``mi`` (Dawson et al. Eq. 2) integrates the Fresnel reflectance of light inside
+the cell at internal angles up to the critical angle. rrtm evaluates the
+reflectance of light arriving from *outside* at those angles (it pairs each
+angle with its refraction into the cell, not out of it), and sums whole degrees
+only, missing the rise to total internal reflection just below the critical
+angle; at 800 nm it gives mi = 0.541 instead of 0.564. Eqs. 1 and 2 have closed
+forms in Stern's (1964) diffuse transmissivity ``tav(90, n)``: ``me = 1 - tav``
+and ``mi = 1 - tav / n^2``, which we use (rrtm's 1-degree sum for ``me`` was
+within 6e-5 of it). Eq. 1 as printed lacks the factor 2 that normalizes the
+cosine-weighted average; Eq. 2 and rrtm both have it.
+
+``liberty_fixed``. Eq. 15 sums the radiation leaving a surface layer of cells
+lying on leaf material of reflectance R (Fig. 1). Its sum is
+
+    R = 2 x me + x (1 - 2 x me) tau (1 - me R) / [(1 - me R) - (1 - x)(1 - me) tau R],
+
+but Eq. 16 places ``2 x me`` over the common denominator without multiplying it
+by that denominator. rrtm (and ``liberty``) implement Eq. 16. Eq. 15 is the
+adding equation ``R = r_d + t_d t_u R / (1 - r_u R)`` for the surface layer of
+Fig. 1, with
+
+    r_d = 2 x me + x (1 - 2 x me) tau     (Eq. 17)    t_d = (1 - x)(1 - 2 x me) tau
+    r_u = me + (1 - x)(1 - me) tau                    t_u = x (1 - me) tau
+
+(d: light arriving from above; u: from below). The layer conserves energy from
+either side (it absorbs (1 - 2 x me)(1 - tau) and (1 - me)(1 - tau)), so
+sqrt(r_d r_u) + sqrt(t_d t_u) <= 1 and R_inf is real for any absorption, tending
+to 1 as absorption vanishes. Eq. 16 instead corresponds to a layer that returns
+more light than it receives when absorption is weak (me (1 + me) / 2 more at
+zero absorption), which is why it has no real root there. ``liberty_fixed``
+replaces Eq. 16 with the sum of Eq. 15 and changes nothing else (Eqs. 1-9, 17,
+19 and Benford's thickness interpolation). It evaluates Eq. 19 as
+``T^2 = t_d t_u (1 - R r_d) / (1 - R r_u)``, equal to ``(R - r)(1 - R r) / R`` by
+the adding equation but free of the cancellation in ``R - r`` under strong
+absorption.
+
 Notes for inference: ``D`` (cell diameter) multiplies every absorption term,
 so it is exactly non-identifiable from the concentrations; it is held fixed
 (``fixed``) at Dawson's typical value. ``thick`` must be >= 1 (the model jumps
-from 2 to 1 layers at thick = 1). For large ``xu`` with weak absorption the
-quadratic has no real root (rrtm diverges); the PyTensor version returns NaN
-there, which the sampler rejects.
+from 2 to 1 layers at thick = 1). In ``liberty``, large ``xu`` with weak
+absorption leaves the quadratic without a real root (rrtm diverges); the
+PyTensor version returns NaN there, which the sampler rejects. ``liberty_fixed``
+is defined for all parameter values.
 """
 
 from __future__ import annotations
@@ -38,6 +77,7 @@ import pandas as pd
 import pytensor.tensor as pt
 
 from leafrtm.rtm.base import RTM
+from leafrtm.rtm.gpm import tav
 
 NWL = 420
 ABSORBERS = ("c_factor", "w_factor", "element", "l_factor", "p_factor")
@@ -45,24 +85,12 @@ _COLUMNS = {"c_factor": "chl", "w_factor": "water", "element": "albino",
             "l_factor": "lignin_cellulose", "p_factor": "protein"}
 
 
-def _fresnel(alpha, n0, n1):
-    beta = np.arcsin(n0 / n1 * np.sin(alpha))
-    plus, dif = alpha + beta, alpha - beta
-    return 0.5 * (np.sin(dif) ** 2 / np.sin(plus) ** 2 + np.tan(dif) ** 2 / np.tan(plus) ** 2)
-
-
-def interface_reflectances(n1, n0=1.0):
-    """External (``me``) and internal (``mi``) diffuse interface reflectance
-    for refractive index ``n1``, by 1-degree rectangle-rule integration, as in
-    Dawson et al. (1998) / rrtm."""
-    width = np.pi / 180
-    alpha = np.arange(1, 91) * width
-    me = 2 * np.sum(_fresnel(alpha, n0, n1) * np.sin(alpha) * np.cos(alpha) * width)
-    critical = np.degrees(np.arcsin(n0 / n1))
-    alpha = np.arange(1, np.floor(critical) + 1) * width  # R: seq(1, critical)
-    mint = np.sum(_fresnel(alpha, n0, n1) * np.sin(alpha) * np.cos(alpha) * width)
-    mi = (1 - np.sin(np.radians(critical)) ** 2) + 2 * mint
-    return me, mi
+def interface_reflectances(n):
+    """Diffuse reflectance of the cell surface for refractive index ``n``:
+    ``me`` for light arriving from the air (Eq. 1) and ``mi`` for light inside
+    the cell (Eq. 2)."""
+    t12 = tav(90, n)
+    return 1 - t12, 1 - t12 / np.asarray(n, dtype=float) ** 2
 
 
 def _slab_m_np(coeff):
@@ -72,6 +100,29 @@ def _slab_m_np(coeff):
     full = 2 * (1 - (cs + 1) * np.exp(-cs)) / cs**2
     series = 1 - 2 * c / 3 + c**2 / 4
     return np.where(small, series, full)
+
+
+def _slab_m_pt(coeff):
+    # M(coeff) with its series near 0 (coeff >= D * baseline > 0 in practice)
+    cs = pt.maximum(coeff, 1e-4)
+    return pt.switch(coeff < 1e-4, 1 - 2 * coeff / 3 + coeff**2 / 4,
+                     2 * (1 - (cs + 1) * pt.exp(-cs)) / cs**2)
+
+
+def _cell(mi, xu, M):
+    """Cell transmission tau (Eq. 6) and upward-scattering coefficient x (Eq. 9)."""
+    Tt = (1 - mi) * M / (1 - mi * M)
+    return xu / (1 - (1 - 2 * xu) * Tt), Tt
+
+
+def _surface_layer(me, x, Tt):
+    """Reflectance and transmittance of the surface cell layer of Fig. 1 for
+    light from above (r_d, t_d) and from below (r_u, t_u)."""
+    rd = 2 * x * me + x * Tt - x * Tt * 2 * x * me
+    td = (1 - x) * (1 - 2 * x * me) * Tt
+    ru = me + (1 - x) * (1 - me) * Tt
+    tu = x * (1 - me) * Tt
+    return rd, td, ru, tu
 
 
 def _benford_fraction(rb, tb, fraction, sqrt=np.sqrt):
@@ -84,21 +135,33 @@ def _benford_fraction(rb, tb, fraction, sqrt=np.sqrt):
     return rif, tif
 
 
+def _leaf(rb, tb, thick, xp):
+    """(R, T) of a leaf ``thick`` layers deep; ``xp`` is ``np`` or ``pt``."""
+    whole = xp.floor(thick)
+    rif, tif = _benford_fraction(rb, tb, thick - whole, sqrt=xp.sqrt)
+    cur_r, cur_t = _stack(rb, tb, xp.maximum(whole - 1, 0), xp.sqrt)
+    trans = cur_t * tif / (1 - rif * cur_r)
+    refl = cur_r + cur_t**2 * rif / (1 - rif * cur_r)
+    return refl, trans
+
+
 @dataclass
 class Liberty(RTM):
     K: np.ndarray = field(default=None, repr=False)  # (NWL, 5), columns ordered as ABSORBERS
     me: np.ndarray = field(default=None, repr=False)
     mi: np.ndarray = field(default=None, repr=False)
 
+    _label = ("liberty", "LIBERTY (Dawson et al. 1998)")
+
     @classmethod
     def create(cls, D: float = 40.0) -> "Liberty":
         with (files("leafrtm.rtm") / "data" / "liberty.csv").open() as f:
             coef = pd.read_csv(f).iloc[:NWL]
-        n1 = 1.4891 - 0.0005 * np.arange(NWL)
-        me, mi = np.array([interface_reflectances(n) for n in n1]).T
+        me, mi = interface_reflectances(1.4891 - 0.0005 * np.arange(NWL))
+        name, description = cls._label
         return cls(
-            name="liberty",
-            description="LIBERTY (Dawson et al. 1998)",
+            name=name,
+            description=description,
             params=("xu", "thick", "baseline", *ABSORBERS),
             wavelength=coef["wavelength"].to_numpy(dtype=float),
             fixed={"D": D},
@@ -106,23 +169,30 @@ class Liberty(RTM):
             me=me, mi=mi,
         )
 
-    # -- NumPy -----------------------------------------------------------------
-    def _quadratic(self, th):
-        """Coefficients of a R^2 + b R + c = 0 for R_inf, plus x and Tt."""
-        C = np.array([th[a] for a in ABSORBERS], dtype=float)
-        coeff = th["D"] * (th["baseline"] + self.K @ C)
-        me, mi, xu = self.me, self.mi, th["xu"]
-        M = _slab_m_np(coeff)
-        Tt = (1 - mi) * M / (1 - mi * M)
-        x = xu / (1 - (1 - 2 * xu) * Tt)
+    def _coefficients(self, me, x, Tt):
+        """a, b, c of a R^2 + b R + c = 0 for R_inf (Eq. 16)."""
         a = me * Tt + x * Tt - me - Tt - x * me * Tt
         b = 1 + x * me * Tt - 2 * x**2 * me**2 * Tt
         c = 2 * me * x**2 * Tt - x * Tt - 2 * x * me
-        return a, b, c, x, Tt
+        return a, b, c
+
+    def _layer(self, me, x, Tt, xp):
+        """Single-layer reflectance (Eq. 17), transmittance (Eq. 19) and R_inf."""
+        a, b, c = self._coefficients(me, x, Tt)
+        R = -2 * c / (b + xp.sqrt(b**2 - 4 * a * c))  # NaN if no real root
+        rb = _surface_layer(me, x, Tt)[0]
+        tb = xp.sqrt((R - rb) * (1 - R * rb) / R)
+        return rb, tb, R
+
+    # -- NumPy -----------------------------------------------------------------
+    def _cell_np(self, th):
+        C = np.array([th[a] for a in ABSORBERS], dtype=float)
+        coeff = th["D"] * (th["baseline"] + self.K @ C)
+        return _cell(self.mi, th["xu"], _slab_m_np(coeff))
 
     def discriminant(self, values) -> np.ndarray:
         """b^2 - 4ac per wavelength; negative where R_inf has no real root (no model)."""
-        a, b, c, _, _ = self._quadratic(self.theta(values))
+        a, b, c = self._coefficients(self.me, *self._cell_np(self.theta(values)))
         return b**2 - 4 * a * c
 
     def validity_margin(self, values) -> float:
@@ -131,17 +201,10 @@ class Liberty(RTM):
 
     def simulate(self, values, return_rinf=False):
         th = self.theta(values)
-        me = self.me
-        a, b, c, x, Tt = self._quadratic(th)
+        x, Tt = self._cell_np(th)
         with np.errstate(invalid="ignore"):
-            R = -2 * c / (b + np.sqrt(b**2 - 4 * a * c))
-            rb = 2 * x * me + x * Tt - x * Tt * 2 * x * me
-            tb = np.sqrt((R - rb) * (1 - R * rb) / R)
-            whole = np.floor(th["thick"])
-            rif, tif = _benford_fraction(rb, tb, th["thick"] - whole)
-            cur_r, cur_t = _stack_np(rb, tb, max(whole - 1, 0))
-        trans = cur_t * tif / (1 - rif * cur_r)
-        refl = cur_r + cur_t**2 * rif / (1 - rif * cur_r)
+            rb, tb, R = self._layer(self.me, x, Tt, np)
+            refl, trans = _leaf(rb, tb, th["thick"], np)
         return (refl, trans, R) if return_rinf else (refl, trans)
 
     # -- PyTensor --------------------------------------------------------------
@@ -149,25 +212,31 @@ class Liberty(RTM):
         th = self.theta(values)
         C = pt.stack([pt.as_tensor_variable(th[a]) for a in ABSORBERS])
         coeff = th["D"] * (th["baseline"] + pt.dot(pt.constant(self.K), C))
-        me, mi, xu = pt.constant(self.me), pt.constant(self.mi), th["xu"]
-        # M(coeff) with its series near 0 (coeff >= D * baseline > 0 in practice)
-        cs = pt.maximum(coeff, 1e-4)
-        M = pt.switch(coeff < 1e-4, 1 - 2 * coeff / 3 + coeff**2 / 4,
-                      2 * (1 - (cs + 1) * pt.exp(-cs)) / cs**2)
-        Tt = (1 - mi) * M / (1 - mi * M)
-        x = xu / (1 - (1 - 2 * xu) * Tt)
-        a = me * Tt + x * Tt - me - Tt - x * me * Tt
-        b = 1 + x * me * Tt - 2 * x**2 * me**2 * Tt
-        c = 2 * me * x**2 * Tt - x * Tt - 2 * x * me
-        R = -2 * c / (b + pt.sqrt(b**2 - 4 * a * c))  # NaN if no real root
-        rb = 2 * x * me + x * Tt - x * Tt * 2 * x * me
-        tb = pt.sqrt((R - rb) * (1 - R * rb) / R)
-        whole = pt.floor(th["thick"])
-        rif, tif = _benford_fraction(rb, tb, th["thick"] - whole, sqrt=pt.sqrt)
-        cur_r, cur_t = _stack_pt(rb, tb, pt.maximum(whole - 1, 0))
-        trans = cur_t * tif / (1 - rif * cur_r)
-        refl = cur_r + cur_t**2 * rif / (1 - rif * cur_r)
-        return refl, trans
+        x, Tt = _cell(pt.constant(self.mi), th["xu"], _slab_m_pt(coeff))
+        rb, tb, _ = self._layer(pt.constant(self.me), x, Tt, pt)
+        return _leaf(rb, tb, th["thick"], pt)
+
+
+@dataclass
+class LibertyFixed(Liberty):
+    """LIBERTY with Eq. 16 replaced by the sum of Eq. 15 (see module docstring)."""
+
+    _label = ("liberty_fixed", "LIBERTY, Eq. 16 re-derived from Eq. 15")
+
+    def _coefficients(self, me, x, Tt):
+        """a, b, c of a R^2 + b R + c = 0 for R_inf (Eq. 15 summed)."""
+        rd, td, ru, tu = _surface_layer(me, x, Tt)
+        return -ru, 1 + rd * ru - td * tu, -rd
+
+    def _layer(self, me, x, Tt, xp):
+        rd, td, ru, tu = _surface_layer(me, x, Tt)
+        b = 1 + rd * ru - td * tu
+        # b^2 - 4 ru rd >= 0 analytically, = 0 only without absorption; clip rounding
+        R = 2 * rd / (b + xp.sqrt(xp.maximum(b**2 - 4 * ru * rd, 0)))
+        tb = xp.sqrt(td * tu * (1 - R * rd) / (1 - R * ru))
+        return rd, tb, R
+
+    validity_margin = RTM.validity_margin  # defined for all parameter values
 
 
 def _stokes_terms(r, t, sqrt):
@@ -177,14 +246,8 @@ def _stokes_terms(r, t, sqrt):
     return va, vb
 
 
-def _stack_np(r, t, n):
+def _stack(r, t, n, sqrt):
     """(R, T) of ``n`` identical (r, t) layers, overflow-safe; n = 0 gives (0, 1)."""
-    va, vb = _stokes_terms(r, t, np.sqrt)
-    u = vb ** (-2 * n)
-    return va * (1 - u) / (va**2 - u), vb ** (-n) * (va**2 - 1) / (va**2 - u)
-
-
-def _stack_pt(r, t, n):
-    va, vb = _stokes_terms(r, t, pt.sqrt)
+    va, vb = _stokes_terms(r, t, sqrt)
     u = vb ** (-2 * n)
     return va * (1 - u) / (va**2 - u), vb ** (-n) * (va**2 - 1) / (va**2 - u)

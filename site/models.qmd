@@ -45,8 +45,16 @@ LIBERTY (Dawson et al. 1998) is a Python port of `rrtm::liberty`. Its parameters
 * "albino" absorption
 * chlorophyll, water, lignin + cellulose and nitrogen (protein)
 
-The port matches the R code solved to convergence to about 1e-12. rrtm's 50 fixed-point
-iterations are within about 3e-6 of that converged solution.
+The port matches the R code solved to convergence to about 1e-12, with one correction. rrtm
+computes the internal reflectance of the cell surface (Dawson et al. Eq. 2) with the Fresnel
+reflectance for light entering the cell rather than leaving it. The port uses the correct value
+(0.564 instead of 0.541 at 800 nm). rrtm's 50 fixed-point iterations are within about 3e-6 of the
+converged solution.
+
+`liberty_fixed` is the same model with one equation corrected. Dawson et al. sum the light
+leaving the leaf as a series (their Eq. 15), but their closed form of that sum (Eq. 16) is
+wrong. The correct sum conserves energy, so `liberty_fixed` is defined for every parameter
+value; see [LIBERTY's valid region](a-liberty.qmd).
 
 $D$ multiplies every absorption term, so it cannot be identified separately from the
 concentrations; it is held at 40 µm.
