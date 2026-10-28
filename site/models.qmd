@@ -51,10 +51,20 @@ reflectance for light entering the cell rather than leaving it. The port uses th
 (0.564 instead of 0.541 at 800 nm). rrtm's 50 fixed-point iterations are within about 3e-6 of the
 converged solution.
 
-`liberty_fixed` is the same model with one equation corrected. Dawson et al. sum the light
-leaving the leaf as a series (their Eq. 15), but their closed form of that sum (Eq. 16) is
-wrong. The correct sum conserves energy, so `liberty_fixed` is defined for every parameter
-value; see [LIBERTY's valid region](a-liberty.qmd).
+**Two variants, and the one we fit.** Dawson et al. sum the light leaving the leaf as a
+series (their Eq. 15), but their closed form of that sum (Eq. 16) is wrong: one term is put
+over the common denominator without being multiplied by it. As published, the model therefore
+has no solution for weakly absorbing, strongly scattering leaves, which is exactly where bright
+leaves sit.
+
+* **`liberty`** (fitted everywhere on this site): fixes this bug by using the correct sum. That
+  sum conserves energy, so the model is defined for every parameter value. Nothing else
+  changes.
+* **`liberty_dawson`**: the model as published, and as implemented in rrtm. Kept for provenance
+  and comparison, not fitted.
+
+See [LIBERTY: the Eq. 16 bug and its fix](a-liberty.qmd) for the derivation and its effect on
+fits.
 
 $D$ multiplies every absorption term, so it cannot be identified separately from the
 concentrations; it is held at 40 µm.

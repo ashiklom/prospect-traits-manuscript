@@ -44,7 +44,7 @@ website:
           - href: a-state-protocol.qmd
             text: Sample state & protocol
           - href: a-liberty.qmd
-            text: "LIBERTY's valid region"
+            text: "LIBERTY: Eq. 16 bug fix"
           - href: a-diagnostics.qmd
             text: Diagnostics
       - text: "B · How do traits vary?"

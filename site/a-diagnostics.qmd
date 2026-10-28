@@ -22,8 +22,9 @@ Two thresholds apply:
   divergent transitions. Fits that fail it are left out of validation, intercomparison and
   the best-estimate product, and are listed below. Spectral-fit pages keep every fit.
 
-Most LIBERTY exclusions come from the edge of LIBERTY's valid region; see
-[LIBERTY's valid region](a-liberty.qmd).
+LIBERTY is fitted with Eq. 16 of Dawson et al. (1998) corrected. As published, LIBERTY has
+no solution for bright leaves, and fits pressed against that edge failed this screen; see
+[LIBERTY: a bug in the original paper, and its fix](a-liberty.qmd).
 
 ```{python}
 if len(diag):
@@ -33,7 +34,7 @@ else:
 ```
 
 ```{python}
-#| tbl-cap: "Fits excluded from the trait analyses, with the failed criteria. wall_margin_q05 (LIBERTY only) is the 5 % quantile over posterior draws of the smallest discriminant of LIBERTY's R∞ quadratic; values near 0 mean the posterior touches the edge of the model's valid region."
+#| tbl-cap: "Fits excluded from the trait analyses, with the failed criteria. frac_at_bound is the share of posterior draws within 1 % of a hard prior bound."
 if len(excl):
     cols = [c for c in ["run_id", "observation_id", "reason", "max_rhat", "min_ess_bulk", "divergent_share",
                         "wall_margin_q05", "frac_at_bound"] if c in excl]

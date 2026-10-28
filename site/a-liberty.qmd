@@ -1,176 +1,198 @@
 ---
-title: "LIBERTY's valid region"
+title: "LIBERTY: a bug in the original paper, and its fix"
 ---
 
 ```{python}
 from _lib import *
 from plotly.subplots import make_subplots
 from leafrtm.rtm import get_model
-from leafrtm.rtm.liberty import ABSORBERS, _slab_m_np
+from leafrtm.rtm.liberty import ABSORBERS, _cell, _slab_m_np
 
-lib = get_model("liberty")
+fixed, pub = get_model("liberty"), get_model("liberty_dawson")
 screen = read("fit_screen")
 fits = read("liberty_fits")
 if len(screen):
     screen = screen[screen["model"] == "liberty"]
-BASE = dict(xu=0.03, thick=1.6, baseline=0.0005, element=2, c_factor=200, w_factor=100, l_factor=40, p_factor=1)
-NIR = int(np.argmin(abs(lib.wavelength - 800)))
+BRIGHT = dict(xu=0.04, thick=1.8, baseline=0.0004, element=0.5, c_factor=200, w_factor=100, l_factor=40,
+              p_factor=1)
+NIR = int(np.argmin(abs(fixed.wavelength - 800)))
+C_FIX, C_PUB = MODEL_COLOR["liberty"], MODEL_COLOR["liberty_dawson"]
 
 
-def scaled(s, **kw):
-    """BASE with every absorption term (baseline and all absorbers) multiplied by s."""
-    th = {**BASE, **kw}
-    for p in ("baseline", *ABSORBERS):
-        th[p] = th[p] * s
-    return th
-
-
-def rinf_plane(xu, k, i=NIR):
-    """Discriminant and R_inf of LIBERTY's quadratic at band i for cell absorption k."""
-    me, mi = lib.me[i], lib.mi[i]
-    M = _slab_m_np(k)
-    Tt = (1 - mi) * M / (1 - mi * M)
-    x = xu / (1 - (1 - 2 * xu) * Tt)
-    a = me * Tt + x * Tt - me - Tt - x * me * Tt
-    b = 1 + x * me * Tt - 2 * x**2 * me**2 * Tt
-    c = 2 * me * x**2 * Tt - x * Tt - 2 * x * me
-    disc = b**2 - 4 * a * c
+def rinf_plane(model, xu, k, i=NIR):
+    """R_inf at band i for cell absorption coefficient k (NaN where it has no real root)."""
+    x, Tt = _cell(model.mi[i], xu, _slab_m_np(k))
     with np.errstate(invalid="ignore"):
-        R = -2 * c / (b + np.sqrt(disc))
-    return disc, np.where(disc >= 0, R, np.nan)
+        return model._layer(model.me[i], x, Tt, np)[2]
 ```
 
-In the pilot, LIBERTY is the only RTM whose fits often fail the convergence screen. The
-reason is the model's own structure, not the sampler. LIBERTY is undefined for part of its
-parameter space, and that part lies exactly where bright leaves pull the fit. This page
-explains why, and what it means for the LIBERTY results elsewhere on this site.
+**Summary.** LIBERTY (Dawson et al. 1998), as published, has no solution for bright leaves.
+The cause is an algebra error in the paper: its closed-form equation for the reflectance of an
+infinitely thick leaf (Eq. 16) is not the sum of the series it is derived from (Eq. 15). Every
+LIBERTY result on this site uses `liberty`, which fixes this bug. The published model is kept,
+as `liberty_dawson`, for comparison only.
 
-## Where the hole comes from
+| Name in the code | What it is | Used for |
+|---|---|---|
+| `liberty` | LIBERTY with Eq. 16 replaced by the correct sum of Eq. 15 | all fits and analyses |
+| `liberty_dawson` | LIBERTY as published, and as implemented in `rrtm` | this page only |
 
-LIBERTY (Dawson et al. 1998) treats a leaf as layers of spherical cells. Inside the leaf,
-light at each wavelength is either absorbed in a cell or scattered at a cell wall. The
-reflectance of an infinitely thick stack of such cells, $R_\infty$, must satisfy a
-self-consistency condition: adding one more layer does not change it. This condition is a
-quadratic equation in $R_\infty$,
+Both variants also share a second, smaller correction, to the internal reflectance of the cell
+wall (see [below](#a-second-correction-the-internal-reflectance-m_i)).
 
-$$a R_\infty^2 + b R_\infty + c = 0,$$
+## How LIBERTY works
 
-whose coefficients depend on two quantities:
+LIBERTY treats a leaf as layers of spherical cells. Inside the leaf, light at each wavelength
+is either absorbed in a cell or scattered at a cell wall. Two quantities control it:
 
-* **Scattering, through `xu`:** the intercellular air-space determinant, the fraction of
-  light that leaves a cell towards the air spaces.
-* **Absorption, through the per-cell transmission $T_t$:** this depends on the cell
-  absorption coefficient $k(\lambda) = D\,[\text{baseline} + \sum_j K_j(\lambda)\,C_j]$,
-  where $K_j$ are the specific absorption coefficients of chlorophyll, water, lignin and
-  cellulose, protein and "albino" material, and $C_j$ are their concentrations.
+* **Scattering, through `xu`:** the intercellular air-space determinant, the fraction of light
+  that leaves a cell towards the air spaces.
+* **Absorption, through the per-cell transmission $\tau$:** this depends on the cell absorption
+  coefficient $k(\lambda) = D\,[\text{baseline} + \sum_j K_j(\lambda)\,C_j]$, where $K_j$ are
+  the specific absorption coefficients of chlorophyll, water, lignin and cellulose, protein
+  and "albino" material, and $C_j$ are their concentrations.
 
-The original R code (`rrtm::liberty`) finds $R_\infty$ by fixed-point iteration, and our
-port takes the matching root of the quadratic in closed form. Both exist only when the
-**discriminant** $b^2 - 4ac$ is non-negative. With strong scattering (large `xu`) and weak
-absorption (small $k$), the discriminant becomes negative and the equation has no real
-solution. The iteration then diverges, and the closed form returns NaN, so LIBERTY has no
-output at those parameter values.
+The model first finds the reflectance $R_\infty$ of an infinitely thick stack of cells. It then
+uses $R_\infty$ to get the reflectance and transmittance of one layer, and stacks layers to the
+leaf's thickness.
 
-Absorption is weakest in the near-infrared plateau (about 750–1300 nm), where only the
-baseline and a little water absorb. So the NIR bands hit the wall first, and they are also
-where leaves are brightest.
+$R_\infty$ is set by a self-consistency condition: putting one more layer of cells on top of an
+infinitely thick leaf must not change its reflectance. Dawson et al. (Fig. 1, Eq. 15) write this
+as a series. Light reaching the leaf is either reflected by the top layer of cells, or passes
+through that layer, is reflected by the leaf below, and comes back up through the top layer,
+possibly after more bounces.
+
+## The bug
+
+The correct sum of the Eq. 15 series is
+
+$$R_\infty = 2xm_e + \frac{x(1-2xm_e)\,\tau\,(1-m_eR_\infty)}{(1-m_eR_\infty) - (1-x)(1-m_e)\,\tau R_\infty},$$
+
+where $m_e$ is the reflectance of the cell surface for light arriving from outside, and $x$ the
+upward-scattering fraction (a function of `xu` and $\tau$). Clearing the denominator gives a
+quadratic in $R_\infty$.
+
+To clear the denominator, Eq. 16 puts the first term, $2xm_e$, over the common denominator
+without multiplying it by that denominator. `rrtm`, and so `liberty_dawson`, implement Eq. 16
+as printed.
+
+The two equations behave very differently:
+
+* **The correct sum** is the "adding" equation for one layer of cells that loses light only by
+  absorption. It therefore always has a solution, and $R_\infty$ tends to 1 as absorption
+  vanishes.
+* **Eq. 16** behaves as if the layer gave back more light than it received, $m_e(1+m_e)/2
+  \approx 4.6\,\%$ more at zero absorption. When absorption is weaker than that, no
+  reflectance satisfies the equation (its discriminant is negative). This happens exactly
+  where real leaves are brightest, in the near-infrared plateau, where only the baseline and a
+  little water absorb.
+
+`liberty` replaces Eq. 16 with the correct sum and changes nothing else (Eqs. 1–9, 17, 19 and
+Benford's thickness interpolation). The unit tests check its $R_\infty$ against the Eq. 15
+series summed term by term, and check that it conserves energy (R + T ≤ 1) everywhere.
 
 ```{python}
-#| fig-cap: "Top: discriminant b² − 4ac of LIBERTY's R∞ equation by wavelength, for three absorption levels (every absorber and the baseline scaled by the factor shown). Below zero (gray band) the equation has no real root. Bottom: R∞ where it exists. Move the slider to increase `xu`: the near-infrared plateau crosses zero first, and the curves break there. The default prior bound in these inversions is xu ≤ 0.06."
-xus = [0.02, 0.03, 0.04, 0.05, 0.055, 0.06, 0.065, 0.07, 0.08]
-scales = [(1.0, "#2a78d6", "absorption × 1"), (0.5, "#eb6834", "× 0.5"), (0.2, "#1baf7a", "× 0.2")]
-fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.06,
-                    row_heights=[0.45, 0.55])
-start = 4
+#| fig-cap: "Reflectance (left) and transmittance (right) of a bright leaf (low baseline absorption) from the corrected `liberty` (green) and the published `liberty_dawson` (gray, dashed), as `xu` (slider) increases. Up to xu = 0.04 both are defined; from 0.06 the published curve breaks wherever its R∞ equation has no solution. The corrected model is defined everywhere and saturates smoothly."
+xus = [0.02, 0.03, 0.04, 0.06, 0.08, 0.1, 0.15, 0.2]
+fig = make_subplots(rows=1, cols=2, horizontal_spacing=0.09)
+start = 2
 for k, xu in enumerate(xus):
-    for s, col, lab in scales:
-        th = scaled(s, xu=xu)
-        disc = lib.discriminant(th)
-        _, _, rinf = lib.simulate(th, return_rinf=True)
-        fig.add_trace(go.Scatter(x=lib.wavelength, y=disc, mode="lines", line=dict(color=col, width=2),
-                                 name=lab, legendgroup=lab, showlegend=(k == start), visible=(k == start),
-                                 hovertemplate="%{x} nm: %{y:.4f}<extra>" + lab + "</extra>"), 1, 1)
-        fig.add_trace(go.Scatter(x=lib.wavelength, y=rinf, mode="lines", line=dict(color=col, width=2),
-                                 name=lab, legendgroup=lab, showlegend=False, visible=(k == start),
-                                 hovertemplate="%{x} nm: R∞ %{y:.3f}<extra>" + lab + "</extra>"), 2, 1)
-fig.add_hrect(y0=-0.3, y1=0, fillcolor="#d9d9d6", opacity=0.5, line_width=0, row=1, col=1)
-fig.add_hline(y=0, line=dict(color=MUTED, width=1), row=1, col=1)
-n = 2 * len(scales)
-steps = [dict(method="update", label=f"{xu}",
-              args=[{"visible": [j // n == k for j in range(n * len(xus))]}]) for k, xu in enumerate(xus)]
-fig.update_layout(sliders=[dict(active=start, steps=steps, currentvalue=dict(prefix="xu: "))],
-                  height=620, legend=dict(orientation="h", y=1.08))
-fig.update_yaxes(title_text="b² − 4ac", range=[-0.1, 0.35], row=1, col=1)
-fig.update_yaxes(title_text="R∞", range=[0, 1], row=2, col=1)
-fig.update_xaxes(title_text="wavelength (nm)", row=2, col=1)
+    th = {**BRIGHT, "xu": xu}
+    for model, col, dash, lab in ((fixed, C_FIX, "solid", MODEL_LABEL["liberty"]),
+                                  (pub, C_PUB, "dash", MODEL_LABEL["liberty_dawson"])):
+        with np.errstate(invalid="ignore"):
+            R, T = model.simulate(th)
+        for c, y in ((1, R), (2, T)):
+            fig.add_trace(go.Scatter(x=model.wavelength, y=y, mode="lines", line=dict(color=col, width=2, dash=dash),
+                                     name=lab, legendgroup=lab, showlegend=(c == 1 and k == start),
+                                     visible=(k == start), hovertemplate="%{x} nm: %{y:.3f}<extra>" + lab + "</extra>"),
+                          1, c)
+n = 4
+steps = [dict(method="update", label=f"{xu}", args=[{"visible": [j // n == k for j in range(n * len(xus))]}])
+         for k, xu in enumerate(xus)]
+fig.update_layout(sliders=[dict(active=start, steps=steps, currentvalue=dict(prefix="xu: "))], height=460,
+                  legend=dict(orientation="h", y=1.1))
+fig.update_xaxes(title_text="wavelength (nm)")
+fig.update_yaxes(title_text="reflectance", range=[0, 0.8], col=1)
+fig.update_yaxes(title_text="transmittance", range=[0, 0.8], col=2)
 show(fig)
 ```
 
-## The valid region and the pilot fits
+## Where each model is defined
 
-At a single wavelength, the discriminant depends only on `xu` and the cell absorption
-coefficient $k$ at that wavelength. The map below shows that plane for 800 nm. The gray
-region has no real root. The shading elsewhere is $R_\infty$, an upper bound on what a
-LIBERTY leaf can reflect at that band, since a finite leaf reflects less than an
-infinitely thick one.
+At a single wavelength, $R_\infty$ depends only on `xu` and the cell absorption coefficient $k$
+at that wavelength. The maps below show that plane at 800 nm for both variants.
 
-The highest achievable reflectance lies right along the edge of the gray region. The
-`xu ≤ 0.06` prior bound (dashed) cuts the plane further.
+* **Published:** the gray region is where the equation has no solution. The prior bound
+  `xu ≤ 0.06` (dotted) was needed only to keep fits out of it.
+* **Corrected:** there is no gray region. The bound is now 0.2 (dashed), above which NIR
+  reflectance changes by less than 2 %.
+* **Pilot fits:** the points are the posterior medians of the corrected-model pilot fits
+  (their `xu`, and $k$ at each leaf's least-absorbing band).
 
 ```{python}
-#| fig-cap: "LIBERTY's valid region at 800 nm. Gray: no real R∞ (model undefined). Colour: R∞, with contours every 0.1. Dashed: the xu ≤ 0.06 prior bound. Points: pilot posterior medians (xu, and k at each leaf's least-absorbing band), coloured by whether the fit passed the convergence screen. Fits that fail it sit at the edge."
-xg = np.linspace(0.005, 0.1, 140)
+#| fig-cap: "R∞ at 800 nm over (xu, cell absorption coefficient k), contours every 0.1. Left: published LIBERTY (gray: no solution). Right: corrected LIBERTY, with pilot posterior medians coloured by whether the fit passed the convergence screen."
+xg = np.linspace(0.005, 0.2, 140)
 kg = np.geomspace(1e-3, 3, 160)
 X, Kk = np.meshgrid(xg, kg)
-disc, R = rinf_plane(X, Kk)
-fig = go.Figure()
-fig.add_trace(go.Heatmap(x=xg, y=kg, z=np.where(disc < 0, 1.0, np.nan), showscale=False, hoverinfo="skip",
-                         colorscale=[[0, "#d9d9d6"], [1, "#d9d9d6"]]))
-fig.add_trace(go.Contour(x=xg, y=kg, z=R, colorscale=[[0, "#e8f1fc"], [1, "#0d366b"]], zmin=0, zmax=0.8,
-                         contours=dict(start=0.1, end=0.8, size=0.1, showlabels=True,
-                                       labelfont=dict(size=10, color=SURFACE)),
-                         line=dict(width=1, color=SURFACE), colorbar=dict(title="R∞", len=0.8),
-                         hovertemplate="xu %{x:.3f}<br>k %{y:.3g}<br>R∞ %{z:.3f}<extra></extra>"))
-fig.add_vline(x=0.06, line=dict(color=INK2, width=1.5, dash="dash"))
+fig = make_subplots(rows=1, cols=2, horizontal_spacing=0.08, shared_yaxes=True,
+                    subplot_titles=["published (liberty_dawson)", "corrected (liberty)"])
+for c, model in ((1, pub), (2, fixed)):
+    R = rinf_plane(model, X, Kk)
+    if c == 1:
+        fig.add_trace(go.Heatmap(x=xg, y=kg, z=np.where(np.isnan(R), 1.0, np.nan), showscale=False,
+                                 hoverinfo="skip", colorscale=[[0, "#d9d9d6"], [1, "#d9d9d6"]]), 1, 1)
+    fig.add_trace(go.Contour(x=xg, y=kg, z=R, colorscale=[[0, "#e8f1fc"], [1, "#0d366b"]], zmin=0, zmax=1,
+                             contours=dict(start=0.1, end=0.9, size=0.1, showlabels=True,
+                                           labelfont=dict(size=10, color=SURFACE)),
+                             line=dict(width=1, color=SURFACE), showscale=(c == 2),
+                             colorbar=dict(title="R∞", len=0.8),
+                             hovertemplate="xu %{x:.3f}<br>k %{y:.3g}<br>R∞ %{z:.3f}<extra></extra>"), 1, c)
+fig.add_vline(x=0.06, line=dict(color=INK2, width=1.5, dash="dot"), row=1, col=1)
+fig.add_vline(x=0.2, line=dict(color=INK2, width=1.5, dash="dash"), row=1, col=2)
 if len(fits):
     f = fits.copy()
     C = np.stack([f[a].to_numpy() for a in ABSORBERS], axis=1)
-    kall = lib.fixed["D"] * (f["baseline"].to_numpy()[:, None] + C @ lib.K.T)
-    f["k_min"] = kall.min(axis=1)
-    if len(screen):
-        f = f.merge(screen[["observation_id", "run_id", "usable"]], on=["observation_id", "run_id"], how="left")
-    else:
-        f["usable"] = True
+    f["k_min"] = (fixed.fixed["D"] * (f["baseline"].to_numpy()[:, None] + C @ fixed.K.T)).min(axis=1)
+    f = f.merge(screen[["observation_id", "run_id", "usable"]], on=["observation_id", "run_id"], how="left") \
+        if len(screen) else f.assign(usable=True)
     for ok, col, lab in ((True, "#1baf7a", "pilot fit: usable"), (False, "#eb6834", "pilot fit: excluded")):
         g = f[f["usable"].fillna(False) == ok]
-        fig.add_trace(go.Scatter(x=g["xu"], y=g["k_min"], mode="markers", name=lab,
-                                 marker=dict(size=9, color=col, line=dict(color=SURFACE, width=1.5)),
-                                 text=g["observation_id"] + " · " + g["run_id"],
-                                 hovertemplate="%{text}<br>xu %{x:.4f}<br>k %{y:.3g}<extra></extra>"))
-fig.update_layout(xaxis_title="xu (intercellular air-space determinant)", height=520,
-                  legend=dict(orientation="h", y=1.1))
-log_axis(fig, "y", kg, title="cell absorption coefficient k (least-absorbing band)")
+        if len(g):
+            fig.add_trace(go.Scatter(x=g["xu"], y=g["k_min"], mode="markers", name=lab,
+                                     marker=dict(size=9, color=col, line=dict(color=SURFACE, width=1.5)),
+                                     text=g["observation_id"] + " · " + g["run_id"],
+                                     hovertemplate="%{text}<br>xu %{x:.4f}<br>k %{y:.3g}<extra></extra>"), 1, 2)
+fig.update_xaxes(title_text="xu")
+fig.update_layout(height=520, legend=dict(orientation="h", y=1.15))
+log_axis(fig, "y", kg, row=1, col=1, title="cell absorption coefficient k")
+log_axis(fig, "y", kg, row=1, col=2)
 show(fig)
 ```
 
-## What it does to the fits
+## What the bug did to the fits
 
-A Bayesian inversion draws parameter values in proportion to how well they explain the
-spectrum. Bright leaves are explained best by strong scattering and weak absorption, so
-their posterior presses against the edge of the valid region. Two things go wrong there:
+The first pilot run fitted the published model, before this bug was found. Bright leaves pulled
+their posteriors against the edge of the gray region, and two things went wrong.
 
-* **The sampler hits the wall.** Hamiltonian Monte Carlo simulates trajectories across the
-  parameter space. Every trajectory that crosses into the gray region meets an undefined
-  log density and is rejected as a *divergent transition*. Smaller steps improve mixing
-  (LIBERTY runs use `target_accept` 0.95 instead of 0.8) but cannot help when the wall is
-  part of the posterior geometry. In a test leaf, even `target_accept` 0.99 cut divergences
-  only from 75 % to 68 %.
-* **The fit is pinned at the edge.** At the edge LIBERTY's NIR reflectance cannot rise
-  further, so bright leaves are underfitted in the NIR. The other parameters then compensate:
-  absorber concentrations fall and `thick` moves.
+* **The sampler hit the wall.** Every Hamiltonian Monte Carlo trajectory that crossed into the
+  gray region met an undefined likelihood and counted as a divergent transition. In 64 fits,
+  22 had R̂ > 1.05, and up to 98 % of transitions diverged. After all other sampler fixes,
+  fits whose posterior touched the wall (smallest discriminant over draws ≤ 0.004) still
+  diverged on 27–86 % of transitions. Fits away from the wall had almost none.
+* **Fits were pinned at the edge.** Published LIBERTY cannot reach the NIR reflectance of many
+  fresh leaves, so it underfitted them, and the other parameters compensated.
+
+Smaller sampler steps did not help: even `target_accept` 0.99 cut divergences on a test leaf
+only from 75 % to 68 %. Those fits have been deleted. Every LIBERTY result on this site comes
+from the corrected model.
+
+The corrected model is not a drop-in replacement for parameter values. At the same parameters
+it transmits about 15–30 % less than the published model and reflects slightly less, so values
+calibrated with Eq. 16, including Dawson et al.'s Table 1, do not carry over.
 
 ```{python}
-#| fig-cap: "Observed vs LIBERTY-fitted reflectance, averaged over 800–900 nm (posterior median fit), for pilot leaves. Points below the 1:1 line are leaves LIBERTY cannot make bright enough. Colour as above."
+#| fig-cap: "Observed vs fitted reflectance averaged over 800–900 nm (posterior median fit of the corrected LIBERTY), for pilot leaves. Points below the 1:1 line would be leaves the model cannot make bright enough."
 if len(fits) and "nir_obs" in fits:
     f = fits.merge(screen[["observation_id", "run_id", "usable"]], on=["observation_id", "run_id"], how="left") \
         if len(screen) else fits.assign(usable=True)
@@ -178,68 +200,44 @@ if len(fits) and "nir_obs" in fits:
     one_to_one(fig, 0, 0.8)
     for ok, col, lab in ((True, "#1baf7a", "usable"), (False, "#eb6834", "excluded")):
         g = f[f["usable"].fillna(False) == ok]
-        fig.add_trace(go.Scatter(x=g["nir_obs"], y=g["nir_fit"], mode="markers", name=lab,
-                                 marker=dict(size=9, color=col, line=dict(color=SURFACE, width=1.5)),
-                                 text=g["observation_id"] + " · " + g["run_id"],
-                                 hovertemplate="%{text}<br>observed %{x:.3f}<br>fitted %{y:.3f}<extra></extra>"))
+        if len(g):
+            fig.add_trace(go.Scatter(x=g["nir_obs"], y=g["nir_fit"], mode="markers", name=lab,
+                                     marker=dict(size=9, color=col, line=dict(color=SURFACE, width=1.5)),
+                                     text=g["observation_id"] + " · " + g["run_id"],
+                                     hovertemplate="%{text}<br>observed %{x:.3f}<br>fitted %{y:.3f}<extra></extra>"))
     fig.update_layout(xaxis_title="observed reflectance, 800–900 nm", yaxis_title="LIBERTY fit, 800–900 nm",
                       height=460, legend=dict(orientation="h", y=1.1))
     show(fig)
 else:
-    no_data("No LIBERTY fits in this fit set.")
+    no_data("No LIBERTY fits in this fit set yet.")
 ```
 
 ```{python}
-#| tbl-cap: "LIBERTY fits in this fit set. wall_margin_q05: 5 % quantile over posterior draws of the smallest discriminant (near 0 = the posterior touches the edge). frac_at_bound: share of draws within 1 % of a hard prior bound (mostly xu = 0.06). divergent_share: divergent transitions."
+#| tbl-cap: "Corrected-LIBERTY fits in this fit set: convergence screen, share of posterior draws within 1 % of a hard prior bound (frac_at_bound), divergent transitions, R̂ and ESS."
 if len(screen):
-    cols = [c for c in ["run_id", "observation_id", "usable", "reason", "wall_margin_q05", "frac_at_bound",
-                        "divergent_share", "max_rhat", "min_ess_bulk"] if c in screen]
-    show_table(fmt(screen[cols].sort_values("wall_margin_q05" if "wall_margin_q05" in screen else "run_id")))
+    cols = [c for c in ["run_id", "observation_id", "usable", "reason", "frac_at_bound", "divergent_share",
+                        "max_rhat", "min_ess_bulk"] if c in screen]
+    show_table(fmt(screen[cols].sort_values(["usable", "max_rhat"], ascending=[True, False])))
 else:
-    no_data("No LIBERTY fits in this fit set.")
+    no_data("No LIBERTY fits in this fit set yet.")
 ```
 
-## Why the model is not patched
+## A second correction: the internal reflectance $m_i$
 
-There are two technical ways to remove the divergences:
+LIBERTY needs two reflectances of the cell surface: $m_e$, for light arriving from outside the
+cell (Eq. 1), and $m_i$, for light inside the cell (Eq. 2). $m_i$ averages the Fresnel
+reflectance of light inside the cell over internal angles up to the critical angle. Beyond the
+critical angle, all light is totally internally reflected.
 
-* **Reparameterize `xu`** as a fraction of the largest value that still has a real root for
-  the current absorption. This is exact inside the valid region, and the sampler could no
-  longer cross the wall. But the wall would still truncate the posterior. It would also need
-  a root solve per band inside the gradient computation, and it changes the meaning of the
-  prior on `xu`.
-* **Continue the model smoothly** past the wall, for example by replacing
-  $\sqrt{b^2-4ac}$ with a smooth positive approximation. This defines a model that Dawson
-  et al. never wrote, and bright leaves would be fitted by the made-up part.
+`rrtm` had two errors in $m_i$:
 
-We keep LIBERTY exactly as published (and as in `rrtm`). The edge is reported as a finding:
+* It evaluated the reflectance of light arriving from *outside* at those angles, pairing each
+  angle with its refraction into the cell instead of out of it.
+* It summed whole degrees only, so it missed the rise to total internal reflection just below
+  the critical angle.
 
-* In its published form, LIBERTY cannot reach the NIR reflectance of many fresh broadleaf
-  leaves.
-* Its estimates for those leaves are pinned at the edge of the valid region.
-
-Every fit that fails the convergence screen is left out of the trait analyses, and listed on
-[Diagnostics](a-diagnostics.qmd). Comparisons of LIBERTY with the other RTMs therefore cover
-the leaves that LIBERTY can represent. This limits LIBERTY's use for retrieving traits from
-bright leaves.
-
-## The cause, and `liberty_fixed`
-
-The hole comes from an algebra error in the paper. Dawson et al. (1998, Fig. 1 and Eq. 15)
-build $R_\infty$ as a series: light reflected by the top layer of cells, plus light that passes
-through that layer, is reflected by the leaf below, and returns through the top layer. The
-correct sum of that series is
-
-$$R_\infty = 2xm_e + \frac{x(1-2xm_e)\,\tau\,(1-m_eR_\infty)}{(1-m_eR_\infty) - (1-x)(1-m_e)\,\tau R_\infty}.$$
-
-Their closed form (Eq. 16) puts $2xm_e$ over the common denominator without multiplying it by
-that denominator. `rrtm` and our `liberty` implement Eq. 16. Eq. 15 describes a layer of cells
-that loses light only by absorption, so its sum always has a solution, and $R_\infty \to 1$ as
-absorption goes to zero. Eq. 16 behaves as if the layer gave back slightly more light than it
-received, $m_e(1+m_e)/2 \approx 4.6\,\%$ more at zero absorption. Where absorption is weaker
-than that, Eq. 16 has no solution. That is the gray region above.
-
-`liberty_fixed` replaces Eq. 16 with the correct sum and changes nothing else. It is defined for
-all parameter values. At the same parameters it transmits less than published LIBERTY, by
-about 15–30 %, and reflects slightly less, so parameter values calibrated with Eq. 16
-(including Dawson et al.'s Table 1) do not carry over.
+Both variants here use the closed forms $m_e = 1 - t_{av}(90°, n)$ and
+$m_i = 1 - t_{av}(90°, n)/n^2$, with Stern's (1964) diffuse transmissivity $t_{av}$. These
+equal Eqs. 1–2 exactly, which the tests check by numerical quadrature. At 800 nm, $m_i$
+changes from 0.541 to 0.564. Unlike Eq. 16, this was an implementation error in `rrtm`, not
+in the paper, so `liberty_dawson` includes this correction too.
