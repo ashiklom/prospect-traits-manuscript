@@ -85,7 +85,9 @@ show(sensitivity("prospectpro", base))
 
 LIBERTY's structure parameters work differently from PROSPECT's single $\mathcal{N}$. The
 intercellular air space $x_u$ controls internal scattering, "thickness" stacks layers, and
-the baseline absorption raises absorption at every wavelength.
+the baseline absorption raises absorption at every wavelength. Strong scattering combined
+with weak absorption leaves LIBERTY undefined: its $R_\infty$ equation has no real root. Bright
+leaves push fits against that edge; see [LIBERTY's valid region](a-liberty.qmd).
 
 ```{python}
 base = dict(xu=0.03, thick=1.6, baseline=0.0005, element=2, c_factor=200, w_factor=100, l_factor=40, p_factor=1)

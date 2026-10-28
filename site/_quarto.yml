@@ -43,6 +43,8 @@ website:
             text: R only vs R + T
           - href: a-state-protocol.qmd
             text: Sample state & protocol
+          - href: a-liberty.qmd
+            text: "LIBERTY's valid region"
           - href: a-diagnostics.qmd
             text: Diagnostics
       - text: "B · How do traits vary?"

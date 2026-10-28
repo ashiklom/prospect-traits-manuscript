@@ -45,6 +45,23 @@ def discrepancy_table(root: Path) -> pd.DataFrame:
     return pd.concat(rows, ignore_index=True) if rows else pd.DataFrame()
 
 
+def liberty_table(d: Path) -> pd.DataFrame:
+    """Per LIBERTY fit: posterior-median parameters and mean observed vs fitted
+    reflectance over 800-900 nm (the bands nearest LIBERTY's validity edge)."""
+    summ, spec = d / "summary" / "summary.parquet", d / "summary" / "spectra.parquet"
+    if not (summ.exists() and spec.exists()):
+        return pd.DataFrame()
+    sm = pd.read_parquet(summ, filters=[("model", "==", "liberty"), ("is_rtm", "==", True)])
+    if sm.empty:
+        return pd.DataFrame()
+    par = sm.pivot_table(index=["observation_id", "run_id"], columns="param", values="q50").reset_index()
+    sp = pd.read_parquet(spec, filters=[("model", "==", "liberty"), ("quantity", "==", "R")])
+    sp = sp[sp["wavelength"].between(800, 900)]
+    nir = (sp.groupby(["observation_id", "run_id"])[["y", "yhat_q50"]].mean()
+           .rename(columns={"y": "nir_obs", "yhat_q50": "nir_fit"}).reset_index())
+    return par.merge(nir, on=["observation_id", "run_id"], how="left")
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--fitset-dir", required=True)
@@ -62,6 +79,9 @@ def main(argv=None):
             leaves = (s["observation_id"].drop_duplicates()
                       .sample(min(N_EXAMPLE_LEAVES, s["observation_id"].nunique()), random_state=1))
             s[s["observation_id"].isin(leaves)].to_parquet(out / "spectra_examples.parquet", index=False)
+    lib = liberty_table(d)
+    if len(lib):
+        lib.to_parquet(out / "liberty_fits.parquet", index=False)
     learned = discrepancy_table(d / "discrepancy")
     if len(learned):
         learned.to_parquet(out / "discrepancy_learned.parquet", index=False)
