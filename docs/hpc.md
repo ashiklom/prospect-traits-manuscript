@@ -24,50 +24,63 @@ Downloads need network access, so run them on the login or transfer node. NASA S
 
 This runs download → harmonize → selection and writes `results/full/inputs/<batch>.pkl`.
 
-## 2. Configure the full run
+## 2. The full run's configuration
 
-Edit `config/config.yaml` → `fitsets.full.runs`, using the pilot's
-[Error models](../site/error-models.qmd) comparison to pick the error model(s), and the R vs
-R+T comparison to decide whether R-only fits are needed. For example, for every RTM:
+`config/config.yaml` → `fitsets.full` is already configured from the pilot (the comments
+there give the evidence):
 
-```yaml
-- {id: prospectd_ou, model: prospectd, errmodel: ou, rt: false, data_use: all, stage: 1}
-- {id: prospectd_ld_rt, model: prospectd, errmodel: ld, rt: true, data_use: all, stage: 2}
-```
+- **Error model:** heteroskedastic + Matérn-3/2 (`ss`) for every RTM, with correlated R/T
+  errors where a leaf has both.
+- **Models:** PROSPECT-4, 5, 5B, D and PRO, LIBERTY (Eq. 16 corrected) and LeafSIP.
+- **Quantities:** reflectance, transmittance, absorptance and pseudo-absorbance.
+- **R only:** a PROSPECT-D fit to reflectance alone on every leaf with R and T.
+- **No stage 1:** all runs are stage 2. The Matérn length scale and nugget come from the
+  pilot (`discrepancy_from: pilot`). PROSPECT versions not in the pilot borrow
+  PROSPECT-D's (`discrepancy.borrow`).
 
-Stage-1 `ou` runs are needed by `learn` whenever any stage-2 `ss` or `ld` run uses that RTM.
-`n_batches` sets the job size: 400 batches puts about 100–150 observations in each.
-
-## 3. Stage 1 fits (dSQ)
+That needs the pilot's learned error structure, `results/pilot/discrepancy/` (7 MB, not in
+git). Copy it from the machine that ran the pilot, or unpack the release asset:
 
 ```bash
-.venv/bin/python -m leafrtm.hpc --fitset full --stage 1 --pilot-dir results/pilot   # prints projected core-hours
-module load dSQ
-dsq --job-file hpc/fit_jobs_full_stage1.txt --mem-per-cpu 4g -t 12:00:00 --max-jobs 400 \
-    -o hpc/logs/%A_%a.out --batch-file hpc/stage1.sh
-sbatch hpc/stage1.sh
+mkdir -p results/pilot && tar -xzf pilot-discrepancy.tar.gz -C results/pilot
 ```
 
-Each job line runs one (run, batch) on one core. Per-observation results are cached in
-`results/full/cache/<run>/`, so a job that hits its time limit resumes where it stopped.
+`n_batches: 400` puts about 230 observations in each job.
+
+## 3. Fits (dSQ)
+
+```bash
+.venv/bin/python -m leafrtm.hpc --fitset full --stage 2 --pilot-dir results/pilot
+module load dSQ
+dsq --job-file hpc/fit_jobs_full_stage2.txt --mem-per-cpu 4g -t 4:00:00 --max-jobs 400 \
+    -o hpc/logs/%A_%a.out --batch-file hpc/fits.sh
+sbatch hpc/fits.sh
+```
+
+`leafrtm.hpc` writes one job line per (run, batch) whose outputs are missing, and prints the
+projected cost from the pilot's timings. Each line runs on one core. In October 2026 the
+projection was 3,200 jobs and about 3,100 core-hours, roughly 1 core-hour per job. Its
+inputs were:
+
+- 91,501 observations, 4,434 of them with R and T;
+- the pilot's per-fit times, scaled to the full run's 2 chains × 1,000 iterations.
+
+Per-observation results are cached in `results/full/cache/<run>/`, so a job that hits its
+time limit resumes where it stopped.
 
 After the array finishes:
 
 ```bash
-dsqa -j <jobid> -f hpc/fit_jobs_full_stage1.txt > hpc/rerun_stage1.txt   # failed or timed-out jobs
-# resubmit hpc/rerun_stage1.txt the same way, until it is empty
+dsqa -j <jobid> -f hpc/fit_jobs_full_stage2.txt > hpc/rerun.txt   # failed or timed-out jobs
+# resubmit hpc/rerun.txt the same way, until it is empty
 ```
 
-## 4. Learn error-model structure, then stage 2
+To add stage-1 (OU) runs and learn the error structure from the full data instead, give the
+runs `stage: 1`, drop `discrepancy_from`, and run
+`snakemake --config fitset=full -- results/full/discrepancy/report.json` between the two job
+files (`--stage 1`, then `--stage 2`).
 
-```bash
-.venv/bin/snakemake --cores 4 --config fitset=full -- results/full/discrepancy/report.json
-.venv/bin/python -m leafrtm.hpc --fitset full --stage 2
-dsq --job-file hpc/fit_jobs_full_stage2.txt --mem-per-cpu 4g -t 12:00:00 --max-jobs 400 \
-    -o hpc/logs/%A_%a.out --batch-file hpc/stage2.sh && sbatch hpc/stage2.sh
-```
-
-## 5. Analyses and site
+## 4. Analyses and site
 
 The remaining steps (aggregate → analysis → site_data → site) are light:
 

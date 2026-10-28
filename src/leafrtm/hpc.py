@@ -40,17 +40,32 @@ def main(argv=None):
     path = hpc / f"fit_jobs_{a.fitset}_stage{a.stage}.txt"
     path.write_text("\n".join(lines) + "\n")
     print(f"{len(lines)} jobs -> {path}")
-    if a.pilot_dir and (out / "fit_set.parquet").exists():
-        info = pd.read_parquet(Path(a.pilot_dir) / "summary" / "info.parquet")
-        sec = info[info["status"] == "ok"].groupby("model")["seconds"].median()
-        fit_set = pd.read_parquet(out / "fit_set.parquet")
-        n_rt = int(fit_set["has_RT"].sum())
-        hours = 0.0
-        for r in runs:
-            n = n_rt if r.get("only_rt") else len(fit_set)
-            hours += n * sec.get(r["model"], sec.median()) / 3600
-        print(f"projected ~{hours:,.0f} core-hours for stage {a.stage} "
-              f"(pilot medians per model; sampler settings may differ)")
+    if a.pilot_dir:
+        print(f"projected ~{projected_hours(cfg, a.fitset, runs, Path(a.pilot_dir)):,.0f} core-hours "
+              f"for stage {a.stage}")
+
+
+def projected_hours(cfg: dict, fitset: str, runs: list[dict], pilot_dir: Path) -> float:
+    """Core-hours from the pilot's mean seconds per fit and model. The sampling part
+    is scaled by the ratio of gradient-evaluation budgets (chains x (tune + draws)) of
+    the two fit sets; the mode search and compilation are not. PROSPECT versions not
+    in the pilot use PROSPECT-D's timings."""
+    from leafrtm.db.harmonize import load
+    from leafrtm.prep import observation_table, select
+
+    fs, pilot = cfg["fitsets"][fitset], cfg["fitsets"][pilot_dir.name]
+    budget = lambda s: s["chains"] * (s["tune"] + s["draws"])  # noqa: E731
+    ratio = budget(fs["sampler"]) / budget(pilot["sampler"])
+    info = pd.read_parquet(pilot_dir / "summary" / "info.parquet")
+    info = info[info["status"] == "ok"]
+    per_fit = ((info["seconds"] - info["sampling_seconds"]) + ratio * info["sampling_seconds"])
+    sec = per_fit.groupby(info["model"]).mean()
+    chosen = select(observation_table(load(), quantities=fs.get("quantities", ["R", "T"])), fs)
+    n_all, n_rt = len(chosen), int(chosen["has_RT"].sum())
+    hours = sum((n_rt if r.get("only_rt") else n_all)
+                * sec.get(r["model"], sec.get("prospectd", sec.mean())) / 3600 for r in runs)
+    print(f"{n_all:,} observations ({n_rt:,} with R and T); sampler budget x{ratio:.2f} of the pilot's")
+    return hours
 
 
 if __name__ == "__main__":

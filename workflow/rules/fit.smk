@@ -5,8 +5,10 @@
 def fit_inputs(wc):
     deps = [ancient(f"results/{wc.fitset}/fit_set.parquet")]
     stage = {r["id"]: r["stage"] for r in config["fitsets"][wc.fitset]["runs"]}[wc.run]
-    if stage == 2:
-        deps.append(f"results/{wc.fitset}/discrepancy/report.json")
+    if stage == 2:  # learned error structure, possibly from another fit set (discrepancy_from)
+        src = config["fitsets"][wc.fitset].get("discrepancy_from", wc.fitset)
+        deps.append(f"results/{src}/discrepancy/report.json" if src == wc.fitset
+                    else ancient(f"results/{src}/discrepancy/report.json"))
     return deps
 
 

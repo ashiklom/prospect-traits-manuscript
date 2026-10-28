@@ -198,12 +198,15 @@ def run_batch(fitset_dir: Path, run: dict, batch: int, cfg: dict) -> dict:
     cache = fitset_dir / "cache" / run_id
     cache.mkdir(parents=True, exist_ok=True)
     corr, discs = {}, {}
+    # learned error structure: this fit set's own, or another's (``discrepancy_from``);
+    # an RTM may borrow another's (``discrepancy.borrow``), e.g. PROSPECT versions
+    ddir = fitset_dir.parent / cfg.get("discrepancy_from", fitset_dir.name) / "discrepancy"
+    learned_model = cfg.get("discrepancy", {}).get("borrow", {}).get(run["model"], run["model"])
     if run["errmodel"] == "ss":
-        corr = json.loads((fitset_dir / "discrepancy" / "ss_correlation.json").read_text())
+        corr = json.loads((ddir / "ss_correlation.json").read_text())
     if run["errmodel"] == "ld":
-        for p in (fitset_dir / "discrepancy").glob(f"{run['model']}/*/*/fold*.npz"):
-            rel = p.relative_to(fitset_dir / "discrepancy").with_suffix("")
-            discs[str(rel)] = disc.Discrepancy.load(p)
+        for p in ddir.glob(f"{learned_model}/*/*/fold*.npz"):
+            discs[str(p.relative_to(ddir).with_suffix(""))] = disc.Discrepancy.load(p)
     priors = load_priors()
     inverters: dict[str, Inverter] = {}
     status = []
@@ -229,10 +232,10 @@ def run_batch(fitset_dir: Path, run: dict, batch: int, cfg: dict) -> dict:
             spec = FitSpec(run["model"], run["errmodel"], run.get("rt", False), od.quantities)
             extra, dkey = None, None
             if spec.errmodel == "ss":
-                extra = ss_arrays(od, corr, run["model"])
+                extra = ss_arrays(od, corr, learned_model)
             elif spec.errmodel == "ld":
                 klass = discrepancy_class(meta.at[oid, "sample_state"], blocks[0].instrument_class)
-                extra, dkey = ld_arrays(od, klass, discs, run["model"], oid,
+                extra, dkey = ld_arrays(od, klass, discs, learned_model, oid,
                                         cfg["discrepancy"]["n_folds"], spec.rt)
             arrays = data_arrays(od, spec, extra)
             if spec.key not in inverters:
