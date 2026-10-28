@@ -46,7 +46,90 @@ def observation_context(db: dict) -> pd.DataFrame:
     obs = obs.merge(sp.rename("foreoptic"), on="observation_id", how="left")
     obs = obs.merge(db["species"][["species_id", "scientific_name", "family", "growth_form",
                                    "leaf_type"]], on="species_id", how="left")
+    obs["year"] = pd.to_datetime(obs["date"], errors="coerce").dt.year.astype("Int64")
     return obs
+
+
+# ---------------------------------------------------------------------------
+# Suspect groups and exclusions
+# ---------------------------------------------------------------------------
+
+FLAG_DEFAULTS = {"min_n": 3, "max_abs_log_deviation": 0.405, "min_share_runs": 0.5}
+
+
+def suspect_groups(leaf: pd.DataFrame, ctx: pd.DataFrame, flag: dict | None = None) -> pd.DataFrame:
+    """(dataset, year, trait) groups whose RTM estimates miss the measurements far more
+    than the same trait does elsewhere.
+
+    Per run and trait, a group's median log(estimate / measured) is compared with the
+    median over all *other* groups of that run and trait, so biases common to a trait
+    everywhere (an RTM problem) are not blamed on one dataset. A group is flagged when it
+    has at least ``min_n`` leaves and its deviation exceeds ``max_abs_log_deviation``
+    (0.405 = a factor of 1.5) in at least ``min_share_runs`` of the runs estimating the
+    trait. Consistent misses across many related spectra point to the measurements (units,
+    method) or the spectra of that group rather than to individual leaves."""
+    f = {**FLAG_DEFAULTS, **(flag or {})}
+    v = leaf[~leaf["relative"] & (leaf["q50"] > 0) & (leaf["measured"] > 0)].merge(
+        ctx[["observation_id", "year"]], on="observation_id", how="left")
+    v = v.assign(lr=np.log(v["q50"] / v["measured"]), year=v["year"].fillna(-1))
+    g = (v.groupby(["run_id", "trait", "dataset_id", "year"])
+         .agg(n=("lr", "size"), med_log_ratio=("lr", "median"), coverage90=("covered90", "mean"))
+         .reset_index())
+    rows = []
+    for (run, trait), h in g.groupby(["run_id", "trait"]):
+        for i, r in h.iterrows():
+            others = h.drop(index=i)
+            base = others.loc[others["n"] >= f["min_n"], "med_log_ratio"].median() if len(others) else np.nan
+            rows.append({**r.to_dict(), "baseline_log_ratio": base, "deviation": r["med_log_ratio"] - base})
+    g = pd.DataFrame(rows)
+    if g.empty:
+        return g
+    g["flag_run"] = (g["n"] >= f["min_n"]) & (g["deviation"].abs() > f["max_abs_log_deviation"])
+    out = (g.groupby(["dataset_id", "year", "trait"])
+           .agg(n_leaves=("n", "max"), n_runs=("run_id", "nunique"), share_runs_flagged=("flag_run", "mean"),
+                median_ratio=("med_log_ratio", lambda x: float(np.exp(np.median(x)))),
+                deviation_ratio=("deviation", lambda x: float(np.exp(np.nanmedian(x)))),
+                coverage90=("coverage90", "median"))
+           .reset_index())
+    out["flagged"] = (out["n_leaves"] >= f["min_n"]) & (out["share_runs_flagged"] >= f["min_share_runs"])
+    out["year"] = out["year"].astype(int).replace(-1, pd.NA)
+    return out.sort_values(["flagged", "share_runs_flagged"], ascending=False).reset_index(drop=True)
+
+
+def exclusion_rules(analysis_cfg: dict, suspects: pd.DataFrame) -> pd.DataFrame:
+    """Exclusions from the config (``analysis.exclude``) plus, with
+    ``analysis.auto_exclude_flagged``, every flagged suspect group (scope "ecology").
+    Columns: dataset_id, year (NA = all years), trait (NA = all traits), scope, reason, source."""
+    rows = []
+    for e in analysis_cfg.get("exclude", []) or []:
+        for t in e.get("traits") or [None]:
+            rows.append({"dataset_id": e["dataset"], "year": e.get("year"), "trait": t,
+                         "scope": e.get("scope", "ecology"), "reason": e.get("reason", ""), "source": "config"})
+    if analysis_cfg.get("auto_exclude_flagged") and len(suspects):
+        for r in suspects[suspects["flagged"]].itertuples():
+            rows.append({"dataset_id": r.dataset_id, "year": r.year, "trait": r.trait, "scope": "ecology",
+                         "reason": f"auto: estimates/measured {r.deviation_ratio:.2f}x the trait's ratio elsewhere",
+                         "source": "flag"})
+    cols = ["dataset_id", "year", "trait", "scope", "reason", "source"]
+    return pd.DataFrame(rows, columns=cols)
+
+
+def excluded(df: pd.DataFrame, ctx: pd.DataFrame, rules: pd.DataFrame, scopes=("ecology", "all")) -> pd.Series:
+    """Boolean mask over ``df`` (needs observation_id and trait) of rows hit by a rule."""
+    mask = pd.Series(False, index=df.index)
+    r = rules[rules["scope"].isin(scopes)]
+    if r.empty or df.empty:
+        return mask
+    c = df[["observation_id"]].merge(ctx[["observation_id", "dataset_id", "year"]], on="observation_id",
+                                     how="left").set_index(df.index)
+    for e in r.itertuples():
+        hit = c["dataset_id"] == e.dataset_id
+        if pd.notna(e.year):
+            hit &= c["year"] == int(e.year)
+        if pd.notna(e.trait):
+            hit &= df["trait"] == e.trait
+        mask |= hit.fillna(False)
+    return mask
 
 
 def _metrics(est: pd.Series, lo: pd.Series, hi: pd.Series, meas: pd.Series, relative: bool) -> dict:
@@ -424,9 +507,12 @@ def correlations(best_sum: pd.DataFrame, meas: pd.DataFrame, ctx: pd.DataFrame, 
 
 
 def main(argv=None):
+    from leafrtm.run import load_config
+
     ap = argparse.ArgumentParser()
     ap.add_argument("--fitset-dir", required=True)
     a = ap.parse_args(argv)
+    acfg = load_config().get("analysis", {}) or {}
     d = Path(a.fitset_dir)
     out = d / "analysis"
     out.mkdir(parents=True, exist_ok=True)
@@ -439,8 +525,15 @@ def main(argv=None):
     # trait analyses use usable fits only; spectral fit tables keep every fit
     td = trait_draws(S["draws"].merge(usable, on=["observation_id", "run_id"]))
     est = summarize_draws(td)
-    meas = measured_traits(db)
+    meas_all = measured_traits(db)
     tables = {}
+    # suspect groups are found on every measurement; exclusions with scope "all" then
+    # remove measurements from validation and best-configuration selection too
+    leaf_all, _ = validation_leaf(est, td, meas_all, ctx, runs)
+    suspects = suspect_groups(leaf_all, ctx, acfg.get("flag"))
+    rules = exclusion_rules(acfg, suspects)
+    tables["suspect_groups"], tables["exclusion_rules"] = suspects, rules
+    meas = meas_all[~excluded(meas_all, ctx, rules, scopes=("all",))]
     leaf, metrics = validation_leaf(est, td, meas, ctx, runs)
     tables["estimates"] = est.pipe(with_runs, runs)
     tables["validation_leaf"] = leaf
@@ -466,8 +559,16 @@ def main(argv=None):
     bd = best_estimates(td, best, ctx)
     bsum = summarize_draws(bd) if len(bd) else pd.DataFrame(columns=["observation_id", "trait", "q50"])
     tables["best_estimates"] = bsum
+    # ecological analyses: drop every excluded group (estimates and measurements alike)
+    bsum = bsum[~excluded(bsum, ctx, rules)]
     vals_rtm = bsum[["observation_id", "trait", "q50"]].rename(columns={"q50": "value"})
-    vals_meas = meas.rename(columns={"measured": "value"})
+    meas_eco = meas[~excluded(meas, ctx, rules)]
+    vals_meas = meas_eco.rename(columns={"measured": "value"})
+    tables["exclusions_applied"] = (
+        pd.concat([tables["best_estimates"].assign(kind="rtm"), meas_all.assign(kind="measured")])
+        .loc[lambda d: excluded(d, ctx, rules)]
+        .merge(ctx[["observation_id", "dataset_id", "year"]], on="observation_id")
+        .groupby(["dataset_id", "year", "trait", "kind"]).size().rename("n").reset_index())
     same = vals_rtm.merge(vals_meas[["observation_id", "trait"]], on=["observation_id", "trait"])
     tables["variance"] = pd.concat([
         variance_partition(vals_rtm, ctx, "rtm_all_leaves"),
@@ -475,7 +576,7 @@ def main(argv=None):
         variance_partition(vals_meas, ctx, "measured")], ignore_index=True)
     tables["treatments"] = pd.concat([treatment_effects(vals_rtm, db, "rtm"),
                                       treatment_effects(vals_meas, db, "measured")], ignore_index=True)
-    corr, within = correlations(bsum, meas, ctx)
+    corr, within = correlations(bsum, meas_eco, ctx)
     tables["correlations"], tables["within_species_correlations"] = corr, within
     for name, df in tables.items():
         df.to_parquet(out / f"{name}.parquet", index=False)

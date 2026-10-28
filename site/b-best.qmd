@@ -6,6 +6,8 @@ title: "Best trait estimates"
 from _lib import *
 best = read("best_config")
 bsum = read("best_estimates")
+rules = read("exclusion_rules")
+applied = read("exclusions_applied")
 ```
 
 Objective B needs the best available trait estimate for every leaf, not a model comparison.
@@ -32,4 +34,21 @@ else:
 if len(bsum):
     stats([(f"{bsum['observation_id'].nunique():,}", "leaves with best estimates"),
            (f"{bsum['trait'].nunique()}", "traits")])
+```
+
+## Groups excluded from the ecological analyses
+
+Groups listed in `analysis.exclude` in `config/config.yaml` (and, with
+`analysis.auto_exclude_flagged`, every group flagged on [Trait retrieval](a-retrieval.qmd#suspect-groups))
+are left out of the variance, treatment and correlation analyses: both their RTM estimates
+and their measurements. Exclusions with scope `all` also remove the measurements from
+validation and from the choice of the best configuration.
+
+```{python}
+if len(rules):
+    show_table(rules)
+    if len(applied):
+        show_table(applied)
+else:
+    print("No exclusions are configured.")
 ```

@@ -110,3 +110,28 @@ if len(plant):
 else:
     print("No plant-level comparisons in this fit set.")
 ```
+
+## Suspect groups
+
+Sometimes most leaves of one dataset and year miss their measured trait by a similar factor.
+That points to the measurements (units, method) or to that group's spectra rather than to the
+RTM. Each (dataset, year, trait) group is compared with the same trait in all other groups:
+the ratio of its median log(estimate / measured) to theirs (`deviation_ratio`). Comparing
+with the other groups means a bias shared by a trait everywhere is not blamed on one dataset.
+
+A group is flagged when, in at least half of the runs estimating the trait, it has at least
+3 leaves and deviates by more than a factor of 1.5 either way. The thresholds are in
+`config/config.yaml` (`analysis.flag`).
+
+Flagged groups are not excluded automatically. To exclude a group, add it to
+`analysis.exclude` with a reason, or set `analysis.auto_exclude_flagged`; see
+[Best trait estimates](b-best.qmd).
+
+```{python}
+#| tbl-cap: "(Dataset, year, trait) groups, flagged first. median_ratio: median estimate / measured; deviation_ratio: the same relative to the trait's ratio in other groups (1 = typical); share_runs_flagged: share of runs in which the group deviates by more than the threshold."
+sus = read("suspect_groups")
+if len(sus):
+    show_table(fmt(sus))
+else:
+    no_data()
+```

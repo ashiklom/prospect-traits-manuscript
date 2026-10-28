@@ -19,6 +19,18 @@ discrepancy: {k: 6, n_folds: 5}
 #   data_use: all (every fitted quantity) | R (reflectance only; only for
 #   observations that also have T or A, so T can be predicted out of sample)
 #   only_rt: fit only observations with both R and T.
+# Trait analyses. `flag`: thresholds for flagging (dataset, year, trait) groups whose RTM
+# estimates miss the measurements much more than the same trait does elsewhere
+# (analysis table suspect_groups; site page "Suspect groups"). `exclude`: groups to leave out,
+# e.g. {dataset: yang_pheno, year: 2012, traits: [chl_area], reason: "...", scope: ecology}.
+# scope "ecology" (default) drops them from the trait-variation analyses (part B); "all"
+# also drops their measurements from validation and best-configuration selection.
+# `auto_exclude_flagged: true` adds every flagged group with scope "ecology".
+analysis:
+  flag: {min_n: 3, max_abs_log_deviation: 0.405, min_share_runs: 0.5}
+  auto_exclude_flagged: false
+  exclude: []
+
 fitsets:
   pilot:
     n_observations: 140
