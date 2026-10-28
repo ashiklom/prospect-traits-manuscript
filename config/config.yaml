@@ -26,9 +26,12 @@ fitsets:
     n_batches: 8
     quantities: [R, T]
     sampler: {chains: 4, tune: 600, draws: 600}
+    # LIBERTY runs use target_accept 0.95: their posteriors press against the edge of
+    # LIBERTY's valid region (see site/a-liberty.qmd); the smaller step size improves mixing
+    # there (R-hat 1.04 -> 1.015 on a test leaf) but cannot remove the divergences.
     runs:
       - {id: prospectd_ou,      model: prospectd, errmodel: ou, rt: false, data_use: all, stage: 1}
-      - {id: liberty_ou,        model: liberty,   errmodel: ou, rt: false, data_use: all, stage: 1}
+      - {id: liberty_ou,        model: liberty,   errmodel: ou, rt: false, data_use: all, stage: 1, sampler: {target_accept: 0.95}}
       - {id: leafsip_ou,        model: leafsip,   errmodel: ou, rt: false, data_use: all, stage: 1}
       - {id: prospectd_ou_rt,   model: prospectd, errmodel: ou, rt: true,  data_use: all, stage: 1, only_rt: true}
       - {id: prospectd_ou_R,    model: prospectd, errmodel: ou, rt: false, data_use: R,   stage: 1, only_rt: true}
@@ -38,8 +41,8 @@ fitsets:
       - {id: prospectd_ld,      model: prospectd, errmodel: ld, rt: false, data_use: all, stage: 2}
       - {id: prospectd_ld_rt,   model: prospectd, errmodel: ld, rt: true,  data_use: all, stage: 2, only_rt: true}
       - {id: prospectd_ld_R,    model: prospectd, errmodel: ld, rt: false, data_use: R,   stage: 2, only_rt: true}
-      - {id: liberty_ss,        model: liberty,   errmodel: ss, rt: false, data_use: all, stage: 2}
-      - {id: liberty_ld_rt,     model: liberty,   errmodel: ld, rt: true,  data_use: all, stage: 2}
+      - {id: liberty_ss,        model: liberty,   errmodel: ss, rt: false, data_use: all, stage: 2, sampler: {target_accept: 0.95}}
+      - {id: liberty_ld_rt,     model: liberty,   errmodel: ld, rt: true,  data_use: all, stage: 2, sampler: {target_accept: 0.95}}
       - {id: leafsip_ss,        model: leafsip,   errmodel: ss, rt: false, data_use: all, stage: 2}
       - {id: leafsip_ld_rt,     model: leafsip,   errmodel: ld, rt: true,  data_use: all, stage: 2}
   smoke:  # tiny end-to-end test of the workflow (CI-sized)
