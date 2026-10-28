@@ -8,6 +8,9 @@ spectra_db (``species_info.csvy``). Names not found there are listed in
 Pass 2 (``python -m leafrtm.db.species gbif``): every resolved name is
 checked against the GBIF backbone (accepted name, family, match type); the
 results are committed as ``vocab/species_gbif.csv`` so rebuilds are offline.
+Synonyms and fuzzy matches were reviewed by hand into
+``vocab/species_synonyms.csv`` (name -> accepted name, source, note), which
+``accepted_names`` applies after pass 1.
 
 Species attributes (growth form, leaf type, phenology, photosynthetic
 pathway) come from ``vocab/species_attributes.csv`` (by species, falling back
@@ -30,6 +33,7 @@ from leafrtm.db.sources import spectra_db
 VOCAB = files("leafrtm.db") / "vocab"
 RESOLUTION = "species_resolution.csv"
 GBIF = "species_gbif.csv"
+SYNONYMS = "species_synonyms.csv"  # reviewed GBIF synonymy: name -> accepted
 ATTRIBUTES = "species_attributes.csv"
 
 _AUTHOR = re.compile(r"\s+(\(?[A-Z][\w.\-'& ]*\)?\s*)+$")
@@ -133,6 +137,15 @@ def resolve(raw: pd.DataFrame) -> pd.DataFrame:
     out["resolved"] = res
     out["resolution"] = how
     return out
+
+
+def accepted_names(names: pd.Series) -> pd.Series:
+    """Map resolved names to accepted names using the reviewed synonym table
+    (GBIF backbone synonymy, minus the cases rejected on review; see its notes)."""
+    syn = _read_vocab(SYNONYMS)
+    if not len(syn):
+        return names
+    return names.map(lambda n: dict(zip(syn["name"], syn["accepted"])).get(n, n) if isinstance(n, str) else n)
 
 
 def review_table(resolved: pd.DataFrame) -> pd.DataFrame:

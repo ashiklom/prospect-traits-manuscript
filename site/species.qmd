@@ -8,14 +8,41 @@ sp = read("inventory_species")
 rev = read("species_review")
 ```
 
-Raw taxon names and codes are resolved in two passes (`src/leafrtm/db/species.py`):
+Raw taxon names and codes are resolved in two passes (`src/leafrtm/db/species.py`).
 
-1. **USDA PLANTS.** Names and USDA codes are cleaned to binomials and matched against the
-   USDA PLANTS checklist distributed with `spectra_db`. Every name *not* found there was
-   reviewed by hand; the decisions are committed in `vocab/species_resolution.csv`.
-2. **GBIF backbone.** After the bulk of the work, every resolved name was re-checked against
-   the GBIF backbone taxonomy (`vocab/species_gbif.csv`: accepted name, status, family, match
-   type).
+**Pass 1: USDA PLANTS and manual review.**
+
+* Names and USDA codes are cleaned to binomials and matched against the USDA PLANTS checklist
+  distributed with `spectra_db`.
+* A name supplied by the dataset wins over its code. Many datasets record USDA symbols without
+  their numeric suffix, and USDA assigns the bare symbol to a different plant: ACSM, for *Acer
+  saccharum*, is *Acacia smallii* in USDA.
+* Every name or code not found in USDA (1,218 pairs) was reviewed by hand, with GBIF used for
+  suggestions only. The decisions are committed in `vocab/species_resolution.csv`, with the
+  source of each decision:
+  * 1,000 exact GBIF matches and 143 synonyms;
+  * 29 typos and 21 codes resolved from dataset context;
+  * the remainder are genus-only, non-taxa (e.g. "Bulk sample") and 8 unresolved.
+* About 1,700 entities that a bare code had matched to the wrong plant were corrected.
+
+**Pass 2: GBIF backbone.** After the bulk of the work, every resolved name (2,127) was
+re-checked against the GBIF backbone taxonomy (`vocab/species_gbif.csv`).
+
+* 2,100 matched exactly, 4 fuzzily, and 23 only at genus level or above.
+* 60 of the matches are synonyms under GBIF.
+
+Synonyms and fuzzy matches were reviewed by hand into `vocab/species_synonyms.csv` (table
+below):
+
+* **Accepted:** 57, e.g. *Acacia* → *Vachellia*/*Senegalia*, *Spartina pectinata* →
+  *Sporobolus michauxianus*.
+* **Rejected:** 6, where the backbone contradicts current treatments or matched a homonym.
+  Examples: *Arctostaphylos alpina* is distinct from *A. uva-ursi*; *Berberis aquifolium* is
+  accepted over *Mahonia*.
+* **Added by hand:** 6 names that GBIF matched only above species level.
+
+Nine pairs of names in the database turn out to be one species (e.g. *Alnus viridis* and
+*A. alnobetula*), so there are 2,118 species. Family comes from GBIF.
 
 ```{python}
 if len(sp):
@@ -24,7 +51,18 @@ if len(sp):
                .sort_values("n_observations", ascending=False))
 ```
 
-## Names awaiting review
+## GBIF synonymy as applied
+
+```{python}
+syn = read("species_synonyms")
+if len(syn):
+    show_table(syn)
+```
+
+## Unresolved names
+
+All entities that still have no species after both passes, by dataset. Most come from
+datasets that record no taxon (e.g. Madison 2016 records only plant type).
 
 ```{python}
 if len(rev):

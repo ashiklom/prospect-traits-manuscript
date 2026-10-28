@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import shutil
 import tarfile
+from importlib.resources import files
 from pathlib import Path
 
 import pandas as pd
@@ -79,6 +80,9 @@ def main(argv=None):
             leaves = (s["observation_id"].drop_duplicates()
                       .sample(min(N_EXAMPLE_LEAVES, s["observation_id"].nunique()), random_state=1))
             s[s["observation_id"].isin(leaves)].to_parquet(out / "spectra_examples.parquet", index=False)
+    syn = files("leafrtm.db") / "vocab" / "species_synonyms.csv"
+    if syn.is_file():
+        pd.read_csv(syn).to_parquet(out / "species_synonyms.parquet", index=False)
     lib = liberty_table(d)
     if len(lib):
         lib.to_parquet(out / "liberty_fits.parquet", index=False)

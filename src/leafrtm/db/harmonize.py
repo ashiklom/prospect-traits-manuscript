@@ -110,14 +110,19 @@ def derive_traits(traits: pd.DataFrame) -> pd.DataFrame:
 
 def species_tables(raw: pd.DataFrame):
     res = sp.resolve(raw)
+    res["pass1_name"] = res["resolved"]
+    res["resolved"] = sp.accepted_names(res["resolved"])
     res["species_id"] = res["resolved"].map(sp.species_id)
     names = res.dropna(subset=["resolved"]).drop_duplicates("species_id")
     species = pd.DataFrame({"species_id": names["species_id"], "scientific_name": names["resolved"]})
     species["genus"] = species["scientific_name"].str.split(" ").str[0]
     gb = sp._read_vocab(sp.GBIF)
     if len(gb):
-        gb = gb.drop_duplicates("name").set_index("name")
-        species["family"] = species["scientific_name"].map(gb["family"])
+        # GBIF matched the pass-1 names; carry each family to its accepted name
+        fam = gb.drop_duplicates("name").set_index("name")["family"]
+        by_acc = (res.dropna(subset=["resolved"]).assign(family=lambda d: d["pass1_name"].map(fam))
+                  .dropna(subset=["family"]).drop_duplicates("resolved").set_index("resolved")["family"])
+        species["family"] = species["scientific_name"].map(by_acc)
     else:
         u = sp.usda().drop_duplicates("name").set_index("name")
         species["family"] = species["scientific_name"].map(u["family"])

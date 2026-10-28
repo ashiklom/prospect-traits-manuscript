@@ -120,6 +120,6 @@ There are two passes:
 1. **Manual review.** Names and USDA codes are matched to the USDA PLANTS checklist. Every
    name not found there is reviewed by hand, and the decisions are committed.
 2. **GBIF re-check.** Every resolved name is checked against the GBIF backbone taxonomy
-   (accepted name, status, family).
+   (accepted name, status, family). Synonyms are reviewed by hand before they are applied.
 
 See [Species resolution](species.qmd).
