@@ -52,3 +52,19 @@ def test_ss_model_runs():
     arrays = data_arrays(od, spec, {"nb": nb, "b": b, "S": S})
     tr, _ = Inverter(spec, arrays).sample(arrays, draws=50, tune=100, chains=1, seed=1)
     assert np.isfinite(tr.posterior["Cab"].values).all()
+
+
+def test_error_priors_sample_without_divergences():
+    """Every error-model prior must map the whole unconstrained space into its support:
+    a truncated lognormal built with lower=None admitted ell <= 0 (17 % divergences)."""
+    import nutpie
+    import pymc as pm
+
+    from leafrtm.fit import _prior, load_priors
+
+    with pm.Model() as model:
+        for name, spec in load_priors()["error"].items():
+            _prior(name, spec, shape=2)
+    trace = nutpie.sample(nutpie.compile_pymc_model(model, backend="numba"), draws=500, tune=500,
+                          chains=2, seed=1, progress_bar=False)
+    assert int(np.asarray(trace.sample_stats["diverging"]).sum()) == 0

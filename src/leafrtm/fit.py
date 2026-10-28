@@ -37,9 +37,9 @@ def load_priors(path: str | None = None) -> dict:
 def _prior(name, spec, **kw):
     d = spec["dist"]
     if d == "lognormal":
-        if "upper" in spec:
+        if "upper" in spec:  # lower=0 explicitly: with None the transform admits x <= 0 (logp -inf)
             return pm.Truncated(name, pm.LogNormal.dist(mu=spec["meanlog"], sigma=spec["sdlog"]),
-                                lower=None, upper=spec["upper"], **kw)
+                                lower=spec.get("lower", 0.0), upper=spec["upper"], **kw)
         return pm.LogNormal(name, mu=spec["meanlog"], sigma=spec["sdlog"], **kw)
     if d == "truncnormal":
         return pm.TruncatedNormal(name, mu=spec["mu"], sigma=spec["sigma"],
