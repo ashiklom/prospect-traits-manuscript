@@ -16,9 +16,12 @@ rtm:
   # CBC ~0.002-0.02 g cm-2)
   Cprot:  {dist: lognormal, meanlog: -6.725, sdlog: 1.0}
   Ccbc:   {dist: lognormal, meanlog: -4.962, sdlog: 1.0}
-  # LIBERTY (typical values and ranges from rrtm::liberty documentation;
-  # thick >= 1 and xu <= 0.06 keep the model in its valid region)
-  xu:       {dist: uniform, lower: 0.005, upper: 0.06}
+  # LIBERTY (typical values and ranges from rrtm::liberty documentation). thick >= 1:
+  # the model jumps from 2 to 1 layers at thick = 1. xu <= 0.2: NIR reflectance
+  # saturates in xu, changing < 2 % above 0.2. (The published model, liberty_dawson,
+  # needed xu <= 0.06 to stay where its R_inf equation has a real root; the fitted
+  # liberty corrects that equation and is defined everywhere.)
+  xu:       {dist: uniform, lower: 0.005, upper: 0.2}
   thick:    {dist: truncnormal, mu: 1.6, sigma: 1.5, lower: 1.0, upper: 10.0}
   baseline: {dist: lognormal, meanlog: -7.6, sdlog: 0.5}
   element:  {dist: lognormal, meanlog: 0.693, sdlog: 0.8}
