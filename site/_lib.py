@@ -107,7 +107,8 @@ except Exception:  # pragma: no cover
 def show_table(df, **kw):
     try:
         from itables import show as ishow
-        ishow(df, classes="display compact", maxBytes=0, **kw)
+        opts = {"classes": "display compact", "maxBytes": 0, "scrollX": True, "showIndex": False, **kw}
+        ishow(df, **opts)
     except Exception:
         from IPython.display import display
         display(df)

@@ -36,8 +36,7 @@ if len(em):
     em = em.assign(run=em.apply(run_label, axis=1))
     cols = ["run", "traits", "coverage90", "crps_log", "r2_log", "heldout_T_rmse",
             "heldout_T_coverage90", "converged", "median_seconds", "total_hours"]
-    show_table(fmt(em[[c for c in cols if c in em]].sort_values("crps_log").reset_index(drop=True)),
-               showIndex=False)
+    show_table(fmt(em[[c for c in cols if c in em]].sort_values("crps_log")))
 else:
     no_data()
 ```
