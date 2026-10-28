@@ -9,18 +9,37 @@ ident = read("identifiability")
 pc = read("posterior_correlations")
 rec = read("recovery")
 feas = read("apa_feasibility")
+excl = read("excluded_fits")
 ```
 
 ## Convergence and cost
 
-A fit counts as converged when every RTM parameter has rank-normalized R̂ < 1.01 and
-bulk and tail ESS ≥ 200.
+Two thresholds apply:
+
+* **Converged** (reported here): every RTM parameter has rank-normalized R̂ < 1.01, and
+  both bulk and tail ESS are ≥ 200.
+* **Usable** (screen for every trait analysis): R̂ ≤ 1.05, bulk ESS ≥ 100 and at most 10 %
+  divergent transitions. Fits that fail it are left out of validation, intercomparison and
+  the best-estimate product, and are listed below. Spectral-fit pages keep every fit.
+
+Most LIBERTY exclusions come from the edge of LIBERTY's valid region; see
+[LIBERTY's valid region](a-liberty.qmd).
 
 ```{python}
 if len(diag):
     show_table(fmt(diag.assign(run=lambda d: d.apply(run_label, axis=1)).drop(columns=["model", "errmodel", "rt", "data_use"])))
 else:
     no_data()
+```
+
+```{python}
+#| tbl-cap: "Fits excluded from the trait analyses, with the failed criteria. wall_margin_q05 (LIBERTY only) is the 5 % quantile over posterior draws of the smallest discriminant of LIBERTY's R∞ quadratic; values near 0 mean the posterior touches the edge of the model's valid region."
+if len(excl):
+    cols = [c for c in ["run_id", "observation_id", "reason", "max_rhat", "min_ess_bulk", "divergent_share",
+                        "wall_margin_q05", "frac_at_bound"] if c in excl]
+    show_table(fmt(excl[cols].sort_values(["run_id", "max_rhat"], ascending=[True, False])))
+else:
+    no_data("No fits were excluded.")
 ```
 
 ## What do the data inform?

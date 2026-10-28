@@ -252,6 +252,7 @@ def run_batch(fitset_dir: Path, run: dict, batch: int, cfg: dict) -> dict:
             info = {"observation_id": oid, "run_id": run_id, "status": "ok",
                     "seconds": time.perf_counter() - t0, "sampling_seconds": t_sample,
                     "n_grad": n_grad, "divergences": div, "n_bands": len(od),
+                    "n_draws": int(sampler["draws"] * sampler["chains"]),
                     "quantities": "".join(od.quantities), "discrepancy": dkey,
                     "max_rhat": float(summ.loc[summ.is_rtm, "rhat"].max()),
                     "min_ess_bulk": float(summ.loc[summ.is_rtm, "ess_bulk"].min()),

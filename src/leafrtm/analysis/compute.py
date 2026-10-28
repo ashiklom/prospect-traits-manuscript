@@ -189,6 +189,31 @@ def diagnostics(info: pd.DataFrame, summ: pd.DataFrame) -> pd.DataFrame:
         divergent_fits=("divergences", lambda x: float(np.mean(x > 0)))).reset_index()
 
 
+USABLE = {"max_rhat": 1.05, "min_ess_bulk": 100, "divergent_share": 0.10}
+
+
+def fit_screen(info: pd.DataFrame) -> pd.DataFrame:
+    """Per fit: is it usable for trait analyses (R-hat <= 1.05, ESS_bulk >= 100,
+    <= 10 % divergent transitions)? A looser screen than the ``converged`` rate in
+    ``diagnostics``, which uses 1.01 / 200 for reporting. Failed fits are unusable."""
+    i = info.copy()
+    n = i["n_draws"] if "n_draws" in i else np.nan
+    i["divergent_share"] = i["divergences"] / n
+    ok = i["status"] == "ok"
+    reasons = pd.Series("", index=i.index)
+    reasons[~ok] = "error"
+    for col, lim, label in (("max_rhat", USABLE["max_rhat"], "rhat"),
+                            ("min_ess_bulk", USABLE["min_ess_bulk"], "ess"),
+                            ("divergent_share", USABLE["divergent_share"], "divergences")):
+        bad = ok & ((i[col] < lim) if col == "min_ess_bulk" else (i[col] > lim))
+        reasons[bad] = reasons[bad].str.cat([label] * int(bad.sum()), sep=";").str.strip(";")
+    i["usable"] = reasons == ""
+    i["reason"] = reasons
+    cols = ["observation_id", "run_id", "usable", "reason", "max_rhat", "min_ess_bulk", "divergent_share"]
+    cols += [c for c in ("wall_margin", "wall_margin_q05", "frac_at_bound") if c in i]
+    return i[cols]
+
+
 def identifiability(summ: pd.DataFrame, priors: dict) -> pd.DataFrame:
     """Posterior / prior SD (log scale for positive parameters): < 1 = learned from data."""
     s = summ[summ["is_rtm"]].copy()
@@ -409,7 +434,10 @@ def main(argv=None):
     runs = S["info"][["run_id", "model", "errmodel", "rt", "data_use"]].drop_duplicates("run_id")
     db = load()
     ctx = observation_context(db)
-    td = trait_draws(S["draws"])
+    screen = fit_screen(S["info"])
+    usable = screen.loc[screen["usable"], ["observation_id", "run_id"]]
+    # trait analyses use usable fits only; spectral fit tables keep every fit
+    td = trait_draws(S["draws"].merge(usable, on=["observation_id", "run_id"]))
     est = summarize_draws(td)
     meas = measured_traits(db)
     tables = {}
@@ -425,7 +453,10 @@ def main(argv=None):
     tables["heldout"] = heldout(per_leaf, runs)
     tables["data_use_comparison"] = data_use_comparison(leaf)
     tables["intercompare"] = intercompare(est, runs)
-    tables["diagnostics"] = diagnostics(S["info"], S["summary"])
+    tables["diagnostics"] = diagnostics(S["info"], S["summary"]).merge(
+        screen.groupby("run_id")["usable"].mean().rename("usable").reset_index(), on="run_id")
+    tables["fit_screen"] = screen.pipe(with_runs, runs)
+    tables["excluded_fits"] = tables["fit_screen"][~tables["fit_screen"]["usable"]]
     tables["identifiability"] = identifiability(S["summary"], load_priors())
     tables["posterior_correlations"] = posterior_correlations(S["draws"])
     tables["error_model_comparison"] = error_model_comparison(metrics, tables["heldout"],
